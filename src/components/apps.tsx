@@ -9,7 +9,7 @@ import { useAtom } from "jotai";
 import {
   closeWindowAtom, // Write atom to close a window
   openWindowAtom, // Write atom to open/focus a window
-  openWindowsAtom, // Read atom for currently VISIBLE windows
+  windowRegistryAtom,
   // focusWindowAtom, // Write atom to bring window to front (used by Window component later)
   // WindowState, // Import type if needed
 } from "../atoms/windowAtoms"; // Adjust path as necessary
@@ -62,8 +62,12 @@ const AppIcon: React.FC<AppIconProps> = ({
 
 // Main component to display all app icons and windows
 export const AppsIcons = () => {
-  // Get the list of VISIBLE open windows from the Jotai atom
-  const [openWindows] = useAtom(openWindowsAtom); // Read-only access
+  // CHANGE: Use the full window registry
+  const [windowRegistry] = useAtom(windowRegistryAtom);
+  // Derive the list of windows to render (all open or minimized)
+  const windowsToRender = Object.values(windowRegistry).filter(
+    (win) => win.isOpen || win.isMinimized,
+  );
 
   // Get the setter functions for window actions
   const openWindow = useAtom(openWindowAtom)[1];
@@ -151,20 +155,28 @@ export const AppsIcons = () => {
     <>
       {/* Background click to clear selection */}
       <div
-        className="inset-0 -z-10"
+        className="fixed inset-0 -z-10" // Ensure background covers everything
         onClick={() => setSelectedAppId(null)}
       >
       </div>
 
       {/* Desktop Icons */}
-      <div className="absolute top-4 left-4 flex flex-col flex-wrap-reverse gap-2 z-10 max-h-[calc(100vh-80px)]">
+      {/* Apply CSS multi-column layout */}
+      <div
+        className="absolute top-4 left-4 z-10 max-h-[calc(100vh-80px)] pb-14 overflow-y-hidden"
+        style={{
+          columnWidth: "6rem", // Adjust based on desired icon width + padding
+          columnGap: "0.5rem", // Adjust gap between columns
+        }}
+      >
         {apps.map((app) => (
+          // Add break-inside-avoid to prevent icons splitting across columns
           <div
             key={app.id}
             onClick={() => handleSelectIcon(app.id)}
-            className={`p-1 rounded ${
-              selectedAppId === app.id ? "brightness-50" : ""
-            }`}
+            className={`p-1 rounded inline-block w-full break-inside-avoid mb-2 ${
+              // Use inline-block, w-full, break-inside, mb-2 for column layout
+              selectedAppId === app.id ? "brightness-50" : ""}`}
           >
             <AppIcon
               src={app.src}
@@ -176,38 +188,38 @@ export const AppsIcons = () => {
         ))}
       </div>
 
-      {/* Render VISIBLE Windows based on the openWindows atom */}
-      {openWindows.map((windowState) => {
+      {/* CHANGE: Render ALL open or minimized windows, hide minimized ones with style */}
+      {windowsToRender.map((windowState) => {
         const appConfig = appRegistry[windowState.appId];
         if (!appConfig) {
           console.error(
             `App configuration not found for: ${windowState.appId}. Closing window ID: ${windowState.id}`,
           );
-          // Close the inconsistent window state
           closeWindow(windowState.id);
           return null;
         }
 
         const AppComponent = appConfig.component;
 
-        // We need to pass the unique window ID and other state down to the Window component
+        // Conditionally apply display: none if minimized
+        const style = windowState.isMinimized ? { display: "none" } : {};
+
         return (
-          <Window
-            key={windowState.id} // Use the unique window instance ID
-            windowId={windowState.id} // Pass windowId down
-            title={windowState.title}
-            isOpen={windowState.isOpen} // Should always be true from openWindowsAtom, but good practice
-            onClose={() => handleCloseWindow(windowState.id)}
-            // Pass state needed by useWindowManagement *inside* Window
-            initialPosition={windowState.position}
-            initialSize={windowState.size}
-            minSize={windowState.minSize}
-            zIndex={windowState.zIndex} // Pass zIndex down
-            isMobileOrTablet={isMobileOrTablet} // Pass mobile/tablet detection
-            // onFocus will be handled inside Window
-          >
-            <AppComponent onClose={() => handleCloseWindow(windowState.id)} />
-          </Window>
+          <div key={windowState.id} style={style}>
+            <Window
+              windowId={windowState.id}
+              title={windowState.title}
+              isOpen={windowState.isOpen} // Pass the actual isOpen state
+              onClose={() => handleCloseWindow(windowState.id)}
+              initialPosition={windowState.position}
+              initialSize={windowState.size}
+              minSize={windowState.minSize}
+              zIndex={windowState.zIndex}
+              isMobileOrTablet={isMobileOrTablet}
+            >
+              <AppComponent onClose={() => handleCloseWindow(windowState.id)} />
+            </Window>
+          </div>
         );
       })}
 

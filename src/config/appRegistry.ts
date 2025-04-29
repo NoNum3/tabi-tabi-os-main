@@ -35,7 +35,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
   music: {
     name: "Music",
     src: "/icons/music.png",
-    defaultSize: { width: 400, height: 600 },
+    defaultSize: { width: 400, height: 650 },
     minSize: { width: 350, height: 250 },
     component: MusicPlayer,
   },
@@ -69,7 +69,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
   textEditor: {
     name: "Notepad",
     src: "/icons/notepad.png",
-    defaultSize: { width: 700, height: 500 },
+    defaultSize: { width: 750, height: 500 },
     minSize: { width: 300, height: 320 },
     component: TextEditor,
   },
@@ -90,7 +90,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
   calculator: {
     name: "Calculator",
     src: "/icons/calculator.png",
-    defaultSize: { width: 350, height: 500 },
+    defaultSize: { width: 400, height: 600 },
     minSize: { width: 260, height: 400 },
     component: Calculator,
   },

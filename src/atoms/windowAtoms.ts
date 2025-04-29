@@ -3,6 +3,9 @@ import { loadFeatureState, saveFeatureState } from "../utils/storage";
 import { Position, Size } from "../types"; // Assuming types are defined here
 import { appRegistry } from "@/config/appRegistry"; // Import appRegistry for icons
 import { isPlayingAtom as ambienceIsPlayingAtom } from "./ambiencePlayerAtom";
+// Import the safe pause function from AmbiencePlayer
+// NOTE: This creates a slight coupling, but necessary for direct control
+import { safeAudioPause } from "../components/apps/ambiencePlayer";
 
 const FEATURE_KEY = "windows";
 
@@ -162,7 +165,15 @@ export const closeWindowAtom = atom(null, (get, set, windowId: string) => {
   if (windowToClose && windowToClose.appId === "ambiencePlayer") {
     // Set the Ambience Player's isPlaying state to false
     set(ambienceIsPlayingAtom, false);
-    console.log("Ambience Player window closed, stopping audio via atom.");
+    // Also directly queue a pause command for the global audio element
+    try {
+      safeAudioPause();
+      console.log(
+        "Ambience Player window closed, set atom and queued safeAudioPause.",
+      );
+    } catch (e) {
+      console.error("Error calling safeAudioPause on close:", e);
+    }
   }
 
   // Proceed with removing the window from the registry

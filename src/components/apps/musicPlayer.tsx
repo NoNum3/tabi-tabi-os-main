@@ -681,37 +681,16 @@ const MusicPlayer: React.FC = () => {
 
       {/* Video Player & Controls Wrapper */}
       <div className="flex flex-col flex-grow relative">
-        {/* Video Player (conditionally rendered) */}
-        {showVideo && (
-          <div className="aspect-video bg-black">
-            {currentSong && (
-              <ReactPlayer
-                ref={playerRef}
-                url={currentSong.url}
-                playing={playing}
-                volume={isMuted ? 0 : volume}
-                onPlay={() => !ignoreEvents.current && setPlaying(true)}
-                onPause={() => !ignoreEvents.current && setPlaying(false)}
-                onEnded={handleNext}
-                onProgress={handleProgress}
-                onDuration={handleDuration}
-                width="100%"
-                height="100%"
-                onError={(e) => console.error("ReactPlayer Error:", e)}
-                onReady={() => {
-                  // Call the defined sync function
-                  if (!initialSyncDone) {
-                    syncPlayerState();
-                  }
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Invisible player for background playback */}
-        {!showVideo && currentSong && (
-          <div style={{ display: "none" }}>
+        {/* --- Single Player Instance --- */}
+        {/* Always render the player if there's a current song */}
+        {/* Control visibility via the container's class */}
+        <div
+          className={cn(
+            "bg-black w-full", // Apply common styles
+            showVideo ? "aspect-video h-auto" : "h-0 overflow-hidden", // Toggle visibility and aspect ratio
+          )}
+        >
+          {currentSong && (
             <ReactPlayer
               ref={playerRef}
               url={currentSong.url}
@@ -722,16 +701,26 @@ const MusicPlayer: React.FC = () => {
               onEnded={handleNext}
               onProgress={handleProgress}
               onDuration={handleDuration}
+              width="100%" // Keep 100% to fill container
+              height="100%" // Keep 100% to fill container
               onError={(e) => console.error("ReactPlayer Error:", e)}
               onReady={() => {
-                // Call the defined sync function
                 if (!initialSyncDone) {
                   syncPlayerState();
                 }
               }}
+              // Add config to potentially help persistence
+              config={{
+                youtube: {
+                  playerVars: {
+                    // Optional: ensures YouTube player controls don't overlay
+                    // controls: 0,
+                  },
+                },
+              }}
             />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Controls Area */}
         <div className="p-3 bg-muted border-t border-border mt-auto">
