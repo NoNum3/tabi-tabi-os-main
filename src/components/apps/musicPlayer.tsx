@@ -22,7 +22,6 @@ import {
   currentSongIndexAtom,
   currentTimeAtom,
   getYoutubeId,
-  isWindowOpenAtom,
   persistMusicPlayerState,
   playingAtom,
   playlistAtom,
@@ -75,7 +74,6 @@ const MusicPlayer: React.FC = () => {
   const [playlist, setPlaylist] = useAtom(playlistAtom);
   const [currentSongIndex, setCurrentSongIndex] = useAtom(currentSongIndexAtom);
   const [playing, setPlaying] = useAtom(playingAtom);
-  const [isWindowOpen, setIsWindowOpen] = useAtom(isWindowOpenAtom);
   const [currentTime, setCurrentTime] = useAtom(currentTimeAtom);
   const [, persistState] = useAtom(persistMusicPlayerState);
   const [volume, setVolume] = useAtom(volumeAtom);
@@ -162,15 +160,13 @@ const MusicPlayer: React.FC = () => {
 
   // Mark window as open when component mounts and closed when unmounted
   useEffect(() => {
-    setIsWindowOpen(true);
     persistState({ isWindowOpen: true });
 
     return () => {
-      setIsWindowOpen(false);
       persistState({ isWindowOpen: false });
       // Don't stop playback on unmount - audio will continue in background
     };
-  }, [setIsWindowOpen, persistState]);
+  }, [persistState]);
 
   // Set up reference to the YouTube player instance
   useEffect(() => {
@@ -276,9 +272,12 @@ const MusicPlayer: React.FC = () => {
     volume,
   ]);
 
-  // Refactored sync effect to just call the function if needed
-  // (Or potentially remove this effect if onReady is sufficient)
-  // For now, let's keep it but make it simpler
+  // Initial sync on component mount
+  useEffect(() => {
+    syncPlayerState();
+  }, [syncPlayerState]);
+
+  // Effect to synchronize playing state with the player
   useEffect(() => {
     if (
       playerRef.current &&
@@ -321,25 +320,6 @@ const MusicPlayer: React.FC = () => {
     };
     // Read currentTime here to avoid stale closures in saveCurrentPosition
   }, [playing, currentTime, setCurrentTime, seeking]);
-
-  // Handle visibility changes
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && !isWindowOpen) {
-        // Removed persistState from here as well - rely on pagehide/beforeunload
-        // if (playerRef.current) {
-        //   const newTime = playerRef.current.getCurrentTime() || 0;
-        //   setCurrentTime(newTime);
-        //   persistState({ currentTime: newTime });
-        // }
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-    // Read isWindowOpen here
-  }, [isWindowOpen /* removed persistState, setCurrentTime */]);
 
   // Handlers
   const handlePlayPause = () => {

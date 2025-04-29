@@ -2,6 +2,7 @@ import { atom } from "jotai";
 import { loadFeatureState, saveFeatureState } from "../utils/storage";
 import { Position, Size } from "../types"; // Assuming types are defined here
 import { appRegistry } from "@/config/appRegistry"; // Import appRegistry for icons
+import { isPlayingAtom as ambienceIsPlayingAtom } from "./ambiencePlayerAtom";
 
 const FEATURE_KEY = "windows";
 
@@ -154,6 +155,17 @@ export const openWindowAtom = atom(
 
 // Atom to close a window (removes it from state)
 export const closeWindowAtom = atom(null, (get, set, windowId: string) => {
+  const registry = get(windowRegistryAtom);
+  const windowToClose = registry[windowId];
+
+  // Check if the closing window is the Ambience Player
+  if (windowToClose && windowToClose.appId === "ambiencePlayer") {
+    // Set the Ambience Player's isPlaying state to false
+    set(ambienceIsPlayingAtom, false);
+    console.log("Ambience Player window closed, stopping audio via atom.");
+  }
+
+  // Proceed with removing the window from the registry
   set(windowRegistryAtom, (prev) => {
     const newState = { ...prev };
     delete newState[windowId]; // Remove completely
