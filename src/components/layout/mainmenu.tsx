@@ -146,11 +146,9 @@ export function Mainmenu() {
             <MenubarSeparator />
             <MenubarItem
               inset
-              onSelect={() => openUrl("www.linkedin.com/in/kenny-stevens-abenz
-
-")}
+              onSelect={() => openUrl("https://www.linkedin.com/in/kenny-stevens-abenz")}
             >
-              Xmigas <MenubarShortcut>Github</MenubarShortcut>
+              Made with <MenubarShortcut>NoNum3</MenubarShortcut>
             </MenubarItem>
             <MenubarItem
               inset
