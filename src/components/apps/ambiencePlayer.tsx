@@ -120,13 +120,13 @@ const safeAudioPlay = () => {
   return Promise.resolve();
 };
 
-const safeAudioPause = () => {
+export const safeAudioPause = () => {
   if (!globalAudio || isPageUnloading) return;
   audioOperationQueue.push({ type: "pause" });
   processAudioQueue();
 };
 
-const safeAudioLoad = () => {
+export const safeAudioLoad = () => {
   if (!globalAudio) return;
   audioOperationQueue.push({ type: "load" });
   processAudioQueue();
@@ -168,6 +168,26 @@ const AmbiencePlayer: React.FC = () => {
   const initialSyncDone = useRef(false);
   const ignoreEvents = useRef(false);
   const timeUpdateInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Effect to react to isPlaying atom changes
+  useEffect(() => {
+    if (!globalAudio || ignoreEvents.current || !initialSyncDone.current) {
+      return;
+    }
+
+    if (isPlaying) {
+      console.log("isPlaying atom is true, calling safeAudioPlay");
+      safeAudioPlay().catch((error) => {
+        console.error("Error playing audio from isPlaying effect:", error);
+        // Optionally set isPlaying back to false if play fails
+        // setIsPlaying(false);
+      });
+    } else {
+      console.log("isPlaying atom is false, calling safeAudioPause");
+      safeAudioPause();
+    }
+    // Remove initialSyncDone.current from dependency array
+  }, [isPlaying]);
 
   // Set up audio element - run only once
   useEffect(() => {

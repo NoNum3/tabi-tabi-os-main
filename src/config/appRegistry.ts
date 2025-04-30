@@ -9,6 +9,16 @@ import AmbiencePlayer from "../components/apps/ambiencePlayer";
 import Calculator from "../components/apps/Calculator/Calculator";
 import ClockApp from "../components/apps/podomoro";
 import MiniGames from "../components/apps/miniGames"; // Import the new component
+import ConverterApp from "../components/apps/converter";
+// Import the QRCodeReader app
+import QRCodeReader from "../components/apps/QRCodeReader";
+// Import the DrawingPadApp
+import DrawingPadApp from "../components/apps/drawingPad";
+// Import new apps
+import PasswordGeneratorApp from "../components/apps/passwordGenerator";
+import HashGeneratorApp from "../components/apps/hashGenerator";
+import CheckersApp from "../components/apps/checkers";
+// import { AppConfig } from "@/types/app"; // Removed unused import
 
 // Updated interface to include missing fields
 interface AppRegistryEntry {
@@ -39,19 +49,6 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     minSize: { width: 350, height: 250 },
     component: MusicPlayer,
   },
-
-  // photobox: {
-  //   name: "Photobox",
-  //   src: "/icons/camera.png",
-  //   defaultSize: { width: 400, height: 450 },
-  //   component: () => React.createElement("div", null, "Photobox Coming Soon"),
-  // },
-  // cafeList: {
-  //   name: "Cafe list",
-  //   src: "/icons/cafe.png",
-  //   defaultSize: { width: 450, height: 500 },
-  //   component: () => React.createElement("div", null, "Cafe List Coming Soon"),
-  // },
   todoList: {
     name: "To-do list",
     src: "/icons/to-do.png",
@@ -59,12 +56,6 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     minSize: { width: 300, height: 340 },
     component: TodoList,
   },
-  // chatRoom: {
-  //   name: "Chat room",
-  //   src: "/icons/phone.png",
-  //   defaultSize: { width: 380, height: 550 },
-  //   component: () => React.createElement("div", null, "Chat Room Coming Soon"),
-  // },
 
   textEditor: {
     name: "Notepad",
@@ -96,10 +87,56 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
   },
   miniGames: {
     name: "Mini Games",
-    src: "/icons/settings.png",
+    src: "/icons/mini-games.png",
     defaultSize: { width: 450, height: 400 },
     minSize: { width: 350, height: 300 },
     component: MiniGames,
+  },
+  converter: {
+    name: "Converter",
+    src: "/icons/converter.png",
+    defaultSize: { width: 500, height: 550 },
+    minSize: { width: 380, height: 400 },
+    component: ConverterApp,
+  },
+  // Add the new QR Code Reader app
+  qrReader: {
+    name: "QR Reader",
+    src: "/icons/qr-reader.png", // Using camera icon as placeholder
+    defaultSize: { width: 450, height: 550 },
+    minSize: { width: 300, height: 400 },
+    component: QRCodeReader,
+  },
+  // Add the new Drawing Pad app
+  drawingPad: {
+    name: "Drawing Pad",
+    src: "/icons/notepad.png", // Placeholder icon
+    defaultSize: { width: 600, height: 500 },
+    minSize: { width: 400, height: 300 },
+    component: DrawingPadApp,
+  },
+  // Add the Password Generator app
+  passwordGenerator: {
+    name: "Password Gen",
+    src: "/icons/password-gen.png", // Placeholder icon
+    defaultSize: { width: 400, height: 480 },
+    minSize: { width: 350, height: 420 },
+    component: PasswordGeneratorApp,
+  },
+  // Add the Hash Generator app
+  hashGenerator: {
+    name: "Hash Gen",
+    src: "/icons/hash-gen.png", // Placeholder icon
+    defaultSize: { width: 450, height: 500 },
+    minSize: { width: 380, height: 400 },
+    component: HashGeneratorApp,
+  },
+  checkers: {
+    name: "Checkers",
+    src: "/icons/checkers-game.png",
+    defaultSize: { width: 520, height: 620 },
+    minSize: { width: 400, height: 500 },
+    component: CheckersApp,
   },
   // Add other apps here using a unique key (appId)
 };

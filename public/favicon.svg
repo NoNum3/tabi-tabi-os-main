@@ -1,0 +1,26 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .favicon {
+                content: url(/icons/white-ico/favicon-32x32.png); /* Show light icon on dark background */
+            }
+            .favicon-16 {
+                 content: url(/icons/white-ico/favicon-16x16.png);
+             }
+        }
+        @media (prefers-color-scheme: light) {
+            .favicon {
+                content: url(/icons/dark-ico/favicon-32x32.png); /* Show dark icon on light background */
+            }
+             .favicon-16 {
+                 content: url(/icons/dark-ico/favicon-16x16.png);
+             }
+        }
+        /* Fallback for browsers without prefers-color-scheme support */
+         #favicon-img-32 { image-rendering: pixelated; }
+         #favicon-img-16 { image-rendering: pixelated; }
+    </style>
+    <image id="favicon-img-32" class="favicon" href="/icons/dark-ico/favicon-32x32.png" width="32" height="32"/>
+     <!-- Optional: Include 16x16 version for smaller tabs/bookmarks if needed -->
+     <!-- <image id="favicon-img-16" class="favicon-16" href="/icons/dark-ico/favicon-16x16.png" width="16" height="16" x="8" y="8"/> -->
+</svg> 

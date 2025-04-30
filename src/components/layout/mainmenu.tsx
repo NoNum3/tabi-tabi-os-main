@@ -26,8 +26,12 @@ import { appRegistry } from "@/config/appRegistry";
 import { useAtom } from "jotai";
 import { openWindowAtom } from "@/atoms/windowAtoms";
 import { useState } from "react";
+import { useTheme } from "next-themes"; // Import useTheme
 
 export function Mainmenu() {
+  // Get theme state
+  const { resolvedTheme } = useTheme();
+
   // Get the setter for opening windows
   const openWindow = useAtom(openWindowAtom)[1];
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
@@ -81,13 +85,19 @@ export function Mainmenu() {
     setResetDialogOpen(true);
   };
 
+  // Determine icon source based on theme
+  const lightIconSrc = "/icons/white-ico/android-icon-192x192.png"; // Light icon for dark theme
+  const darkIconSrc = "/icons/dark-ico/android-icon-192x192.png"; // Dark icon for light theme
+  const iconSrc = resolvedTheme === "dark" ? lightIconSrc : darkIconSrc;
+
   return (
     <>
       <Menubar className="fixed top-0 left-0 right-0 bg-stone-100 border-stone-300 border-b text-black dark:bg-neutral-900 dark:border-neutral-700 dark:text-white z-30 shadow-sm h-9 px-2 flex items-center">
         <MenubarMenu>
           <div className="px-1 flex items-center">
             <Image
-              src="/icons/icon192.png"
+              key={iconSrc}
+              src={iconSrc}
               alt="logo"
               width={20}
               height={20}
@@ -146,14 +156,14 @@ export function Mainmenu() {
             <MenubarSeparator />
             <MenubarItem
               inset
-              onSelect={() => openUrl("https://www.linkedin.com/in/kenny-stevens-abenz")}
+              onSelect={() =>
+                openUrl("https://www.linkedin.com/in/kenny-stevens-abenz")}
             >
               Made with <MenubarShortcut>NoNum3</MenubarShortcut>
             </MenubarItem>
             <MenubarItem
               inset
-              onSelect={() =>
-                openUrl("https://github.com/NoNum3")}
+              onSelect={() => openUrl("https://github.com/NoNum3")}
             >
               Github<MenubarShortcut>repository</MenubarShortcut>
             </MenubarItem>

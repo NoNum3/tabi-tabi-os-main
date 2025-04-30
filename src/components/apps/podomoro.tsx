@@ -66,24 +66,18 @@ export const GlobalPodomoroTimer = () => {
 
   // Effect 2: Handle the completion logic when time runs out
   useEffect(() => {
-    // Check if the timer is running and time has reached zero
     if (isRunning && timeRemaining <= 0) {
-      // Ensure completion is handled only once per cycle
       if (!completionHandledRef.current) {
         completionHandledRef.current = true;
         playSound("/sounds/timeup.mp3");
-        // Call the completion action atom. It should set isRunning to false.
         handleCompletion();
       }
     } else if (isRunning && timeRemaining > 0) {
-      // Reset the completion flag if the timer is running but time is not yet zero
-      // (e.g., after a reset or mode switch while running)
-      completionHandledRef.current = false;
-    } else if (!isRunning) {
-      // Reset the completion flag if the timer is stopped/paused
+      // If the timer starts running again with positive time,
+      // it signifies a new cycle or manual start, so reset the flag.
       completionHandledRef.current = false;
     }
-  }, [isRunning, timeRemaining, handleCompletion]); // Re-run when these values change
+  }, [isRunning, timeRemaining, handleCompletion]);
 
   // This component doesn't render anything itself
   return null;

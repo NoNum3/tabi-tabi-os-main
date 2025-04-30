@@ -1,8 +1,15 @@
-# Work from Coffee
+# Tabi Tabi OS
 
-WFCOS (Work From Cafe OS) is a web-based desktop environment designed to centralize your digital workflow and enhance productivity. By providing a single, organized interface, it helps users reduce clutter, streamline tasks, and access essential tools and applications efficiently from any browser.
+"Inspired by the Japanese word 'Tabi-Tabi' (often, frequently), this OS provides
+a streamlined toolkit of reusable utilities. We prioritize performance,
+minimalist design, and a great user experience, inviting users to rate and shape
+the tool collection through feedback.
 
-Built with a cutting-edge stack including Next.js 15, React 19, and Tailwind CSS v4, WFCOS offers a customizable and performant workspace. Leveraging Radix UI and shadcn/ui, it provides a familiar, desktop-like environment tailored to your needs. Ideal for remote workers, developers, and anyone seeking a consistent and personalized command center for their online activities.
+Built with a cutting-edge stack including Next.js 15, React 19, and Tailwind CSS
+v4, Tabi Tabi OS offers a customizable and performant workspace. Leveraging
+Radix UI and shadcn/ui, it provides a collection of useful tools accessible from
+any browser. Ideal for anyone seeking a consistent and efficient toolkit for
+online activities.
 
 ## 🛠️ Tech Stack
 
@@ -15,7 +22,8 @@ Built with a cutting-edge stack including Next.js 15, React 19, and Tailwind CSS
 - **Containerization:** [Docker](https://www.docker.com/)
 - **Language:** [TypeScript](https://www.typescriptlang.org/) v5.8.3
 - **Package Manager:** [Bun](https://bun.sh/) v1.x
-- **UI Components:** [Radix UI](https://www.radix-ui.com/) v1.1.7, [shadcn/ui](https://ui.shadcn.com/)
+- **UI Components:** [Radix UI](https://www.radix-ui.com/) v1.1.7,
+  [shadcn/ui](https://ui.shadcn.com/)
 - **Icons:** [Lucide React](https://lucide.dev/) v0.488.0
 
 ## 📁 Folder Structure
@@ -88,7 +96,7 @@ Built with a cutting-edge stack including Next.js 15, React 19, and Tailwind CSS
 
    ```bash
    git clone <your-repository-url>
-   cd wfcOS
+   cd tabi-tabi-os-main
    ```
 
 2. Install dependencies with Bun:
@@ -102,7 +110,8 @@ Built with a cutting-edge stack including Next.js 15, React 19, and Tailwind CSS
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the
+result.
 
 ### Building for Production
 
@@ -127,13 +136,13 @@ bun run lint
 1. Build the Docker image:
 
    ```bash
-   docker build -t wfcOS .
+   docker build -t tabi-tabi-os .
    ```
 
 2. Run the container:
 
    ```bash
-   docker run -p 3000:3000 wfcOS
+   docker run -p 3000:3000 tabi-tabi-os
    ```
 
    Alternatively, using docker-compose:
@@ -146,7 +155,8 @@ bun run lint
 
 ### Commit Message Format
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) for standardized commit messages:
+This project uses [Conventional Commits](https://www.conventionalcommits.org/)
+for standardized commit messages:
 
 ```
 <type>(<scope>): <description>
@@ -181,13 +191,25 @@ Contributions are welcome! Please follow these steps:
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for
+details.
 
-## 🙏 Acknowledgements
+## �� Acknowledgements
 
-- Inspired by [ryos](https://github.com/ryokun6/ryos)
+This project utilizes and acknowledges the contributions of the following
+open-source software:
+
 - [Next.js](https://nextjs.org/) - The React Framework
-- [Tailwind CSS](https://tailwindcss.com/) - For utility-first CSS
-- [Shadcn](https://ui.shadcn.com/) - For UI components
-- [Radix UI](https://www.radix-ui.com/) - For accessible UI components
-- [Bun](https://bun.sh/) - For fast JavaScript runtime and package management
+- [React](https://react.dev/) - UI Library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-First CSS Framework
+- [shadcn/ui](https://ui.shadcn.com/) - Re-usable UI components
+- [Radix UI](https://www.radix-ui.com/) - Primitives for building accessible
+  design systems
+- [Lucide React](https://lucide.dev/) - Icon library
+- [Jotai](https://jotai.org/) - State management
+- [Tiptap](https://tiptap.dev/) - Headless WYSIWYG editor framework
+- [TypeScript](https://www.typescriptlang.org/) - Superset of JavaScript
+- [Bun](https://bun.sh/) - JavaScript runtime & toolkit
+- [Husky](https://typicode.github.io/husky/) - Git hooks manager
+- [Commitlint](https://commitlint.js.org/) - Commit message linter
+- [ESLint](https://eslint.org/) - Code linter

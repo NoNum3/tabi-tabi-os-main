@@ -690,37 +690,37 @@ const MusicPlayer: React.FC = () => {
             showVideo ? "aspect-video h-auto" : "h-0 overflow-hidden", // Toggle visibility and aspect ratio
           )}
         >
-          {currentSong && (
-            <ReactPlayer
-              ref={playerRef}
-              url={currentSong.url}
-              playing={playing}
-              volume={isMuted ? 0 : volume}
-              onPlay={() => !ignoreEvents.current && setPlaying(true)}
-              onPause={() => !ignoreEvents.current && setPlaying(false)}
-              onEnded={handleNext}
-              onProgress={handleProgress}
-              onDuration={handleDuration}
+            {currentSong && (
+              <ReactPlayer
+                ref={playerRef}
+                url={currentSong.url}
+                playing={playing}
+                volume={isMuted ? 0 : volume}
+                onPlay={() => !ignoreEvents.current && setPlaying(true)}
+                onPause={() => !ignoreEvents.current && setPlaying(false)}
+                onEnded={handleNext}
+                onProgress={handleProgress}
+                onDuration={handleDuration}
               width="100%" // Keep 100% to fill container
               height="100%" // Keep 100% to fill container
-              onError={(e) => console.error("ReactPlayer Error:", e)}
-              onReady={() => {
-                if (!initialSyncDone) {
-                  syncPlayerState();
-                }
-              }}
-              // Add config to potentially help persistence
+                onError={(e) => console.error("ReactPlayer Error:", e)}
+                onReady={() => {
+                  if (!initialSyncDone) {
+                    syncPlayerState();
+                  }
+                }}
+              // Correct the config structure for YouTube playerVars AGAIN
               config={{
-                youtube: {
-                  playerVars: {
-                    // Optional: ensures YouTube player controls don't overlay
-                    // controls: 0,
-                  },
+                playerVars: {
+                  // Optional: ensures YouTube player controls don't overlay
+                  // controls: 0,
+                  // Add other vars if needed, e.g.:
+                  // origin: window.location.origin // Sometimes needed
                 },
               }}
-            />
-          )}
-        </div>
+              />
+            )}
+          </div>
 
         {/* Controls Area */}
         <div className="p-3 bg-muted border-t border-border mt-auto">

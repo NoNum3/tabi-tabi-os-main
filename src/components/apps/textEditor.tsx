@@ -45,7 +45,6 @@ import {
   Save,
   Trash2,
   Underline,
-  WrapText,
 } from "lucide-react";
 
 interface TextEditorProps {
@@ -222,7 +221,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
             </TooltipContent>
           </Tooltip>
 
-          <ToolbarSeparator />
+          <ToolbarSeparator className="mx-1 h-6" />
 
           {/* Font Selection */}
           <Select
@@ -275,7 +274,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
             </SelectContent>
           </Select>
 
-          <ToolbarSeparator />
+          <ToolbarSeparator className="mx-1 h-6" />
 
           {/* Text Styles */}
           <ToolbarToggleGroup
@@ -336,7 +335,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
             </Tooltip>
           </ToolbarToggleGroup>
 
-          <ToolbarSeparator />
+          <ToolbarSeparator className="mx-1 h-6" />
 
           {/* Text Align */}
           <ToolbarToggleGroup
@@ -407,117 +406,132 @@ const TextEditor: React.FC<TextEditorProps> = ({
             </Tooltip>
           </ToolbarToggleGroup>
 
-          <ToolbarSeparator />
+          <ToolbarSeparator className="mx-1 h-6" />
 
-          {/* Color Pickers - Simple Input Type Color */}
-          <div className="flex items-center space-x-2 mx-2">
+          {/* --- Improved Text Color Picker --- */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Label
-                  htmlFor="textColorPicker"
-                  className="cursor-pointer p-1 rounded hover:bg-accent"
+              <div className="flex items-center border border-input rounded-md h-8 overflow-hidden">
+                <ToolbarButton
+                  className="rounded-none border-r border-input p-1.5 h-full"
+                  onClick={() => {
+                    document.getElementById(`${editorId}-textColorPicker`)
+                      ?.click();
+                  }}
                 >
                   <Palette className="h-4 w-4" />
-                </Label>
+                </ToolbarButton>
+                <input
+                  id={`${editorId}-textColorPicker`}
+                  type="color"
+                  value={editorSettings.textColor}
+                  onChange={(e) => updateSetting("textColor", e.target.value)}
+                  className="w-6 h-full border-none p-0 bg-transparent cursor-pointer"
+                  aria-label="Select text color"
+                />
+              </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Text Color</p>
               </TooltipContent>
             </Tooltip>
-            <input
-              id="textColorPicker"
-              type="color"
-              value={editorSettings.textColor}
-              onChange={(e) => updateSetting("textColor", e.target.value)}
-              className="w-6 h-6 border-none cursor-pointer bg-transparent"
-              title="Text Color"
-            />
+
+          <ToolbarSeparator className="mx-1 h-6" />
+
+          {/* --- Improved Background Color Picker --- */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Label
-                  htmlFor="bgColorPicker"
-                  className="cursor-pointer p-1 rounded hover:bg-accent"
+              {/* Group icon button and color input visually */}
+              <div className="flex items-center border border-input rounded-md h-8 overflow-hidden ml-1">
+                <ToolbarButton
+                  className="rounded-none border-r border-input p-1.5 h-full"
+                  onClick={() => {
+                    // Trigger click on the hidden input
+                    document.getElementById(`${editorId}-bgColorPicker`)
+                      ?.click();
+                  }}
                 >
-                  <Palette className="h-4 w-4 opacity-50" />{" "}
-                  {/* Slightly different look maybe? */}
-                </Label>
+                  {/* Use dimmed Palette icon for background */}
+                  <Palette className="h-4 w-4 opacity-60" />
+                </ToolbarButton>
+                <input
+                  id={`${editorId}-bgColorPicker`}
+                  type="color"
+                  value={editorSettings.backgroundColor}
+                  onChange={(e) =>
+                    updateSetting("backgroundColor", e.target.value)}
+                  className="w-6 h-full border-none p-0 bg-transparent cursor-pointer"
+                  aria-label="Select background color"
+                />
+              </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Background Color</p>
               </TooltipContent>
             </Tooltip>
-            <input
-              id="bgColorPicker"
-              type="color"
-              value={editorSettings.backgroundColor}
-              onChange={(e) => updateSetting("backgroundColor", e.target.value)}
-              className="w-6 h-6 border-none cursor-pointer bg-transparent"
-              title="Background Color"
-            />
-        </div>
 
-          <ToolbarSeparator />
+          <ToolbarSeparator className="mx-1 h-6" />
 
           {/* Word Wrap */}
-          <div className="flex items-center space-x-2 mx-2">
+          <div className="flex items-center space-x-2 ml-auto pl-2">
             <Tooltip>
               <TooltipTrigger asChild>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id={`${editorId}-wordWrapSwitch`}
+                    checked={editorSettings.wordWrap}
+                    onCheckedChange={(checked) =>
+                      updateSetting("wordWrap", checked)}
+                    aria-label="Toggle word wrap"
+                  />
                 <Label
-                  htmlFor="wordWrapToggle"
-                  className="cursor-pointer p-1 rounded hover:bg-accent"
+                    htmlFor={`${editorId}-wordWrapSwitch`}
+                    className="text-xs cursor-pointer"
                 >
-                  <WrapText className="h-4 w-4" />
+                    Wrap
                 </Label>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Toggle Word Wrap</p>
               </TooltipContent>
             </Tooltip>
-            <Switch
-              id="wordWrapToggle"
-              checked={editorSettings.wordWrap}
-              onCheckedChange={(checked) => updateSetting("wordWrap", checked)}
-              className="w-8 h-4 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
-            />
             </div>
         </Toolbar>
 
-        {/* Text Area - Now uncontrolled */}
+        {/* Text Area - Apply consistent padding and border */}
+        <div className="flex-grow p-1">
+          {/* Container for padding */}
         <Textarea
-          ref={textareaRef} // Assign the ref
-          key={editorId} // Ensure it resets if ID changes
+            ref={textareaRef}
+            key={editorId}
           id={`${editorId}-mainContent`}
-          defaultValue={content} // Set initial value ONLY
-          onBlur={handleBlur} // Sync state on blur
+            defaultValue={content}
+            onBlur={handleBlur}
           className={cn(
-            "flex-grow w-full p-3 text-sm rounded-none border-none focus:outline-none focus:ring-0 resize-none",
+              "w-full h-full resize-none border border-border rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-ring text-base leading-relaxed shadow-inner bg-background", // Added padding, border, rounded
             editorSettings.wordWrap
               ? "whitespace-pre-wrap break-words"
               : "whitespace-pre",
-            "font-mono", // Default to mono, specific font set by style
+              // REMOVED redundant font-mono class
         )}
         style={{
             fontFamily: editorSettings.fontFamily,
             fontSize: `${editorSettings.fontSize}px`,
-            lineHeight: editorSettings.lineHeight,
+              // lineHeight: editorSettings.lineHeight, // Removed - use leading-relaxed class
             fontWeight: editorSettings.isBold ? "bold" : "normal",
             fontStyle: editorSettings.isItalic ? "italic" : "normal",
             textDecoration: editorSettings.isUnderline ? "underline" : "none",
             textAlign: editorSettings.textAlign,
             color: editorSettings.textColor,
             backgroundColor: editorSettings.backgroundColor,
-            tabSize: editorSettings.tabSize,
+              // tabSize: editorSettings.tabSize, // Removed - rely on browser default/CSS
           }}
-          placeholder="Start typing here..."
-          wrap={editorSettings.wordWrap ? "soft" : "off"}
-        />
-
-        {/* Status Bar - REMOVED */}
-        {
-          /* <div className="w-full p-1 border-t border-border bg-muted text-xs text-muted-foreground text-right h-6 flex items-center justify-end">
-          <span>{statusMessage || "Ready"}</span>
-        </div> */
-        }
+            placeholder="Start typing your note..."
+            // wrap prop is deprecated/non-standard, use CSS whitespace instead
+            // wrap={editorSettings.wordWrap ? "soft" : "off"}
+          />
+        </div>
     </div>
     </TooltipProvider>
   );
