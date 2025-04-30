@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Provider } from "jotai";
-import { GlobalPodomoroTimer } from "../apps/podomoro";
+import { GlobalPodomoroTimer } from "../(clock)/ClockApp";
+import { AuthInitializer } from "../auth/AuthInitializer";
 
 export default function JotaiProvider({
   children,
@@ -11,7 +12,8 @@ export default function JotaiProvider({
 }) {
   return (
     <Provider>
-      {/* Mount the global timer component here so it runs regardless of whether the Podomoro window is open */}
+      <AuthInitializer />
+      {/* Mount the global timer component here */}
       <GlobalPodomoroTimer />
       {children}
     </Provider>

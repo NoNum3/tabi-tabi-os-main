@@ -1,224 +1,640 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Window from "./layout/window";
+// import { DndProvider, DropTargetMonitor, useDrag, useDrop } from "react-dnd"; // DropTargetMonitor is unused
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { appRegistry } from "../config/appRegistry";
 import { playSound } from "../lib/utils"; // Import the sound utility
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   closeWindowAtom, // Write atom to close a window
+  // focusWindowAtom, // focusWindow variable is unused
   openWindowAtom, // Write atom to open/focus a window
   windowRegistryAtom,
-  // focusWindowAtom, // Write atom to bring window to front (used by Window component later)
   // WindowState, // Import type if needed
 } from "../atoms/windowAtoms"; // Adjust path as necessary
 // import { v4 as uuidv4 } from "uuid"; // Import uuid for generating unique window IDs
 import Taskbar from "./layout/taskbar"; // Import the Taskbar
+import { useI18n } from "@/locales/client"; // Import useI18n
+// Import AppStoreWindow to render it directly
+// import { AppStoreWindow } from "./appstore/AppStoreWindow"; // Comment out if not used directly
+// --- Import the main Window component for rendering ---
+import Window from "./layout/window"; // Corrected: Default import
+// --- Import dashboard atoms ---
+import {
+  addedAppIdsAtom,
+  iconPositionsAtom,
+  // resetIconPositionsAtom, // Unused variable
+  updateIconPositionAtom,
+} from "../atoms/dashboardAtoms";
+// --- Import display settings atoms ---
+import {
+  currentGridCellPixelSizeAtom, // <-- Use this derived atom
+  showGridLinesAtom,
+  // snapToGridAtom, // snapGrid variable is unused
+} from "@/atoms/displaySettingsAtoms";
+import { cn } from "@/lib/utils"; // Import cn utility
+// import { AppRegistration, Position, Size } from "@/types"; // Position and Size are unused. AppRegistration is used.
+import { AppRegistration } from "@/types";
 
-// Define the props for the reusable AppIcon component
-interface AppIconProps {
-  src: string;
-  name: string;
-  appId: string; // Use appId from registry
-  // isOpen: boolean; // Determined by checking openWindowsAtom now
-  // isSelected: boolean; // Selection might be handled differently (e.g., based on z-index or a separate atom)
-  onDoubleClick: (appId: string) => void; // Pass appId on double click
-  // Consider adding onSelect if needed for single-click behavior
+// --- Define GridPosition type --- //
+interface GridPosition {
+  row: number;
+  col: number;
 }
 
-// Reusable AppIcon component
-const AppIcon: React.FC<AppIconProps> = ({
-  src,
-  name,
-  appId,
-  onDoubleClick,
-}) => {
-  // Removed hardcoded bgStyle
-  // const bgStyle = "bg-white text-primary";
+// --- Define DragItem type --- //
+interface DragItem {
+  appId: string;
+}
 
-  return (
-    <div
-      className={`flex flex-col items-center justify-center cursor-pointer group p-1 rounded transition-opacity duration-150 ease-in-out min-w-24`}
-      //   onClick={onSelect} // Single click might focus desktop or select icon differently
-      onDoubleClick={() => onDoubleClick(appId)} // Trigger open/focus action
-    >
-      <Image
-        src={src}
-        alt={name}
-        width={60}
-        height={60}
-        className={`drop-shadow-lg`}
-        priority={appId === "clock"}
-      />
-      {/* Apply theme-aware classes directly */}
-      <p
-        className={`px-1.5 py-0.5 font-tight shadow-md mt-1 rounded text-sm bg-background/80 backdrop-blur-sm text-foreground`}
+// Reusable AppIcon component (modified slightly for flexibility if needed)
+interface AppIconProps {
+  appId: string;
+  appNameKey: string; // Use string as key
+  src: string;
+  isSelected: boolean;
+  // Removed onDoubleClick, handled by Draggable wrapper
+  // Removed onClick, handled by Draggable wrapper
+  cellSizeClass?: string; // Optional class based on grid size
+}
+
+const AppIconDisplay: React.FC<AppIconProps> = React.memo(
+  ({ appId, appNameKey, src, isSelected, cellSizeClass }) => {
+    const t = useI18n();
+    const iconSize = appId === "clock" ? 60 : 48;
+
+    return (
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center w-full h-full group p-1 rounded transition-colors duration-150 ease-in-out text-center",
+          isSelected
+            ? "bg-primary/20"
+            : "hover:bg-black/10 dark:hover:bg-white/10",
+          cellSizeClass,
+        )}
+        title={t(appNameKey as keyof ReturnType<typeof t>, {})}
       >
-        {name}
-      </p>
-    </div>
-  );
-};
+        <Image
+          src={src}
+          alt={t(appNameKey as keyof ReturnType<typeof t>, {})}
+          width={iconSize}
+          height={iconSize}
+          className={`drop-shadow-lg object-contain ${
+            isSelected ? "" : "group-hover:scale-105 transition-transform"
+          }`}
+          priority={appId === "clock"}
+        />
+        <span
+          className={cn(
+            "mt-1 font-medium truncate w-full text-white dark:text-gray-200 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)]",
+            cellSizeClass === "text-xs" ? "text-xs" : "text-[11px]", // Adjust text size based on cell size
+          )}
+        >
+          {t(appNameKey as keyof ReturnType<typeof t>, {})}
+        </span>
+      </div>
+    );
+  },
+);
+AppIconDisplay.displayName = "AppIconDisplay";
+
+// --- Draggable App Icon Component ---
+interface DraggableAppIconProps {
+  app: AppRegistration; // Use AppRegistration type
+  position: GridPosition;
+  cellSize: number;
+  isSelected: boolean;
+  onSelect: (appId: string) => void; // Explicit string type
+  onDoubleClick: (appId: string) => void; // Explicit string type
+}
+
+const DraggableAppIcon: React.FC<DraggableAppIconProps> = React.memo(
+  ({
+    app,
+    position,
+    cellSize,
+    isSelected,
+    onSelect,
+    onDoubleClick,
+  }) => {
+    const divRef = useRef<HTMLDivElement>(null); // Create a ref for the div
+    const [{ isDragging }, drag] = useDrag(() => ({
+      type: "ICON",
+      item: { appId: app.id, position },
+      collect: (monitor) => ({
+        isDragging: !!monitor.isDragging(),
+      }),
+    }));
+
+    drag(divRef);
+
+    const cellSizeClass = cellSize < 64
+      ? "text-xs"
+      : cellSize < 80
+      ? "text-[11px]"
+      : "text-xs";
+
+    return (
+      <div
+        ref={divRef}
+        style={{
+          gridRowStart: position.row + 1,
+          gridColumnStart: position.col + 1,
+          opacity: isDragging ? 0.5 : 1,
+          cursor: "grab",
+          zIndex: isDragging ? 100 : 1,
+          touchAction: "none",
+        }}
+        className="transition-opacity duration-150"
+        onClick={() => onSelect(app.id)}
+        onDoubleClick={() => onDoubleClick(app.id)}
+      >
+        <AppIconDisplay
+          appId={app.id}
+          appNameKey={app.nameKey}
+          src={app.src}
+          isSelected={isSelected}
+          cellSizeClass={cellSizeClass}
+        />
+      </div>
+    );
+  },
+);
+DraggableAppIcon.displayName = "DraggableAppIcon";
+
+// --- Desktop Grid Component ---
+interface DesktopGridProps {
+  dashboardApps: AppRegistration[]; // Use AppRegistration type
+  selectedAppId: string | null;
+  handleSelectIcon: (appId: string) => void; // Explicit string type
+  handleDoubleClick: (appId: string) => void; // Explicit string type
+}
+
+const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
+  ({
+    dashboardApps,
+    selectedAppId,
+    handleSelectIcon,
+    handleDoubleClick,
+  }) => {
+    const [iconPositions] = useAtom(iconPositionsAtom);
+    // const addedAppIds = useAtomValue(addedAppIdsAtom); // Removed as it's unused
+    const updatePosition = useSetAtom(updateIconPositionAtom);
+    const cellSize = useAtomValue(currentGridCellPixelSizeAtom); // <-- Read pixel size
+    // const [snapGrid] = useAtom(snapToGridAtom); // snapGrid variable is unused
+    const [showGridLines] = useAtom(showGridLinesAtom);
+    // State for the drop preview indicator
+    const [previewTarget, setPreviewTarget] = useState<GridPosition | null>(
+      null,
+    );
+
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    // Removed iconHolderRef - drop target is the scroll container now
+
+    // Removed maxOccupiedRow/Col calculation and totalGridWidth/Height - CSS grid handles sizing
+
+    const [{ isOver }, drop] = useDrop<DragItem, void, { isOver: boolean }>(
+      () => ({
+        accept: "ICON",
+        canDrop: () => true,
+        hover: (item, monitor) => {
+          const delta = monitor.getClientOffset();
+          if (!delta || !scrollContainerRef.current) {
+            setPreviewTarget(null);
+            return;
+          }
+
+          const scrollContainerRect = scrollContainerRef.current
+            .getBoundingClientRect();
+          const scrollTop = scrollContainerRef.current.scrollTop;
+          const scrollLeft = scrollContainerRef.current.scrollLeft;
+
+          const dropX = delta.x - scrollContainerRect.left + scrollLeft;
+          const dropY = delta.y - scrollContainerRect.top + scrollTop;
+
+          // Calculate effective size including gap for coordinate division
+          const gapSize = 4; // Defined in the grid CSS
+          const effectiveCellSize = cellSize + gapSize;
+
+          // Calculate target grid cell using effective size
+          const targetCol = Math.max(0, Math.floor(dropX / effectiveCellSize));
+          const targetRow = Math.max(0, Math.floor(dropY / effectiveCellSize));
+          const newTarget = { row: targetRow, col: targetCol };
+
+          if (
+            previewTarget?.row !== newTarget.row ||
+            previewTarget?.col !== newTarget.col
+          ) {
+            const isOccupied = Object.entries(iconPositions).some(
+              ([id, pos]) =>
+                id !== item.appId && pos.row === targetRow &&
+                pos.col === targetCol,
+            );
+            // Only show preview for valid (non-occupied) target cells
+            setPreviewTarget(isOccupied ? null : newTarget);
+            // console.log(`[DesktopGrid] Hover preview target: ${isOccupied ? 'null (occupied)' : JSON.stringify(newTarget)}`);
+          }
+        },
+        drop: (item, monitor) => {
+          setPreviewTarget(null); // Clear preview on actual drop
+          console.log(
+            `[DesktopGrid] Drop function *EXECUTED* for ${item.appId}`,
+          );
+          const currentIconPositions = iconPositions;
+
+          // Log the positions being checked
+          console.log(
+            "[DesktopGrid Drop] Checking against positions:",
+            JSON.stringify(currentIconPositions, null, 2),
+          );
+
+          const effectiveCellSize = cellSize + 4; // Cell size including gap
+
+          let targetCol = Math.max(
+            0,
+            Math.floor(
+              (monitor.getClientOffset()!.x -
+                scrollContainerRef.current!.getBoundingClientRect().left +
+                scrollContainerRef.current!.scrollLeft) / effectiveCellSize,
+            ),
+          );
+          let targetRow = Math.max(
+            0,
+            Math.floor(
+              (monitor.getClientOffset()!.y -
+                scrollContainerRef.current!.getBoundingClientRect().top +
+                scrollContainerRef.current!.scrollTop) / effectiveCellSize,
+            ),
+          );
+
+          console.log(
+            `[DesktopGrid Drop] Initial target for ${item.appId}: R${targetRow}, C${targetCol}`,
+          );
+
+          // Ensure target is not negative
+          targetRow = Math.max(0, targetRow);
+          targetCol = Math.max(0, targetCol);
+
+          // Check if the target cell is occupied by another icon
+          const isOccupied = Object.entries(currentIconPositions).some(
+            ([id, pos]) =>
+              id !== item.appId && pos.row === targetRow &&
+              pos.col === targetCol,
+          );
+
+          if (!isOccupied) {
+            console.log(
+              `[DesktopGrid Drop] Target R${targetRow}, C${targetCol} is NOT occupied for ${item.appId}. Updating position.`,
+            );
+            updatePosition({
+              appId: item.appId,
+              position: {
+                row: targetRow,
+                col: targetCol,
+              },
+            });
+          } else {
+            console.log(
+              `[DesktopGrid Drop] Target R${targetRow}, C${targetCol} IS OCCUPIED for ${item.appId}. No position update.`,
+            );
+            // Handle collision: maybe find nearest empty spot, or revert to original, or nothing.
+            // For now, we do nothing if it's occupied, meaning the icon effectively can't be dropped there.
+          }
+        },
+      }),
+      [cellSize, iconPositions, updatePosition], // Added iconPositions to deps
+    );
+
+    // Attach drop to the scroll container
+    drop(scrollContainerRef);
+
+    return (
+      <div
+        ref={scrollContainerRef} // Ref for the main scrollable area
+        className={cn(
+          "relative flex-grow p-2 overflow-auto w-full h-full",
+          showGridLines ? "debug-grid-lines" : "", // Conditional class for grid lines
+        )}
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(auto-fill, minmax(${cellSize}px, 1fr))`,
+          gridAutoRows: `${cellSize}px`,
+          gap: "4px", // Consistent gap
+          alignContent: "start", // Align items to the start of the grid
+        }}
+        // onClick={() => handleSelectIcon(null)} // Deselect on empty space click handled elsewhere
+      >
+        {dashboardApps.map((app) => {
+          const currentPosition = iconPositions[app.id] || { row: 0, col: 0 }; // Default if not set
+          return (
+            <DraggableAppIcon
+              key={app.id}
+              app={app}
+              position={currentPosition}
+              cellSize={cellSize}
+              isSelected={selectedAppId === app.id}
+              onSelect={handleSelectIcon}
+              onDoubleClick={handleDoubleClick}
+            />
+          );
+        })}
+        {/* Drop Preview Indicator */}
+        {previewTarget && isOver && (() => {
+          // Find the app being dragged
+          const draggingAppId = dashboardApps.find((app) =>
+            app.id === selectedAppId
+          )?.id || Object.keys(iconPositions)[0];
+          const draggingApp = dashboardApps.find((app) =>
+            app.id === draggingAppId
+          );
+          if (!draggingApp) return null;
+          return (
+            <div
+              style={{
+                gridRowStart: previewTarget.row + 1,
+                gridColumnStart: previewTarget.col + 1,
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                zIndex: 2,
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  opacity: 0.5,
+                  filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AppIconDisplay
+                  appId={draggingApp.id}
+                  appNameKey={draggingApp.nameKey}
+                  src={draggingApp.src}
+                  isSelected={false}
+                  cellSizeClass={cellSize < 64
+                    ? "text-xs"
+                    : cellSize < 80
+                    ? "text-[11px]"
+                    : "text-xs"}
+                />
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+    );
+  },
+);
+DesktopGrid.displayName = "DesktopGrid";
 
 // Main component to display all app icons and windows
 export const AppsIcons = () => {
-  // CHANGE: Use the full window registry
-  const [windowRegistry] = useAtom(windowRegistryAtom);
-  // Derive the list of windows to render (all open or minimized)
-  const windowsToRender = Object.values(windowRegistry).filter(
+  const windows = useAtomValue(windowRegistryAtom);
+  const openWindow = useSetAtom(openWindowAtom);
+  const closeWindow = useSetAtom(closeWindowAtom);
+  // const focusWindow = useSetAtom(focusWindowAtom); // focusWindow variable is unused
+  const t = useI18n();
+
+  const addedAppIds = useAtomValue(addedAppIdsAtom);
+
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+
+  // Calculate windows to render (visible or minimized)
+  const windowsToRender = Object.values(windows).filter(
     (win) => win.isOpen || win.isMinimized,
   );
 
-  // Get the setter functions for window actions
-  const openWindow = useAtom(openWindowAtom)[1];
-  const closeWindow = useAtom(closeWindowAtom)[1];
-  // const focusWindow = useAtom(focusWindowAtom)[1]; // focusWindow will be used inside the Window component
-
-  // Local state for selection might still be needed if we want desktop icon selection independent of window focus
-  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
-
-  // Mobile/tablet detection
-  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
-
-  // Check for mobile/tablet on component mount
+  // Check for mobile/tablet on mount
   useEffect(() => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /iphone|ipad|ipod|android|blackberry|windows phone/g
+      .test(userAgent);
+    const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/g
+      .test(userAgent);
+    const isMobileOrTabletDevice = isMobile || isTablet;
+    setIsMobileOrTablet(isMobileOrTabletDevice);
+
     const checkDevice = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isMobile = /iphone|ipad|ipod|android|blackberry|windows phone/g
-        .test(userAgent);
-      const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/g
-        .test(userAgent);
-      setIsMobileOrTablet(isMobile || isTablet);
+      const newIsMobileOrTablet =
+        /iphone|ipad|ipod|android|blackberry|windows phone/g.test(
+          navigator.userAgent.toLowerCase(),
+        ) ||
+        /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/g.test(
+          navigator.userAgent.toLowerCase(),
+        );
+      setIsMobileOrTablet(newIsMobileOrTablet);
     };
-
-    checkDevice();
     window.addEventListener("resize", checkDevice);
-
-    return () => {
-      window.removeEventListener("resize", checkDevice);
-    };
+    return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Convert appRegistry to an array for mapping (if it's an object)
-  const apps = Object.entries(appRegistry).map(([id, config]) => ({
-    id, // This is the appId
-    ...config,
-  }));
+  // --- Filter apps based on addedAppIds and ensure they have config ---
+  const dashboardApps = React.useMemo(() => {
+    return addedAppIds
+      .map((appId): AppRegistration | null => {
+        const config = appRegistry[appId];
+        if (!config) return null; // Skip if config missing in registry
+        // Construct the AppRegistration object
+        return {
+          id: appId,
+          nameKey: appId, // Use the key as the nameKey
+          src: config.src,
+          defaultSize: config.defaultSize,
+          minSize: config.minSize,
+          category: config.category,
+          component: config.component,
+        };
+      })
+      .filter((app): app is AppRegistration => app !== null); // Simple filter for non-null
+  }, [addedAppIds]);
 
-  const openAppWindow = (appId: string) => {
-    const appConfig = appRegistry[appId];
-    if (!appConfig) return;
+  // Log dashboardApps only when it changes
+  useEffect(() => {
+    console.log(
+      "[AppsIcons] Rendering DesktopGrid with dashboardApps:",
+      JSON.stringify(dashboardApps.map((app) => app.id), null, 2),
+    );
+  }, [dashboardApps]);
 
-    playSound("/sounds/open.mp3"); // Play open sound
+  // Define handleCloseWindow first
+  const handleCloseWindow = useCallback(
+    (windowId: string) => {
+      playSound("/sounds/close.mp3");
+      closeWindow(windowId);
+    },
+    [closeWindow],
+  );
 
-    // We need a unique ID for each window instance, even of the same app type.
-    // If an instance already exists, openWindowAtom should focus it.
-    // If not, it creates a new one.
-    // Let's generate a predictable ID based on appId for simplicity for now,
-    // or handle multiple instances if needed. Assuming single instance per appId for now.
-    // A better approach for multi-instance would use uuidv4() always.
-    const windowInstanceId = `${appId}-instance`; // Simple instance ID
+  // Now define openAppWindow, which depends on handleCloseWindow
+  const openAppWindow = useCallback(
+    (appId: string) => {
+      console.log("[AppsIcons] Attempting to open app:", appId); // <-- Log entry
+      const appConfig = dashboardApps.find((app) => app.id === appId);
 
-    openWindow({
-      id: windowInstanceId, // Unique ID for this instance
-      appId: appId,
-      title: appConfig.name, // Use name from registry
-      minSize: appConfig.minSize,
-      initialSize: appConfig.defaultSize, // Pass initial size
-      // initialPosition will be handled by openWindowAtom (loads saved or calculates default)
-    });
-    setSelectedAppId(appId); // Optionally select the icon on double click
-  };
+      if (!appConfig) {
+        console.error(`[AppsIcons] App config not found for ${appId}`); // <-- Log error
+        return;
+      }
 
-  const handleDoubleClick = (appId: string) => {
-    openAppWindow(appId);
-  };
+      console.log("[AppsIcons] Found app config:", appConfig); // <-- Log config
 
-  const handleCloseWindow = (windowId: string) => {
-    playSound("/sounds/close.mp3"); // Play close sound
-    closeWindow(windowId); // Use the Jotai action atom
-    // No need to manage selectedAppId here unless closing should deselect icon
-  };
+      playSound("/sounds/open.mp3");
+      const windowInstanceId = `${appId}-instance-${Date.now()}`;
 
-  const handleSelectIcon = (appId: string) => {
-    setSelectedAppId(appId);
-    // Maybe play a click sound?
-    playSound("/sounds/click.mp3");
+      const windowPayload = {
+        id: windowInstanceId,
+        appId: appId,
+        title: t(appConfig.nameKey as keyof ReturnType<typeof t>, {}),
+        minSize: appConfig.minSize,
+        initialSize: appConfig.defaultSize,
+        children: React.createElement(appConfig.component, {
+          windowId: windowInstanceId,
+          onClose: () => handleCloseWindow(windowInstanceId), // Pass handleCloseWindow
+        }),
+      };
 
-    // For mobile/tablet, open the window on a single click
-    if (isMobileOrTablet) {
+      console.log(
+        "[AppsIcons] Calling openWindow with payload:",
+        windowPayload,
+      ); // <-- Log payload
+
+      openWindow(windowPayload);
+      setSelectedIcon(appId);
+    },
+    [dashboardApps, openWindow, t, handleCloseWindow], // Added handleCloseWindow dependency
+  );
+
+  const handleDoubleClick = useCallback(
+    (appId: string) => {
       openAppWindow(appId);
+    },
+    [openAppWindow],
+  );
+
+  const handleSelectIcon = useCallback(
+    (appId: string) => {
+      setSelectedIcon(appId);
+      playSound("/sounds/click.mp3");
+      // Mobile/Tablet: Single click opens the app
+      if (isMobileOrTablet) {
+        openAppWindow(appId);
+      }
+    },
+    [isMobileOrTablet, openAppWindow], // Removed playSound
+  );
+
+  // --- Effect to close windows with app IDs not found in the main appRegistry --- // MODIFIED LOGIC
+  useEffect(() => {
+    const windowsToCloseNow: string[] = [];
+    windowsToRender.forEach((windowState) => {
+      // Check if the appId exists in the main appRegistry
+      const appConfigExistsInRegistry = windowState.appId in appRegistry; // <<< MODIFIED CHECK
+      if (
+        !appConfigExistsInRegistry &&
+        (windowState.isOpen || windowState.isMinimized)
+      ) {
+        windowsToCloseNow.push(windowState.id);
+      }
+    });
+
+    if (windowsToCloseNow.length > 0) {
+      console.warn(
+        "Closing windows with app IDs not found in appRegistry:", // Modified log message
+        windowsToCloseNow,
+      );
+      windowsToCloseNow.forEach((id) => closeWindow(id));
     }
-  };
+    // Keep dependencies, appRegistry is static so doesn't need to be listed
+  }, [windows, closeWindow, windowsToRender]); // Removed dashboardApps from dependencies
 
   return (
-    <>
-      {/* Background click to clear selection */}
-      <div
-        className="fixed inset-0 -z-10" // Ensure background covers everything
-        onClick={() => setSelectedAppId(null)}
-      >
-      </div>
+    <DndProvider backend={HTML5Backend}>
+      {/* Wrap with DndProvider */}
 
-      {/* Desktop Icons */}
-      {/* Apply CSS multi-column layout */}
-      <div
-        className="absolute top-4 left-4 z-10 max-h-[calc(100vh-80px)] pb-14 overflow-y-hidden"
-        style={{
-          columnWidth: "6rem", // Adjust based on desired icon width + padding
-          columnGap: "0.5rem", // Adjust gap between columns
-        }}
+      {/* --- Temporarily Comment Out Background Click Div --- */}
+      {
+        /* <div
+        className="fixed inset-0 -z-10"
+        onClick={() => setSelectedIcon(null)}
       >
-        {apps.map((app) => (
-          // Add break-inside-avoid to prevent icons splitting across columns
-          <div
-            key={app.id}
-            onClick={() => handleSelectIcon(app.id)}
-            className={`p-1 rounded inline-block w-full break-inside-avoid mb-2 ${
-              // Use inline-block, w-full, break-inside, mb-2 for column layout
-              selectedAppId === app.id ? "brightness-50" : ""}`}
-          >
-            <AppIcon
-              src={app.src}
-              name={app.name}
-              appId={app.id}
-              onDoubleClick={handleDoubleClick}
-            />
-          </div>
-        ))}
-      </div>
+      </div> */
+      }
 
-      {/* CHANGE: Render ALL open or minimized windows, hide minimized ones with style */}
+      {/* --- Render Desktop Grid --- */}
+      <DesktopGrid
+        dashboardApps={dashboardApps}
+        selectedAppId={selectedIcon}
+        handleSelectIcon={handleSelectIcon}
+        handleDoubleClick={handleDoubleClick}
+      />
+
+      {/* --- Render Windows --- */}
       {windowsToRender.map((windowState) => {
-        const appConfig = appRegistry[windowState.appId];
-        if (!appConfig) {
-          console.error(
-            `App configuration not found for: ${windowState.appId}. Closing window ID: ${windowState.id}`,
+        // Find the app config from the *filtered* dashboardApps list
+        const appConfig = dashboardApps.find((app) =>
+          app.id === windowState.appId
+        );
+
+        // *** ADD THIS LOG ***
+        if (windowState.appId === "appStore") {
+          console.log(
+            "[AppsIcons] Rendering App Store window with state:",
+            JSON.stringify(windowState, null, 2),
           );
-          closeWindow(windowState.id);
+        }
+        // *** END OF ADDED LOG ***
+
+        // If config is missing, window closing is handled by the useEffect above
+        if (!appConfig || !appConfig.component) {
           return null;
         }
 
         const AppComponent = appConfig.component;
 
-        // Conditionally apply display: none if minimized
-        const style = windowState.isMinimized ? { display: "none" } : {};
+        // Define styles for minimized windows (keeps them in DOM for sound etc.)
+        const style: React.CSSProperties = windowState.isMinimized
+          ? {
+            position: "fixed",
+            left: "-9999px",
+            opacity: 0,
+            pointerEvents: "none",
+            zIndex: -1,
+            visibility: "hidden",
+          }
+          : {};
 
         return (
           <div key={windowState.id} style={style}>
+            {/* Use default imported Window */}
             <Window
               windowId={windowState.id}
-              title={windowState.title}
-              isOpen={windowState.isOpen} // Pass the actual isOpen state
+              title={windowState.title ||
+                t(appConfig.nameKey as keyof ReturnType<typeof t>, {})}
+              isOpen={windowState.isOpen && !windowState.isMinimized}
               onClose={() => handleCloseWindow(windowState.id)}
               initialPosition={windowState.position}
               initialSize={windowState.size}
-              minSize={windowState.minSize}
+              minSize={windowState.minSize ?? appConfig.minSize}
               zIndex={windowState.zIndex}
-              isMobileOrTablet={isMobileOrTablet}
+              isMobileOrTablet={isMobileOrTablet} // Pass down mobile status
             >
-              <AppComponent onClose={() => handleCloseWindow(windowState.id)} />
+              {/* Render the actual app component */}
+              <AppComponent
+                windowId={windowState.id}
+                onClose={() => handleCloseWindow(windowState.id)}
+              />
             </Window>
           </div>
         );
@@ -226,6 +642,6 @@ export const AppsIcons = () => {
 
       {/* Render the Taskbar */}
       <Taskbar />
-    </>
+    </DndProvider>
   );
 };

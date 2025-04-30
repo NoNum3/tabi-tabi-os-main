@@ -1,4 +1,4 @@
-const BASE_STORAGE_KEY = "wfcOS_state";
+const BASE_STORAGE_KEY = "tabiOS_state";
 
 // Helper to check if localStorage is available
 const isLocalStorageAvailable = (): boolean => {
@@ -38,7 +38,7 @@ export const saveFeatureState = <T>(feature: string, state: T): boolean => {
   } catch (error) {
     console.error(
       `Could not save state for feature '${feature}' to localStorage:`,
-      error
+      error,
     );
     return false;
   }
@@ -47,7 +47,7 @@ export const saveFeatureState = <T>(feature: string, state: T): boolean => {
 // Load state for a specific feature
 export const loadFeatureState = <T>(feature: string): T | undefined => {
   if (!isLocalStorageAvailable()) {
-    console.warn("localStorage is not available");
+    // console.warn("localStorage is not available"); // <-- Comment out this warning
     return undefined;
   }
 
@@ -60,7 +60,7 @@ export const loadFeatureState = <T>(feature: string): T | undefined => {
   } catch (error) {
     console.error(
       `Could not load state for feature '${feature}' from localStorage:`,
-      error
+      error,
     );
     return undefined;
   }
@@ -79,7 +79,7 @@ export const clearFeatureState = (feature: string): boolean => {
   } catch (error) {
     console.error(
       `Could not clear state for feature '${feature}' from localStorage:`,
-      error
+      error,
     );
     return false;
   }
@@ -97,7 +97,7 @@ export const clearAllAppState = (): boolean => {
     Object.keys(localStorage)
       .filter((key) => key.startsWith(BASE_STORAGE_KEY))
       .forEach((key) => localStorage.removeItem(key));
-    console.log("Cleared all wfcOS state from localStorage.");
+    console.log("Cleared all tabiOS state from localStorage.");
     return true;
   } catch (error) {
     console.error("Could not clear all app state from localStorage:", error);

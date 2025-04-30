@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Position, Size } from "../types";
 import { playSound } from "../lib/utils";
 
@@ -20,6 +20,7 @@ interface UseWindowManagementProps {
   initialPosition: Position;
   initialSize: Size;
   minSize?: Size;
+  aspectRatio?: number;
   containerRef?: React.RefObject<HTMLElement>;
   onInteractionEnd: (id: string, newPosition: Position, newSize: Size) => void;
   onFocus: (id: string) => void;
@@ -30,6 +31,7 @@ export const useWindowManagement = ({
   initialPosition,
   initialSize,
   minSize,
+  aspectRatio,
   containerRef,
   onInteractionEnd,
   onFocus,
@@ -39,8 +41,9 @@ export const useWindowManagement = ({
   const [size, setSize] = useState<Size>(initialSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const [resizeDirection, setResizeDirection] =
-    useState<ResizeDirection | null>(null);
+  const [resizeDirection, setResizeDirection] = useState<
+    ResizeDirection | null
+  >(null);
 
   // Refs to store starting values during interactions
   const startPositionRef = useRef<Position>({ x: 0, y: 0 });
@@ -63,7 +66,7 @@ export const useWindowManagement = ({
       startMousePositionRef.current = { x: e.clientX, y: e.clientY };
       e.preventDefault();
     },
-    [position, windowId, onFocus]
+    [position, windowId, onFocus],
   );
 
   const handleDragMove = useCallback(
@@ -78,25 +81,25 @@ export const useWindowManagement = ({
         const parentRect = containerRef.current.getBoundingClientRect();
         newX = Math.max(
           0,
-          Math.min(newX, parentRect.width - currentSize.width)
+          Math.min(newX, parentRect.width - currentSize.width),
         );
         newY = Math.max(
           0,
-          Math.min(newY, parentRect.height - currentSize.height)
+          Math.min(newY, parentRect.height - currentSize.height),
         );
       } else {
         newX = Math.max(
           0,
-          Math.min(newX, window.innerWidth - currentSize.width)
+          Math.min(newX, window.innerWidth - currentSize.width),
         );
         newY = Math.max(
           0,
-          Math.min(newY, window.innerHeight - currentSize.height)
+          Math.min(newY, window.innerHeight - currentSize.height),
         );
       }
       setPosition({ x: newX, y: newY });
     },
-    [isDragging, size, containerRef]
+    [isDragging, size, containerRef],
   );
 
   const handleDragEnd = useCallback(() => {
@@ -126,51 +129,109 @@ export const useWindowManagement = ({
       e.preventDefault();
       e.stopPropagation();
     },
-    [position, size, windowId, onFocus]
+    [position, size, windowId, onFocus],
   );
 
   const handleResizeMove = useCallback(
     (e: MouseEvent) => {
       if (!isResizing || !resizeDirection) return;
+
       const currentMousePos = { x: e.clientX, y: e.clientY };
-      const deltaX = currentMousePos.x - startMousePositionRef.current.x;
-      const deltaY = currentMousePos.y - startMousePositionRef.current.y;
-      let newWidth = startSizeRef.current.width;
-      let newHeight = startSizeRef.current.height;
-      let newX = startPositionRef.current.x;
-      let newY = startPositionRef.current.y;
+      const startMousePos = startMousePositionRef.current;
+      const startSize = startSizeRef.current;
+      const startPos = startPositionRef.current;
+
+      const deltaX = currentMousePos.x - startMousePos.x;
+      const deltaY = currentMousePos.y - startMousePos.y;
+
+      let newWidth = startSize.width;
+      let newHeight = startSize.height;
+      let newX = startPos.x;
+      let newY = startPos.y;
+
       const effectiveMinSize = {
         width: minSize?.width ?? 150,
         height: minSize?.height ?? 100,
       };
+
+      // Calculate preliminary new dimensions based on direction
       if (resizeDirection.includes("right")) {
-        newWidth = Math.max(
-          effectiveMinSize.width,
-          startSizeRef.current.width + deltaX
-        );
+        newWidth = startSize.width + deltaX;
       }
       if (resizeDirection.includes("bottom")) {
-        newHeight = Math.max(
-          effectiveMinSize.height,
-          startSizeRef.current.height + deltaY
-        );
+        newHeight = startSize.height + deltaY;
       }
       if (resizeDirection.includes("left")) {
-        const widthChange = Math.min(
-          deltaX,
-          startSizeRef.current.width - effectiveMinSize.width
-        );
-        newWidth = startSizeRef.current.width - widthChange;
-        newX = startPositionRef.current.x + widthChange;
+        const widthChange = deltaX; // Use raw delta for calculation
+        newWidth = startSize.width - widthChange;
+        newX = startPos.x + widthChange;
       }
       if (resizeDirection.includes("top")) {
-        const heightChange = Math.min(
-          deltaY,
-          startSizeRef.current.height - effectiveMinSize.height
-        );
-        newHeight = startSizeRef.current.height - heightChange;
-        newY = startPositionRef.current.y + heightChange;
+        const heightChange = deltaY; // Use raw delta for calculation
+        newHeight = startSize.height - heightChange;
+        newY = startPos.y + heightChange;
       }
+
+      // --- Aspect Ratio Enforcement ---
+      if (aspectRatio) {
+        // Determine primary resize axis based on direction
+        const isHorizontalResize = resizeDirection.includes("left") ||
+          resizeDirection.includes("right");
+        const isVerticalResize = resizeDirection.includes("top") ||
+          resizeDirection.includes("bottom");
+
+        if (isHorizontalResize && !isVerticalResize) { // Only width changed
+          newHeight = newWidth / aspectRatio;
+        } else if (isVerticalResize && !isHorizontalResize) { // Only height changed
+          newWidth = newHeight * aspectRatio;
+        } else { // Corner resize - prioritize the larger change relative to aspect ratio
+          const widthBasedHeight = newWidth / aspectRatio;
+          const heightBasedWidth = newHeight * aspectRatio;
+
+          // Check which axis respects the aspect ratio better given the drag
+          if (
+            Math.abs(newHeight - widthBasedHeight) <
+              Math.abs(newWidth - heightBasedWidth)
+          ) {
+            // Height change was closer to aspect ratio, adjust width
+            newWidth = heightBasedWidth;
+          } else {
+            // Width change was closer, adjust height
+            newHeight = widthBasedHeight;
+          }
+        }
+
+        // Adjust position if needed after aspect ratio enforcement (for left/top drags)
+        if (resizeDirection.includes("left")) {
+          newX = startPos.x + (startSize.width - newWidth);
+        }
+        if (resizeDirection.includes("top")) {
+          newY = startPos.y + (startSize.height - newHeight);
+        }
+      }
+      // --- End Aspect Ratio Enforcement ---
+
+      // Apply minimum size constraints AFTER aspect ratio calculation
+      newWidth = Math.max(effectiveMinSize.width, newWidth);
+      newHeight = Math.max(effectiveMinSize.height, newHeight);
+
+      // Re-enforce aspect ratio AFTER min size constraint, might slightly violate minSize on one axis
+      if (aspectRatio) {
+        if (newWidth / aspectRatio < effectiveMinSize.height) {
+          newWidth = effectiveMinSize.height * aspectRatio;
+        }
+        if (newHeight * aspectRatio < effectiveMinSize.width) {
+          newHeight = effectiveMinSize.width / aspectRatio;
+        }
+        // Decide which dimension dictates the final size based on which min-size was hit first
+        if (newWidth / aspectRatio > newHeight) {
+          newHeight = newWidth / aspectRatio; // Width dictates
+        } else {
+          newWidth = newHeight * aspectRatio; // Height dictates
+        }
+      }
+
+      // Final boundary checks (container/window)
       if (containerRef?.current) {
         const parentRect = containerRef.current.getBoundingClientRect();
         newWidth = Math.min(newWidth, parentRect.width - newX);
@@ -183,10 +244,11 @@ export const useWindowManagement = ({
         newX = Math.max(0, Math.min(newX, window.innerWidth - newWidth));
         newY = Math.max(0, Math.min(newY, window.innerHeight - newHeight));
       }
+
       setSize({ width: newWidth, height: newHeight });
       setPosition({ x: newX, y: newY });
     },
-    [isResizing, resizeDirection, minSize, containerRef]
+    [isResizing, resizeDirection, minSize, aspectRatio, containerRef],
   );
 
   const handleResizeEnd = useCallback(() => {

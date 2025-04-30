@@ -1,12 +1,9 @@
 import { atom } from "jotai";
-import { loadFeatureState, saveFeatureState } from "../utils/storage";
-
-interface Song {
-  url: string;
-  title: string;
-  id?: string;
-  seqId?: number;
-}
+import { supabase } from "@/lib/supabaseClient";
+import { userAtom } from "@/atoms/authAtoms";
+import { Song } from "@/components/(music)/types/Song";
+import { loadFeatureState, saveFeatureState } from "@/utils/storage";
+import type { Tables } from "../../database.types";
 
 // Define the shape of the persisted state
 interface MusicPlayerState {
@@ -20,33 +17,42 @@ interface MusicPlayerState {
 
 const defaultSongs: Song[] = [
   {
-    url: "https://www.youtube.com/watch?v=lTRiuFIWV54",
-    title: "Lo-fi Study Session",
-    id: "lTRiuFIWV54",
-  },
-  {
     url: "https://www.youtube.com/watch?v=Fp5ghKduTK8",
-    title: "Ghibli Piano",
+    title: "Ghibli Melody",
     id: "Fp5ghKduTK8",
+    seqId: 1,
   },
   {
-    url: "https://www.youtube.com/watch?v=KxJrYKoTeXA",
-    title: "Jazzjeans",
-    id: "KxJrYKoTeXA",
+    url: "https://www.youtube.com/watch?v=rrFlMNT4blk",
+    title: "Harukaze - Rihwa",
+    id: "rrFlMNT4blk",
+    seqId: 2,
   },
   {
-    url: "https://www.youtube.com/watch?v=pfU0QORkRpY",
-    title: "FKJ Live",
-    id: "pfU0QORkRpY",
+    url: "https://www.youtube.com/watch?v=7oU-eM8dM4Y",
+    title: "One Summer's Day - Joe Hisaishi",
+    id: "7oU-eM8dM4Y",
+    seqId: 3,
   },
   {
-    url: "https://www.youtube.com/watch?v=ot5UsNymqgQ",
-    title: "Cozy Room",
-    id: "ot5UsNymqgQ",
+    url: "https://www.youtube.com/watch?v=92IUxkS6nFY",
+    title: "Path of the Wind - Totoro OST",
+    id: "92IUxkS6nFY",
+    seqId: 4,
+  },
+  {
+    url: "https://www.youtube.com/watch?v=8ykEy-yPBFc",
+    title: "Kimi wo Nosete - Laputa OST",
+    id: "8ykEy-yPBFc",
+    seqId: 5,
+  },
+  {
+    url: "https://www.youtube.com/watch?v=6hzrDeceEKc",
+    title: "Summer - Joe Hisaishi",
+    id: "6hzrDeceEKc",
+    seqId: 6,
   },
 ];
-
-const FEATURE_KEY = "musicPlayer";
 
 // Default state object
 const defaultMusicPlayerState: MusicPlayerState = {
@@ -64,8 +70,7 @@ const getInitialState = (): MusicPlayerState => {
   if (typeof window === "undefined") {
     return defaultMusicPlayerState;
   }
-  return loadFeatureState<MusicPlayerState>(FEATURE_KEY) ??
-    defaultMusicPlayerState;
+  return defaultMusicPlayerState;
 };
 
 // --- Base Atom ---
@@ -84,86 +89,145 @@ export const musicPlayerStateAtom = atom(
       ? update(get(baseMusicPlayerAtom))
       : update;
     set(baseMusicPlayerAtom, newState);
-    // Only save on client
-    if (typeof window !== "undefined") {
-      saveFeatureState(FEATURE_KEY, newState);
+  },
+);
+
+// --- Playlist Atoms (Supabase CRUD) ---
+export const playlistAtom = atom<Song[]>([]);
+
+export const fetchPlaylistAtom = atom(null, async (get, set) => {
+  const user = get(userAtom);
+  if (!user) return;
+  // Fetch user songs
+  const { data: songs, error } = await supabase
+    .from("music_songs")
+    .select("id, title, url, seq_id")
+    .eq("user_id", user.id)
+    .order("seq_id", { ascending: true });
+  if (error) throw error;
+  if (!songs || songs.length === 0) {
+    // Copy global songs to user only if user has no songs
+    const { data: defaults } = await supabase
+      .from("music_songs")
+      .select("title, url, seq_id")
+      .is("user_id", null);
+    if (defaults && defaults.length > 0) {
+      for (const song of defaults) {
+        await supabase.from("music_songs").insert({
+          user_id: user.id,
+          title: song.title,
+          url: song.url,
+          seq_id: song.seq_id,
+        });
+      }
+      // Fetch again
+      const { data: newSongs } = await supabase
+        .from("music_songs")
+        .select("id, title, url, seq_id")
+        .eq("user_id", user.id)
+        .order("seq_id", { ascending: true });
+      // Use newSongs for deduplication
+      const seen = new Set();
+      const deduped = (newSongs || []).map((song) => ({
+        ...song,
+        seqId: song.seq_id,
+      }))
+        .filter((song) => {
+          const id = getYoutubeId(song.url);
+          if (!id || seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
+      set(playlistAtom, deduped);
+      return;
     }
+  }
+  // Deduplicate by YouTube video ID
+  const seen = new Set();
+  const deduped = (songs || []).map((song) => ({ ...song, seqId: song.seq_id }))
+    .filter((song) => {
+      const id = getYoutubeId(song.url);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  set(playlistAtom, deduped);
+});
+
+export const addSongAtom = atom(
+  null,
+  async (get, set, newSong: Omit<Song, "id">) => {
+    const user = get(userAtom);
+    if (!user) return;
+    // Use seq_id for backend, seqId for local state
+    const { data, error } = await supabase
+      .from("music_songs")
+      .insert({
+        user_id: user.id,
+        title: newSong.title,
+        url: newSong.url,
+        seq_id: newSong.seqId,
+      })
+      .select("id, title, url, seq_id")
+      .single();
+    if (error) throw error;
+    // Map seq_id to seqId for Song type
+    set(playlistAtom, [...get(playlistAtom), { ...data, seqId: data.seq_id }]);
+    set(fetchPlaylistAtom);
   },
 );
 
-// --- Derived Atoms for Component Access ---
-
-// Playlist
-export const playlistAtom = atom(
-  (get) => get(musicPlayerStateAtom).playlist,
-  (get, set, newPlaylist: Song[]) => {
-    set(musicPlayerStateAtom, (prev) => ({ ...prev, playlist: newPlaylist }));
-  },
-);
-
-// Current Song Index
-export const currentSongIndexAtom = atom(
-  (get) => get(musicPlayerStateAtom).currentSongIndex,
-  (get, set, newIndex: number) => {
-    const playlist = get(playlistAtom); // Use derived atom getter is fine
-    const safeIndex = playlist.length > 0
-      ? ((newIndex % playlist.length) + playlist.length) % playlist.length
-      : 0;
+export const updateSongTitleAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    { songId, newTitle }: { songId: string; newTitle: string },
+  ) => {
+    const { error } = await supabase
+      .from("music_songs")
+      .update({ title: newTitle })
+      .eq("id", songId);
+    if (error) throw error;
     set(
-      musicPlayerStateAtom,
-      (prev) => ({ ...prev, currentSongIndex: safeIndex }),
+      playlistAtom,
+      get(playlistAtom).map((song) =>
+        song.id === songId ? { ...song, title: newTitle } : song
+      ),
     );
+    set(fetchPlaylistAtom);
   },
 );
 
-// Playing State
-export const playingAtom = atom(
-  (get) => get(musicPlayerStateAtom).isPlaying,
-  (get, set, isPlaying: boolean) => {
-    set(musicPlayerStateAtom, (prev) => ({ ...prev, isPlaying }));
-  },
-);
+export const deleteSongAtom = atom(null, async (get, set, songId: string) => {
+  const { error } = await supabase
+    .from("music_songs")
+    .delete()
+    .eq("id", songId);
+  if (error) throw error;
+  set(playlistAtom, get(playlistAtom).filter((song) => song.id !== songId));
+  set(fetchPlaylistAtom);
+});
 
-// Current Time
-export const currentTimeAtom = atom(
-  (get) => get(musicPlayerStateAtom).currentTime,
-  (get, set, newTime: number) => {
-    set(musicPlayerStateAtom, (prev) => ({ ...prev, currentTime: newTime }));
-  },
-);
-
-// Window Open State
-export const isWindowOpenAtom = atom(
-  (get) => get(musicPlayerStateAtom).isWindowOpen,
-  (get, set, isOpen: boolean) => {
-    set(musicPlayerStateAtom, (prev) => ({ ...prev, isWindowOpen: isOpen }));
-  },
-);
-
-// Volume
-export const volumeAtom = atom(
-  (get) => get(musicPlayerStateAtom).volume,
-  (get, set, newVolume: number) => {
-    const clampedVolume = Math.max(0, Math.min(1, newVolume)); // Ensure volume is 0-1
-    set(musicPlayerStateAtom, (prev) => ({ ...prev, volume: clampedVolume }));
-  },
-);
-
-// --- Non-persisted atoms for player UI state (remain unchanged) ---
+// --- Local UI/Playback State Atoms (unchanged) ---
+export const currentSongIndexAtom = atom(0);
+export const playingAtom = atom(false);
+export const currentTimeAtom = atom(0);
+export const isWindowOpenAtom = atom(false);
+export const volumeAtom = atom(0.7);
 export const durationAtom = atom<number>(0);
 export const playedSecondsAtom = atom<number>(0);
 export const seekingAtom = atom<boolean>(false);
 export const showVideoAtom = atom<boolean>(false);
 
-// --- Derived atoms (remain largely unchanged, use new derived atoms) ---
 export const currentSongAtom = atom<Song | null>((get) => {
-  const playlist = get(playlistAtom); // Read from derived atom
-  const index = get(currentSongIndexAtom); // Read from derived atom
-
+  const playlist = get(playlistAtom);
+  const index = get(currentSongIndexAtom);
   if (playlist.length === 0) return null;
-  // Use the validated index from currentSongIndexAtom logic
   return playlist[index] || null;
 });
+
+// --- Derived atoms (remain largely unchanged, use new derived atoms) ---
 
 // --- Persistence Atom (Simplified - now just triggers save on base atom changes) ---
 // We can still keep this atom if components rely on it to explicitly trigger saves,
@@ -202,20 +266,6 @@ export const previousSongAtom = atom(null, (get, set) => {
   set(playingAtom, true); // Usually start playing previous
 });
 
-export const addSongAtom = atom(null, (get, set, newSong: Song) => {
-  const currentPlaylist = get(playlistAtom);
-  // Assign seqId if needed - find max current seqId
-  const maxSeqId = Math.max(0, ...currentPlaylist.map((s) => s.seqId ?? 0));
-  const songWithId = { ...newSong, seqId: maxSeqId + 1 };
-  const newPlaylist = [...currentPlaylist, songWithId];
-  set(playlistAtom, newPlaylist); // Use derived setter
-
-  // If this is the first song, select it
-  if (currentPlaylist.length === 0) {
-    set(currentSongIndexAtom, 0); // Use derived setter
-  }
-});
-
 export const removeSongAtom = atom(null, (get, set, indexToRemove: number) => {
   const playlist = get(playlistAtom);
   const currentIndex = get(currentSongIndexAtom);
@@ -238,25 +288,8 @@ export const removeSongAtom = atom(null, (get, set, indexToRemove: number) => {
     // If we removed a song before the current one, adjust the index
     set(currentSongIndexAtom, currentIndex - 1); // Use derived setter
   }
+  set(fetchPlaylistAtom);
 });
-
-export const updateSongTitleAtom = atom(
-  null,
-  (get, set, params: { index: number; title: string }) => {
-    const { index, title } = params;
-    const playlist = get(playlistAtom);
-
-    if (index < 0 || index >= playlist.length) return;
-
-    const updatedPlaylist = [...playlist];
-    updatedPlaylist[index] = {
-      ...updatedPlaylist[index],
-      title: title.trim() || `Song ${index + 1}`, // Fallback if empty
-    };
-
-    set(playlistAtom, updatedPlaylist); // Use derived setter
-  },
-);
 
 // Helper to extract YouTube video ID from URL
 export function getYoutubeId(url: string): string | null {
@@ -264,3 +297,248 @@ export function getYoutubeId(url: string): string | null {
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
 }
+
+// --- Types for Playlists ---
+// Use generated types for playlists
+export type Playlist = Tables<"playlists">;
+export type PlaylistSong = Tables<"playlist_songs">;
+
+// --- Atoms for Playlists ---
+const PLAYLISTS_FEATURE_KEY = "musicPlaylists";
+const PLAYLIST_SONGS_FEATURE_KEY = "musicPlaylistSongs";
+
+// Atom for all user playlists
+export const userPlaylistsAtom = atom<Playlist[]>([]);
+
+// Atom for current playlist ID
+export const currentPlaylistIdAtom = atom<string | null>(null);
+
+// Atom for songs in the current playlist
+export const currentPlaylistSongsAtom = atom<PlaylistSong[]>([]);
+
+// Fetch all playlists for the user (or from localStorage for guests)
+export const fetchUserPlaylistsAtom = atom(null, async (get, set) => {
+  const user = get(userAtom);
+  if (!user) {
+    // Guest: load from localStorage
+    const playlists = loadFeatureState<Playlist[]>(PLAYLISTS_FEATURE_KEY) || [];
+    set(userPlaylistsAtom, playlists);
+    return;
+  }
+  // Logged in: fetch from Supabase
+  const { data, error } = await supabase
+    .from("playlists")
+    .select("id, user_id, name, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  set(userPlaylistsAtom, data || []);
+});
+
+// Fetch songs for a playlist
+export const fetchPlaylistSongsAtom = atom(
+  null,
+  async (get, set, playlistId: string) => {
+    const user = get(userAtom);
+    if (!user) {
+      // Guest: load from localStorage
+      const allSongs = loadFeatureState<Record<string, PlaylistSong[]>>(
+        PLAYLIST_SONGS_FEATURE_KEY,
+      ) || {};
+      set(currentPlaylistSongsAtom, allSongs[playlistId] || []);
+      return;
+    }
+    // Logged in: fetch from Supabase
+    const { data, error } = await supabase
+      .from("playlist_songs")
+      .select("id, playlist_id, song_id, title, url, seq_id")
+      .eq("playlist_id", playlistId)
+      .order("seq_id", { ascending: true });
+    if (error) throw error;
+    set(currentPlaylistSongsAtom, data || []);
+  },
+);
+
+// Add a new playlist
+export const addPlaylistAtom = atom(null, async (get, set, name: string) => {
+  const user = get(userAtom);
+  if (!user) {
+    // Guest: save to localStorage
+    const playlists = loadFeatureState<Playlist[]>(PLAYLISTS_FEATURE_KEY) || [];
+    const newPlaylist: Playlist = {
+      id: crypto.randomUUID(),
+      user_id: "guest",
+      name,
+      created_at: new Date().toISOString(),
+    };
+    const updated = [...playlists, newPlaylist];
+    saveFeatureState(PLAYLISTS_FEATURE_KEY, updated);
+    set(userPlaylistsAtom, updated);
+    return newPlaylist.id;
+  }
+  // Logged in: insert to Supabase
+  const { data, error } = await supabase
+    .from("playlists")
+    .insert({ user_id: user.id, name })
+    .select("id, user_id, name, created_at")
+    .single();
+  if (error) throw error;
+  set(userPlaylistsAtom, [...get(userPlaylistsAtom), data]);
+  return data.id;
+});
+
+// Add a song to a playlist (prevent duplicates)
+export const addSongToPlaylistAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    { playlistId, song }: {
+      playlistId: string;
+      song: Omit<PlaylistSong, "id" | "playlist_id" | "seq_id">;
+    },
+  ) => {
+    const user = get(userAtom);
+    // Check for duplicate by song_id
+    const currentSongs = get(currentPlaylistSongsAtom);
+    if (currentSongs.some((s) => s.song_id === song.song_id)) return;
+    const seq_id = currentSongs.length + 1;
+    if (!user) {
+      // Guest: save to localStorage
+      const allSongs = loadFeatureState<Record<string, PlaylistSong[]>>(
+        PLAYLIST_SONGS_FEATURE_KEY,
+      ) || {};
+      const newSong: PlaylistSong = {
+        id: Date.now(), // Use a number for local-only songs
+        playlist_id: playlistId,
+        seq_id,
+        ...song,
+      };
+      const updated = {
+        ...allSongs,
+        [playlistId]: [...(allSongs[playlistId] || []), newSong],
+      };
+      saveFeatureState(PLAYLIST_SONGS_FEATURE_KEY, updated);
+      set(currentPlaylistSongsAtom, updated[playlistId]);
+      return;
+    }
+    // Logged in: insert to Supabase
+    const { data, error } = await supabase
+      .from("playlist_songs")
+      .insert({
+        playlist_id: playlistId,
+        song_id: song.song_id,
+        title: song.title,
+        url: song.url,
+        seq_id,
+      })
+      .select("id, playlist_id, song_id, title, url, seq_id")
+      .single();
+    if (error) throw error;
+    set(currentPlaylistSongsAtom, [...get(currentPlaylistSongsAtom), data]);
+  },
+);
+
+// Remove a song from a playlist
+export const removeSongFromPlaylistAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    { playlistId, songId }: { playlistId: string; songId: string },
+  ) => {
+    const user = get(userAtom);
+    if (!user) {
+      // Guest: localStorage
+      const allSongs = loadFeatureState<Record<string, PlaylistSong[]>>(
+        PLAYLIST_SONGS_FEATURE_KEY,
+      ) || {};
+      const updated = {
+        ...allSongs,
+        [playlistId]: (allSongs[playlistId] || []).filter((s) =>
+          s.song_id !== songId
+        ),
+      };
+      saveFeatureState(PLAYLIST_SONGS_FEATURE_KEY, updated);
+      set(currentPlaylistSongsAtom, updated[playlistId]);
+      return;
+    }
+    // Logged in: Supabase
+    const { error } = await supabase
+      .from("playlist_songs")
+      .delete()
+      .eq("playlist_id", playlistId)
+      .eq("song_id", songId);
+    if (error) throw error;
+    set(
+      currentPlaylistSongsAtom,
+      get(currentPlaylistSongsAtom).filter((s) => s.song_id !== songId),
+    );
+  },
+);
+
+// Reorder songs in a playlist
+export const reorderPlaylistSongsAtom = atom(
+  null,
+  async (
+    get,
+    set,
+    { playlistId, newOrder }: { playlistId: string; newOrder: PlaylistSong[] },
+  ) => {
+    const user = get(userAtom);
+    if (!user) {
+      // Guest: localStorage
+      const allSongs = loadFeatureState<Record<string, PlaylistSong[]>>(
+        PLAYLIST_SONGS_FEATURE_KEY,
+      ) || {};
+      const reordered = newOrder.map((s, i) => ({ ...s, seq_id: i + 1 }));
+      const updated = { ...allSongs, [playlistId]: reordered };
+      saveFeatureState(PLAYLIST_SONGS_FEATURE_KEY, updated);
+      set(currentPlaylistSongsAtom, reordered);
+      return;
+    }
+    // Logged in: Supabase (batch update)
+    for (let i = 0; i < newOrder.length; i++) {
+      const s = newOrder[i];
+      await supabase
+        .from("playlist_songs")
+        .update({ seq_id: i + 1 })
+        .eq("id", s.id);
+    }
+    set(
+      currentPlaylistSongsAtom,
+      newOrder.map((s, i) => ({ ...s, seq_id: i + 1 })),
+    );
+  },
+);
+
+// Clear a playlist
+export const clearPlaylistAtom = atom(
+  null,
+  async (get, set, playlistId: string) => {
+    const user = get(userAtom);
+    if (!user) {
+      // Guest: localStorage
+      const allSongs = loadFeatureState<Record<string, PlaylistSong[]>>(
+        PLAYLIST_SONGS_FEATURE_KEY,
+      ) || {};
+      const updated: Record<string, PlaylistSong[]> = {
+        ...allSongs,
+        [playlistId]: [],
+      };
+      saveFeatureState(PLAYLIST_SONGS_FEATURE_KEY, updated);
+      set(currentPlaylistSongsAtom, []);
+      return;
+    }
+    // Logged in: Supabase
+    const { error } = await supabase
+      .from("playlist_songs")
+      .delete()
+      .eq("playlist_id", playlistId);
+    if (error) throw error;
+    set(currentPlaylistSongsAtom, []);
+  },
+);
+
+// TODO: UI integration for drag-and-drop, modals for save/load, toasts for feedback
+// TODO: Playlist sharing (future)

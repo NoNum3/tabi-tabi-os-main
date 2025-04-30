@@ -1,11 +1,11 @@
 import { atom } from "jotai";
-import { loadFeatureState, saveFeatureState } from "../utils/storage";
-import { Position, Size } from "../types"; // Assuming types are defined here
-import { appRegistry } from "@/config/appRegistry"; // Import appRegistry for icons
+import { atomWithStorage, createJSONStorage } from "jotai/utils"; // Import utils
+import type { Position, Size } from "@/types"; // Assuming types are defined here - updated path
+// import { appRegistry } from "@/config/appRegistry"; // Removed unused import
 import { isPlayingAtom as ambienceIsPlayingAtom } from "./ambiencePlayerAtom";
 // Import the safe pause function from AmbiencePlayer
 // NOTE: This creates a slight coupling, but necessary for direct control
-import { safeAudioPause } from "../components/apps/ambiencePlayer";
+import { safeAudioPause } from "@/components/(ambiencePlayer)/ambiencePlayer";
 
 const FEATURE_KEY = "windows";
 
@@ -37,48 +37,32 @@ const getNextZIndex = (registry: WindowRegistryState): number => {
 
 // --- Atoms ---
 
-// Default state, ensuring new fields have defaults
 const getDefaultWindowState = (): WindowRegistryState => ({});
 
-// Create initial state atom with safe client-side initialization
-const getInitialState = (): WindowRegistryState => {
-  if (typeof window === "undefined") {
-    return getDefaultWindowState();
+// Create storage utility using createJSONStorage
+const windowStorage = createJSONStorage<WindowRegistryState>(() => {
+  // Return localStorage only if it's available (client-side)
+  if (typeof window !== "undefined" && window.localStorage) {
+    return localStorage;
   }
-  const loaded = loadFeatureState<WindowRegistryState>(FEATURE_KEY);
-  // Ensure loaded state includes the isMinimized flag
-  if (loaded) {
-    Object.keys(loaded).forEach((key) => {
-      if (loaded[key].isMinimized === undefined) {
-        loaded[key].isMinimized = false;
-      }
-    });
-  }
-  return loaded ?? getDefaultWindowState();
-};
+  // Return dummy storage for SSR
+  return {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getItem: (_key) => null,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    setItem: (_key, _value) => {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    removeItem: (_key) => {},
+  };
+});
 
-// Create the base atom with proper initialization
-const baseWindowsAtom = atom<WindowRegistryState>(getInitialState());
-
-// Create a derived atom that saves to localStorage on change
-export const windowRegistryAtom = atom(
-  (get) => get(baseWindowsAtom),
-  (
-    get,
-    set,
-    newRegistry:
-      | WindowRegistryState
-      | ((prevRegistry: WindowRegistryState) => WindowRegistryState),
-  ) => {
-    const updatedRegistry = typeof newRegistry === "function"
-      ? newRegistry(get(baseWindowsAtom))
-      : newRegistry;
-    set(baseWindowsAtom, updatedRegistry);
-    if (typeof window !== "undefined") {
-      saveFeatureState(FEATURE_KEY, updatedRegistry);
-    }
-  },
+// Use atomWithStorage with the simplified storage
+export const windowRegistryAtom = atomWithStorage<WindowRegistryState>(
+  FEATURE_KEY,
+  getDefaultWindowState(), // Default state
+  windowStorage,
 );
+windowRegistryAtom.debugLabel = "windowRegistryAtom (synced)";
 
 // Atom to get an array of currently VISIBLE windows, sorted by zIndex
 export const openWindowsAtom = atom(
@@ -92,18 +76,28 @@ export const openWindowsAtom = atom(
 // Includes minimized windows, excludes closed ones (removed from registry)
 export const taskbarAppsAtom = atom((get) => {
   const registry = get(windowRegistryAtom);
-  const highestZIndex = getNextZIndex(registry) - 1;
-  // Filter first: Only include windows that are open OR minimized
-  return Object.values(registry)
-    .filter((win) => win.isOpen || win.isMinimized)
-    // Add icon source and active status
-    .map((win) => ({
-      ...win,
-      iconSrc: appRegistry[win.appId]?.src || "/icons/settings.png", // Fallback icon
-      // isActive is true only if the window is the top-most AND not minimized
-      isActive: win.zIndex === highestZIndex && win.isOpen && !win.isMinimized,
-    }))
-    .sort((a, b) => a.zIndex - b.zIndex); // Consider sorting by open order or app ID?
+  // Calculate highestZIndex only once
+  const highestZIndex = Math.max(
+    0,
+    ...Object.values(registry).map((win) => win.zIndex),
+  );
+
+  return (
+    Object.values(registry)
+      // Filter for open or minimized windows
+      .filter((win) => win.isOpen || win.isMinimized)
+      // Map to include only necessary info + isActive flag
+      .map((win) => ({
+        ...win, // Spread the original WindowState
+        // isActive is true only if the window is the top-most AND not minimized
+        isActive: win.zIndex === highestZIndex && win.isOpen &&
+          !win.isMinimized,
+        // Remove iconSrc - Taskbar will get the icon component directly
+        // iconSrc: appRegistry[win.appId]?.icon, // No longer using src or storing icon here
+      }))
+      // Optional: Sort if needed, e.g., by zIndex or initial open order
+      .sort((a, b) => a.zIndex - b.zIndex)
+  );
 });
 
 // --- Window Management Action Atoms (Write-only) ---
@@ -119,10 +113,17 @@ export const openWindowAtom = atom(
         WindowState,
         "isOpen" | "zIndex" | "position" | "size" | "isMinimized"
       >
-      & { initialPosition?: Position; initialSize: Size },
+      & {
+        initialPosition?: Position;
+        initialSize: Size;
+        children: React.ReactNode; // Add children property
+      },
   ) => {
     const currentRegistry = get(windowRegistryAtom);
-    const existingWindow = currentRegistry[windowConfig.id];
+    // Find if any window with the same appId exists
+    const existingWindow = Object.values(currentRegistry).find(
+      (win) => win.appId === windowConfig.appId,
+    );
 
     if (existingWindow) {
       // If window exists, bring it to front and ensure it's open and not minimized
@@ -138,8 +139,29 @@ export const openWindowAtom = atom(
     } else {
       // If window doesn't exist, create it
       const nextZIndex = getNextZIndex(currentRegistry);
+
+      // --- Calculate centered position --- //
+      const calculateCenteredPosition = (size: Size): Position => {
+        if (typeof window === "undefined") {
+          // Fallback for SSR or environments without window
+          return { x: 100, y: 100 };
+        }
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight; // Consider available height (e.g., excluding taskbar if fixed)
+        // TODO: Adjust screenHeight if taskbar takes up fixed space at bottom
+        // const taskbarHeight = 48; // Example taskbar height
+        // const availableHeight = screenHeight - taskbarHeight;
+        const availableHeight = screenHeight; // Use full height for now
+
+        const x = Math.max(0, (screenWidth - size.width) / 2);
+        const y = Math.max(0, (availableHeight - size.height) / 3); // Changed from / 2 to / 3
+        return { x, y };
+      };
+
+      // Use provided initialPosition or calculate centered position
       const defaultPosition = windowConfig.initialPosition ??
-        { x: 50 + Math.random() * 100, y: 50 + Math.random() * 100 };
+        calculateCenteredPosition(windowConfig.initialSize);
+
       const newWindow: WindowState = {
         ...windowConfig,
         position: defaultPosition,

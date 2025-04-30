@@ -25,6 +25,7 @@ interface WindowProps {
   initialSize: Size;
   initialPosition: Position;
   minSize?: Size;
+  aspectRatio?: number;
   zIndex: number; // Pass zIndex for styling
   // Added isMobileOrTablet prop
   isMobileOrTablet: boolean;
@@ -40,6 +41,7 @@ const Window: React.FC<WindowProps> = ({
   initialSize,
   initialPosition,
   minSize,
+  aspectRatio,
   zIndex,
   isMobileOrTablet,
 }) => {
@@ -128,9 +130,9 @@ const Window: React.FC<WindowProps> = ({
       initialSize: adjustedInitialSize,
       initialPosition: adjustedInitialPosition,
       minSize,
-      onInteractionEnd: handleInteractionEnd, // Pass callback
-      onFocus: handleFocus, // Pass focus callback
-      // containerRef could be added here if needed
+      aspectRatio,
+      onInteractionEnd: handleInteractionEnd,
+      onFocus: handleFocus,
     });
 
   // Don't render if not mounted (to prevent hydration mismatch) or not open
@@ -237,18 +239,19 @@ const Window: React.FC<WindowProps> = ({
         isMobileOrTablet ? "mobile-window" : ""
       }`}
       style={{
-        top: `${position.y}px`,
-        left: `${position.x}px`,
+        left: isMinimized ? "100vw" : `${position.x}px`,
+        top: isMinimized ? "0" : `${position.y}px`,
         width: `${size.width}px`,
         height: `${size.height}px`,
-        minWidth: isMobileOrTablet
-          ? undefined
-          : minSize?.width
-          ? `${minSize.width}px`
-          : "150px",
-        minHeight: minSize?.height ? `${minSize.height}px` : "100px",
         zIndex: zIndex, // Apply zIndex from global state
-        display: isMinimized ? "none" : "flex", // Hide if minimized
+        ...(isMinimized
+          ? {
+            position: "fixed",
+            display: "flex",
+            opacity: 1,
+            pointerEvents: "none",
+          }
+          : { display: "flex" }),
         ...mobileWindowStyles,
       }}
       onMouseDown={handleWindowFocus} // Bring window to front on click
@@ -288,7 +291,18 @@ const Window: React.FC<WindowProps> = ({
       </div>
 
       {/* Content Area */}
-      <div className="flex-grow p-1 overflow-auto bg-background text-foreground">
+      <div
+        className={`flex-grow p-1 overflow-auto bg-background text-foreground transition-all duration-200`}
+        style={isMinimized
+          ? {
+            opacity: 0,
+            pointerEvents: "none",
+            height: "1px",
+            minHeight: 0,
+            padding: 0,
+          }
+          : {}}
+      >
         {children}
       </div>
 

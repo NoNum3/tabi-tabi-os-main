@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom, WritableAtom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 // Default background path
@@ -54,7 +54,7 @@ export const applyPreviewBackgroundAtom = atom(
     const preview = get(previewBackgroundAtom);
     if (preview !== null) {
       set(backgroundSettingsAtom, preview); // Save preview to the synced atom
-      set(previewBackgroundAtom, null); // Clear preview
+      set(previewBackgroundAtom as WritableAtom<BackgroundSettings | null, [BackgroundSettings | null], void>, null); // Clear preview
     }
   }
 );
