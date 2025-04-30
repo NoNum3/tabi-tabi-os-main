@@ -48,7 +48,8 @@ const AppIcon: React.FC<AppIconProps> = ({
         alt={name}
         width={60}
         height={60}
-        className={`drop-shadow-lg`} // Remove brightness change for now
+        className={`drop-shadow-lg`}
+        priority={appId === "clock"}
       />
       {/* Apply theme-aware classes directly */}
       <p

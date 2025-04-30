@@ -25,16 +25,36 @@ import { playSound } from "@/lib/utils";
 import { appRegistry } from "@/config/appRegistry";
 import { useAtom } from "jotai";
 import { openWindowAtom } from "@/atoms/windowAtoms";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes"; // Import useTheme
 
 export function Mainmenu() {
-  // Get theme state
+  // Theme and mount state
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Default src for SSR and initial client render (use white icon as default)
+  const defaultIconSrc = "/icons/white-ico/android-icon-192x192.png"; // Changed default to white
+  const [currentIconSrc, setCurrentIconSrc] = useState(defaultIconSrc);
 
   // Get the setter for opening windows
   const openWindow = useAtom(openWindowAtom)[1];
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
+
+  // Effect to set mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Effect to update icon source based on theme *after* mounting
+  useEffect(() => {
+    if (mounted) {
+      const lightIconSrc = "/icons/white-ico/android-icon-192x192.png";
+      const darkIconSrc = "/icons/dark-ico/android-icon-192x192.png";
+      // Set to DARK icon if theme is dark, otherwise set to LIGHT icon
+      setCurrentIconSrc(resolvedTheme === "dark" ? darkIconSrc : lightIconSrc);
+    }
+  }, [mounted, resolvedTheme]); // Removed defaultIconSrc dependency as it's now handled by lightIconSrc
 
   // Function to open an app
   const openApp = (appId: string) => {
@@ -85,19 +105,14 @@ export function Mainmenu() {
     setResetDialogOpen(true);
   };
 
-  // Determine icon source based on theme
-  const lightIconSrc = "/icons/white-ico/android-icon-192x192.png"; // Light icon for dark theme
-  const darkIconSrc = "/icons/dark-ico/android-icon-192x192.png"; // Dark icon for light theme
-  const iconSrc = resolvedTheme === "dark" ? lightIconSrc : darkIconSrc;
-
   return (
     <>
       <Menubar className="fixed top-0 left-0 right-0 bg-stone-100 border-stone-300 border-b text-black dark:bg-neutral-900 dark:border-neutral-700 dark:text-white z-30 shadow-sm h-9 px-2 flex items-center">
         <MenubarMenu>
           <div className="px-1 flex items-center">
             <Image
-              key={iconSrc}
-              src={iconSrc}
+              key={currentIconSrc}
+              src={currentIconSrc}
               alt="logo"
               width={20}
               height={20}
