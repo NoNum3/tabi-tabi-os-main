@@ -1,6 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import { toast } from "sonner";
+import { Store, Volume2, VolumeX } from "lucide-react";
+import { DateTime } from "luxon";
+
+// Shadcn UI components
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Menubar,
   MenubarContent,
@@ -10,45 +27,37 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-// import Clock from "../clock"; // Removed Clock import
-import { ThemeToggle } from "../ui/theme-toggle";
-import { playSound } from "@/lib/utils";
-import { appRegistry } from "@/config/appRegistry";
-import { useAtom, useAtomValue } from "jotai";
-import { openWindowAtom } from "@/atoms/windowAtoms";
-import { useTheme } from "next-themes"; // Import useTheme
-import { useChangeLocale, useCurrentLocale, useI18n } from "@/locales/client"; // Import useI18n and locale hooks
-import { supabase } from "@/lib/supabaseClient"; // Import supabase
-import { authLoadingAtom, profileAtom, userAtom } from "@/atoms/authAtoms"; // Import auth atoms
-import { SignInForm, SignUpForm } from "../auth/AuthForms"; // Import auth forms
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
-import { useToast } from "@/hooks/useToast"; // Keep this import
-import { AppStoreWindow } from "@/components/appstore/AppStoreWindow";
-import { Store } from "lucide-react"; // Import Store icon
-import { addedAppIdsAtom } from "@/atoms/dashboardAtoms";
-import ResetSystem from "@/components/(settings)/components/ResetSystem";
-import { COUNTRIES, weatherDefaultCountryAtom } from "@/atoms/weatherAtom";
-import {
-  getWeatherForCountry,
-  getWeatherIcon,
-} from "@/components/(weather)/WeatherWidget";
-import { soundEffectsMutedAtom } from "@/atoms/displaySettingsAtoms";
-import { Volume2, VolumeX } from "lucide-react";
-import { MiniYoutubePlayer } from "@/components/(music)/components/MiniYoutubePlayer";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function Mainmenu() {
+// Project UI components
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { AppStoreWindow } from "@/components/appstore/AppStoreWindow";
+import { SignInForm, SignUpForm } from "@/components/auth/AuthForms";
+
+// Atoms & State
+import { useAtom, useAtomValue } from "jotai";
+import { openWindowAtom } from "@/application/atoms/windowAtoms";
+import { authLoadingAtom, profileAtom, userAtom } from "@/application/atoms/authAtoms";
+import { addedAppIdsAtom } from "@/application/atoms/dashboardAtoms";
+import { soundEffectsMutedAtom } from "@/application/atoms/displaySettingsAtoms";
+
+// App-specific imports
+import ResetSystem from "@/apps/settings/components/ResetSystem";
+import { COUNTRIES, weatherDefaultCountryAtom } from "@/apps/weather/atoms/weatherAtom";
+import { getWeatherForCountry, getWeatherIcon } from "@/apps/weather/WeatherWidget";
+import { MiniYoutubePlayer } from "@/apps/music/components/MiniYoutubePlayer";
+
+// Utilities & Config
+import { playSound } from "@/infrastructure/lib/utils";
+import { appRegistry } from "@/config/appRegistry";
+import { supabase } from "@/infrastructure/lib/supabaseClient";
+
+// i18n
+import { useChangeLocale, useCurrentLocale, useI18n } from "@/locales/client";
+import { ReCaptchaProvider } from "@/components/providers/ReCaptchaProvider";
+
+function Mainmenu() {
   const t = useI18n(); // Get translation function
-  const { toast } = useToast(); // Call the hook here to get the toast function
   const changeLocale = useChangeLocale() as (locale: string) => void;
   const currentLocale = useCurrentLocale();
   // Theme and mount state
@@ -66,6 +75,9 @@ export function Mainmenu() {
   const [signInOpen, setSignInOpen] = useState(false);
   const [signUpOpen, setSignUpOpen] = useState(false);
 
+  // Debug logging for UI state
+  console.log("[Mainmenu] mounted:", mounted, "isLoadingAuth:", isLoadingAuth, "user:", user, "profile:", profile);
+
   // Read the list of added app IDs
   const addedAppIds = useAtomValue(addedAppIdsAtom);
 
@@ -79,6 +91,10 @@ export function Mainmenu() {
 
   // Sound state
   const [soundMuted, setSoundMuted] = useAtom(soundEffectsMutedAtom);
+
+  // Time state
+  const [userTime, setUserTime] = useState<string>("");
+  const [userTimezone, setUserTimezone] = useState<string>("");
 
   // Effect to set mounted state
   useEffect(() => {
@@ -118,6 +134,42 @@ export function Mainmenu() {
     };
   }, [weatherCountry]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    // Try to get user's timezone from browser/geolocation
+    if (typeof window !== "undefined" && "Intl" in window) {
+      // Use browser timezone as fallback
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      setUserTimezone(tz);
+      setUserTime(DateTime.now().setZone(tz).toFormat("HH:mm:ss"));
+      interval = setInterval(() => {
+        setUserTime(DateTime.now().setZone(tz).toFormat("HH:mm:ss"));
+      }, 1000);
+      // Optionally, use geolocation for more accuracy
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            // Use Intl API to get timezone from coordinates (if available)
+            // Fallback to browser tz if not
+            fetch(`https://www.timeapi.io/api/TimeZone/coordinate?latitude=${latitude}&longitude=${longitude}`)
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.timeZone) {
+                  setUserTimezone(data.timeZone);
+                  setUserTime(DateTime.now().setZone(data.timeZone).toFormat("HH:mm:ss"));
+                }
+              })
+              .catch(() => {});
+          },
+          () => {},
+          { timeout: 2000 }
+        );
+      }
+    }
+    return () => interval && clearInterval(interval);
+  }, []);
+
   // Function to open an app
   const openApp = (appId: string) => {
     const appConfig = appRegistry[appId];
@@ -132,9 +184,13 @@ export function Mainmenu() {
       title: t(appId as keyof ReturnType<typeof t>, {}),
       minSize: appConfig.minSize,
       initialSize: appConfig.defaultSize,
-      children: React.createElement(appConfig.component, {
-        windowId: windowInstanceId,
-      }),
+      children: (
+        <Suspense fallback={<div>Loading...</div>}>
+          {React.createElement(appConfig.component, {
+            windowId: windowInstanceId,
+          })}
+        </Suspense>
+      ),
     });
   };
 
@@ -168,13 +224,17 @@ export function Mainmenu() {
     playSound("/sounds/click.mp3");
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast({
-        title: "Sign Out Failed",
+      playSound("/sounds/error.mp3");
+      toast("Sign Out Failed", {
         description: error.message,
-        variant: "destructive",
+        duration: 6000,
       });
     } else {
-      toast({ title: t("signOutSuccess", { count: 1 }) });
+      playSound("/sounds/notify.mp3");
+      toast("Signed Out", {
+        description: "You have been signed out successfully.",
+        duration: 6000,
+      });
     }
   };
 
@@ -202,6 +262,12 @@ export function Mainmenu() {
               </>
             )
             : <span className="text-muted-foreground text-sm">--°C</span>}
+        </div>
+        {/* User local time display */}
+        <div className="flex items-center gap-1 mr-4 px-2 py-1 rounded bg-stone-200/70 dark:bg-neutral-800/70 text-xs font-mono select-none" title={userTimezone ? `Timezone: ${userTimezone}` : undefined}>
+          <span role="img" aria-label="clock">🕒</span>
+          <span>{userTime || "--:--:--"}</span>
+          {userTimezone && <span className="ml-1 text-muted-foreground">({userTimezone})</span>}
         </div>
         <MenubarMenu>
           <MenubarTrigger
@@ -330,11 +396,12 @@ export function Mainmenu() {
                 </Button>
               </>
             )
-            : user && profile
+            : user
             ? (
               <MenubarMenu>
                 <MenubarTrigger className="text-sm ... px-3 py-1.5 rounded">
-                  {profile.full_name || user.email}
+                  {/* Show username if available, otherwise email */}
+                  {profile?.username ? profile.username : user.email}
                 </MenubarTrigger>
                 <MenubarContent>
                   <MenubarItem
@@ -387,8 +454,10 @@ export function Mainmenu() {
       </Menubar>
       <MiniYoutubePlayer />
       {/* Auth Modals */}
-      <SignInForm open={signInOpen} onOpenChange={setSignInOpen} />
-      <SignUpForm open={signUpOpen} onOpenChange={setSignUpOpen} />
+      <ReCaptchaProvider>
+        <SignInForm open={signInOpen} onOpenChange={setSignInOpen} />
+        <SignUpForm open={signUpOpen} onOpenChange={setSignUpOpen} />
+      </ReCaptchaProvider>
 
       {/* Reset Confirmation Dialog */}
       <Dialog
@@ -426,6 +495,8 @@ export function Mainmenu() {
   );
 }
 
+const MainmenuClient = dynamic(() => Promise.resolve(Mainmenu), { ssr: false });
+export default MainmenuClient;
 //
 //
 //

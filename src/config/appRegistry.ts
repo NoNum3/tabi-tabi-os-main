@@ -1,34 +1,23 @@
 import { Size } from "../types";
-// import PodomoroTimer from "../components/apps/podomoro"; // Removed unused import
-import TodoList from "../components/(todoList)/TodoList";
-// import BackgroundChanger from "../components/apps/background"; // Removed unused import
 import React from "react";
-// import TextEditor from "../components/apps/textEditor"; // Unused import
-import MusicPlayer from "../components/(music)/MusicPlayer";
-import AmbiencePlayer from "@/components/(ambiencePlayer)/ambiencePlayer";
-import Calculator from "../components/(calculator)/Calculator";
-import ClockApp from "../components/(clock)/ClockApp";
-import MiniGames from "@/components/(miniGames)/MiniGames"; // Import the new component
-import ConverterApp from "@/components/(converter)/ConverterApp";
-// Import the QRCodeReader app
-import QRCodeReader from "@/components/(qrCodeReader)/QRCodeReader";
-// Import the DrawingPadApp
-import DrawingPadApp from "../components/(drawingPad)/DrawingPadApp";
+import MusicPlayer from "@/apps/music/MusicPlayer";
+import AmbiencePlayer from "@/apps/ambiencePlayer/ambiencePlayer";
+import Calculator from "@/apps/calculator/Calculator";
+import ClockApp from "@/apps/clock/ClockApp";
+import MiniGames from "@/apps/miniGames/MiniGames"; // Import the new component
+import ConverterApp from "@/apps/converter/ConverterApp";
+import QRCodeReader from "@/apps/qrCodeReader/QRCodeReader";
+import DrawingPadApp from "@/apps/drawingPad/DrawingPadApp";
 // Import new apps
-import PasswordGeneratorApp from "../components/(passwordGenerator)/PasswordGeneratorApp";
-import HashGeneratorApp from "../components/(hashGenerator)/HashGeneratorApp";
-import CheckersApp from "../components/(checkers)/CheckersApp";
-// --- Import the AppStoreWindow component --- //
-import { AppStoreWindow } from "../components/appstore/AppStoreWindow";
-// --- Import the new SettingsApp component --- //
-import SettingsApp from "../components/(settings)/SettingsApp";
-// import Chat from "../components/apps/Chat/Chat"; // Removed unused import
-// import { AppConfig } from "@/types/app"; // Removed unused import
-import Notepad from "../components/(notepad)/Notepad"; // Corrected import for Notepad
-import WeatherWidget from "@/components/(weather)/WeatherWidget";
-import SimpleCalendar from "@/components/(calendar)/SimpleCalendar";
-import QuotesWidget from "@/components/(quotes)/QuotesWidget";
-// import { LayoutDashboard } from "lucide-react";
+import PasswordGeneratorApp from "@/apps/passwordGenerator/PasswordGeneratorApp";
+import HashGeneratorApp from "@/apps/hashGenerator/HashGeneratorApp";
+import CheckersApp from "@/apps/checkers/CheckersApp";
+import SettingsApp from "@/apps/settings/SettingsApp";
+import Notepad from "@/apps/notepad/Notepad"; 
+import WeatherWidget from "@/apps/weather/WeatherWidget";
+import SimpleCalendar from "@/apps/calendar/SimpleCalendar";
+import QuotesWidget from "@/apps/quotes/QuotesWidget";
+import BookmarksApp from "@/apps/bookmarks";
 
 // Define categories
 export type AppCategory =
@@ -52,151 +41,162 @@ export interface AppRegistryEntry {
 
 // App names are now defined in locale files (e.g., locales/en.ts)
 // The keys here MUST match the keys in the locale files.
+
+// Helper to get responsive size (clamped to min/max)
+function getResponsiveSize(widthRatio: number, heightRatio: number, min: Size, max: Size): Size {
+  if (typeof window !== "undefined") {
+    const w = Math.round(window.innerWidth * widthRatio);
+    const h = Math.round(window.innerHeight * heightRatio);
+    return {
+      width: Math.max(min.width, Math.min(w, max.width)),
+      height: Math.max(min.height, Math.min(h, max.height)),
+    };
+  }
+  // Fallback for SSR
+  return {
+    width: Math.max(min.width, Math.min(900 * widthRatio, max.width)),
+    height: Math.max(min.height, Math.min(700 * heightRatio, max.height)),
+  };
+}
+
 export const appRegistry: Record<string, AppRegistryEntry> = {
   // --- Add Settings entry --- //
   settings: {
-    src: "/icons/settings.png", // Reuse icon or create new one
-    defaultSize: { width: 650, height: 500 },
-    minSize: { width: 450, height: 400 }, // Adjusted min size
+    src: "/icons/settings.png",
+    defaultSize: getResponsiveSize(0.5, 0.6, { width: 350, height: 350 }, { width: 900, height: 700 }),
+    minSize: { width: 350, height: 350 },
     category: "System",
     component: SettingsApp,
   },
   // --- Add the App Store entry --- //
   appStore: {
-    src: "/icons/settings.png", // Make sure this icon exists in public/icons/
-    defaultSize: { width: 700, height: 550 },
-    minSize: { width: 500, height: 400 },
-    category: "System", // Assign category
-    component: AppStoreWindow, // Reference the imported component
+    src: "/icons/settings.png",
+    defaultSize: getResponsiveSize(0.6, 0.7, { width: 400, height: 400 }, { width: 1100, height: 800 }),
+    minSize: { width: 400, height: 400 },
+    category: "System",
+    // Use React.lazy to break circular dependency
+    component: React.lazy(() => import("@/components/appstore/AppStoreWindow").then(m => ({ default: m.AppStoreWindow }))),
   },
   clock: {
     // name: "Clock", // Removed
     src: "/icons/clock.png",
-    defaultSize: { width: 400, height: 650 },
-    minSize: { width: 300, height: 300 },
+    defaultSize: getResponsiveSize(0.35, 0.6, { width: 220, height: 300 }, { width: 600, height: 900 }),
+    minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
     component: ClockApp,
   },
   youtubePlayer: {
     src: "/icons/youtobe-player.png", // Updated icon for YouTube Player
-    defaultSize: { width: 900, height: 700 },
-    minSize: { width: 480, height: 320 },
+    defaultSize: getResponsiveSize(0.7, 0.7, { width: 400, height: 320 }, { width: 1200, height: 900 }),
+    minSize: { width: 400, height: 320 },
     category: "Entertainment",
     component: MusicPlayer, // Still uses the same component
   },
-  todoList: {
-    // name: "To-do list", // Removed
-    src: "/icons/to-do.png",
-    defaultSize: { width: 400, height: 400 },
-    minSize: { width: 300, height: 340 },
-    category: "Productivity", // Assign category
-    component: TodoList,
-  },
   notepad: { // New entry for Notepad
     src: "/icons/notepad.png", // Reusing icon from old textEditor
-    defaultSize: { width: 750, height: 500 },
+    defaultSize: getResponsiveSize(0.6, 0.5, { width: 300, height: 320 }, { width: 900, height: 700 }),
     minSize: { width: 300, height: 320 },
     category: "Productivity",
     requiresAuth: true, // Notepad now requires authentication
     component: Notepad,
   },
+  bookmarks: {
+    src: "/icons/settings.png", // TEMP: Use settings icon for now
+    defaultSize: getResponsiveSize(0.5, 0.6, { width: 320, height: 400 }, { width: 900, height: 700 }),
+    minSize: { width: 320, height: 400 },
+    category: "Productivity",
+    component: BookmarksApp,
+  },
   ambience: {
     // name: "Ambience", // Removed
     src: "/icons/ambience.png",
-    defaultSize: { width: 375, height: 190 },
-    minSize: { width: 375, height: 190 },
+    defaultSize: getResponsiveSize(0.4, 0.2, { width: 220, height: 120 }, { width: 600, height: 300 }),
+    minSize: { width: 220, height: 120 },
     category: "Entertainment", // Assign category
     component: AmbiencePlayer,
   },
   calculator: {
     // name: "Calculator", // Removed
     src: "/icons/calculator.png",
-    defaultSize: { width: 320, height: 860 },
-    minSize: { width: 280, height: 680 },
+    defaultSize: getResponsiveSize(0.3, 0.7, { width: 220, height: 320 }, { width: 600, height: 900 }),
+    minSize: { width: 220, height: 320 },
     category: "Utilities", // Assign category
     component: Calculator,
   },
   miniGames: {
     // name: "Mini Games", // Removed
     src: "/icons/mini-games.png",
-    defaultSize: { width: 450, height: 400 },
-    minSize: { width: 350, height: 300 },
+    defaultSize: getResponsiveSize(0.5, 0.5, { width: 300, height: 300 }, { width: 900, height: 700 }),
+    minSize: { width: 300, height: 300 },
     category: "Games", // Assign category
     component: MiniGames,
   },
   converter: {
     // name: "Converter", // Removed
     src: "/icons/converter.png",
-    defaultSize: { width: 500, height: 550 },
-    minSize: { width: 380, height: 400 },
+    defaultSize: getResponsiveSize(0.45, 0.5, { width: 280, height: 320 }, { width: 800, height: 700 }),
+    minSize: { width: 280, height: 320 },
     category: "Utilities", // Assign category
     component: ConverterApp,
   },
   qrReader: {
     // name: "QR Reader", // Removed
     src: "/icons/qr-reader.png",
-    defaultSize: { width: 450, height: 550 },
-    minSize: { width: 300, height: 400 },
+    defaultSize: getResponsiveSize(0.4, 0.5, { width: 220, height: 300 }, { width: 700, height: 700 }),
+    minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
     component: QRCodeReader,
   },
   drawingPad: {
     // name: "Drawing Pad", // Removed
     src: "/icons/notepad.png",
-    defaultSize: { width: 600, height: 500 },
-    minSize: { width: 400, height: 300 },
+    defaultSize: getResponsiveSize(0.5, 0.5, { width: 300, height: 300 }, { width: 900, height: 700 }),
+    minSize: { width: 300, height: 300 },
     category: "Entertainment", // Assign category
     component: DrawingPadApp,
   },
   passwordGenerator: {
     // name: "Password Gen", // Removed
     src: "/icons/password-gen.png",
-    defaultSize: { width: 400, height: 480 },
-    minSize: { width: 350, height: 420 },
+    defaultSize: getResponsiveSize(0.4, 0.5, { width: 220, height: 300 }, { width: 700, height: 700 }),
+    minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
     component: PasswordGeneratorApp,
   },
   hashGenerator: {
     // name: "Hash Gen", // Removed
     src: "/icons/hash-gen.png",
-    defaultSize: { width: 450, height: 500 },
-    minSize: { width: 380, height: 400 },
+    defaultSize: getResponsiveSize(0.4, 0.5, { width: 220, height: 300 }, { width: 700, height: 700 }),
+    minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
     component: HashGeneratorApp,
   },
   checkers: {
     // name: "Checkers", // Removed
     src: "/icons/checkers-game.png",
-    defaultSize: { width: 520, height: 620 },
-    minSize: { width: 400, height: 500 },
+    defaultSize: getResponsiveSize(0.5, 0.6, { width: 320, height: 400 }, { width: 900, height: 700 }),
+    minSize: { width: 320, height: 400 },
     category: "Games", // Assign category
     component: CheckersApp,
   },
-  // Add new Chat app entry
-  // chat: {
-  //   src: "/icons/checkers-game.png", // Assuming you have or will create a chat icon
-  //   defaultSize: { width: 450, height: 600 },
-  //   minSize: { width: 350, height: 400 },
-  //   component: Chat,
-  // },
   weather: {
     src: "/icons/weather.png",
-    defaultSize: { width: 320, height: 220 },
-    minSize: { width: 220, height: 180 },
+    defaultSize: getResponsiveSize(0.35, 0.25, { width: 180, height: 120 }, { width: 600, height: 400 }),
+    minSize: { width: 180, height: 120 },
     category: "Utilities",
     component: WeatherWidget,
   },
   calendar: {
     src: "/icons/calendar.png",
-    defaultSize: { width: 500, height: 420 },
-    minSize: { width: 320, height: 320 },
+    defaultSize: getResponsiveSize(0.45, 0.4, { width: 220, height: 220 }, { width: 800, height: 700 }),
+    minSize: { width: 220, height: 220 },
     category: "Productivity",
     component: SimpleCalendar,
   },
   quotes: {
     src: "/icons/quotes.png",
-    defaultSize: { width: 350, height: 220 },
-    minSize: { width: 220, height: 180 },
+    defaultSize: getResponsiveSize(0.3, 0.2, { width: 150, height: 100 }, { width: 500, height: 300 }),
+    minSize: { width: 150, height: 100 },
     category: "Entertainment",
     component: QuotesWidget,
   },

@@ -4,7 +4,7 @@ import * as React from "react";
 import * as ToolbarPrimitive from "@radix-ui/react-toolbar";
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/infrastructure/lib/utils";
 
 const toolbarVariants = cva(
     "relative flex select-none items-stretch gap-1 bg-muted",

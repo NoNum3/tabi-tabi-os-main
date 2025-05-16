@@ -23,6 +23,8 @@ export default {
     hashGenerator: "Hash Generator",
     checkers: "Checkers",
     ambience: "Ambience",
+    bookmarks: "Bookmarks",
+    youtubePlayer: "YouTube Player",
     // Other UI Text
     reset_dialog_title: "Reset System",
     reset_dialog_desc:

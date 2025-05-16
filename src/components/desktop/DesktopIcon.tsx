@@ -3,10 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import { useAtom } from "jotai";
-import { openWindowAtom } from "@/atoms/windowAtoms";
+import { openWindowAtom } from "@/application/atoms/windowAtoms";
 // import { appRegistry } from "@/config/appRegistry"; // Removed unused import
 import { useI18n } from "@/locales/client";
-import { playSound } from "@/lib/utils";
+import { playSound } from "@/infrastructure/lib/utils";
 import { AppRegistration } from "@/types"; // Import the defined type
 
 interface DesktopIconProps {

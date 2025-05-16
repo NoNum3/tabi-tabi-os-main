@@ -2,16 +2,15 @@
 
 import { useCallback, useEffect } from "react";
 import { useAtom, useSetAtom } from "jotai";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/infrastructure/lib/supabaseClient";
 import {
     authLoadingAtom,
     Profile,
     profileAtom,
     sessionAtom,
     userAtom,
-} from "@/atoms/authAtoms";
+} from "@/application/atoms/authAtoms";
 import { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
 import type { PrimitiveAtom } from "jotai";
 import type { Session } from "@supabase/supabase-js";
 import type { FC } from "react";
@@ -25,7 +24,6 @@ export const AuthInitializer: FC = () => {
         profileAtom as PrimitiveAtom<Profile | null>,
     );
     const setLoading = useSetAtom(authLoadingAtom);
-    const router = useRouter();
 
     const fetchAndSetProfile = useCallback(async (user: User) => {
         try {
@@ -41,9 +39,15 @@ export const AuthInitializer: FC = () => {
             }
 
             if (data) {
-                console.log("[Auth] Profile fetched:", data);
-                setProfile(data as Profile);
-                localStorage.setItem("cachedProfile", JSON.stringify(data));
+                // Patch: ensure username is present, fallback to full_name if needed
+                const typedData = data as { [key: string]: unknown, username?: string | null, full_name?: string | null };
+                const patchedProfile = {
+                    ...data,
+                    username: typedData.username ?? typedData.full_name ?? null,
+                };
+                console.log("[Auth] Profile fetched:", patchedProfile);
+                setProfile(patchedProfile as Profile);
+                localStorage.setItem("cachedProfile", JSON.stringify(patchedProfile));
             } else {
                 console.log("[Auth] No profile found");
                 setProfile(null); // No profile found
@@ -114,26 +118,16 @@ export const AuthInitializer: FC = () => {
             },
         );
 
-        // Add visibilitychange event to rehydrate session on tab focus
-        const handleVisibility = () => {
-            if (document.visibilityState === "visible") {
-                router.refresh();
-            }
-        };
-        document.addEventListener("visibilitychange", handleVisibility);
-
         // Cleanup listener on unmount
         return () => {
             authListener?.subscription?.unsubscribe();
-            document.removeEventListener("visibilitychange", handleVisibility);
         };
     }, [
         setSession,
         setUser,
         setProfile,
         setLoading,
-        fetchAndSetProfile,
-        router,
+        fetchAndSetProfile
     ]);
 
     return null;

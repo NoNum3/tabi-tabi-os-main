@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useAtom } from "jotai";
-import { focusWindowAtom, taskbarAppsAtom } from "@/atoms/windowAtoms";
+import { focusWindowAtom, taskbarAppsAtom } from "@/application/atoms/windowAtoms";
 import { appRegistry } from "@/config/appRegistry";
-import { cn } from "@/lib/utils";
+import { cn } from "@/infrastructure/lib/utils";
 import {
     Tooltip,
     TooltipContent,
@@ -100,13 +100,15 @@ const Taskbar: React.FC = () => {
                                             onClick={handleClick}
                                             aria-label={`Open ${title}`}
                                         >
-                                            <Image
-                                                src={finalIconSrc}
-                                                alt={title}
-                                                width={24}
-                                                height={24}
-                                                className="h-full w-full object-contain"
-                                            />
+                                            <Suspense fallback={<div>Loading...</div>}>
+                                                <Image
+                                                    src={finalIconSrc}
+                                                    alt={title}
+                                                    width={24}
+                                                    height={24}
+                                                    className="h-full w-full object-contain"
+                                                />
+                                            </Suspense>
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" sideOffset={5}>

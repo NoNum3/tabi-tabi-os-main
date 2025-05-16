@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { Itim } from "next/font/google";
 import "@/styles/globals.css";
 import JotaiProvider from "@/components/providers/JotaiProvider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { I18nProviderClient } from "@/locales/client";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { LayoutClientWrapper } from "@/components/layout/LayoutClientWrapper";
-import { createSupabaseServerClient } from "@/lib/supabaseServerClient";
-import { SessionSyncer } from "@/components/providers/SessionSyncer";
+import { createSupabaseServerClient } from "@/infrastructure/lib/supabaseServerClient";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthAtomLogger } from "@/components/debug/AuthAtomLogger";
 
 // Removed dynamic export as async components are dynamic by default
 // export const dynamic = 'force-dynamic';
@@ -152,7 +153,13 @@ export default async function RootLayout({ children, params }: {
             .select("*")
             .eq("id", session.user.id)
             .single();
-        profile = data;
+        if (data) {
+            const typedData = data as { [key: string]: unknown, username?: string | null, full_name?: string | null };
+            profile = {
+                ...data,
+                username: typedData.username ?? typedData.full_name ?? null,
+            };
+        }
     }
 
     return (
@@ -171,10 +178,11 @@ export default async function RootLayout({ children, params }: {
                                 initialSession={session}
                                 initialProfile={profile}
                             >
-                                <SessionSyncer />
+                                <AuthAtomLogger />
                                 <LayoutClientWrapper>
                                     {children}
                                 </LayoutClientWrapper>
+                                <Toaster position="bottom-right" />
                             </AuthProvider>
                         </JotaiProvider>
                     </ThemeProvider>

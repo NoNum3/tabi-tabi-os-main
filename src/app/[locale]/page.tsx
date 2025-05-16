@@ -1,4 +1,4 @@
-import { Mainmenu } from "@/components/layout/mainmenu";
+import Mainmenu from "@/components/layout/mainmenu";
 import DesktopBackground from "@/components/layout/desktop-background";
 import DynamicAppsIcons from "@/components/layout/DynamicAppsIcons";
 import Taskbar from "@/components/layout/taskbar";

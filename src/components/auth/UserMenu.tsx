@@ -1,13 +1,13 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { profileAtom, userAtom } from "@/atoms/authAtoms";
+import { profileAtom, userAtom } from "@/application/atoms/authAtoms";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { SignInForm, SignUpForm } from "./AuthForms";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/infrastructure/lib/supabaseClient";
 
 export const UserMenu = () => {
     const [user] = useAtom(userAtom);
@@ -49,15 +49,15 @@ export const UserMenu = () => {
             <Avatar className="w-10 h-10">
                 <AvatarImage
                     src={profile?.avatar_url || undefined}
-                    alt={profile?.full_name || user.email || "User"}
+                    alt={profile?.username || user.email || "User"}
                 />
                 <AvatarFallback>
-                    {(profile?.full_name || user.email || "U").slice(0, 2)
+                    {(profile?.username || user.email || "U").slice(0, 2)
                         .toUpperCase()}
                 </AvatarFallback>
             </Avatar>
             <div className="text-sm font-semibold text-center">
-                {profile?.full_name || user.email}
+                {profile?.username || user.email}
             </div>
             <Button
                 variant="ghost"

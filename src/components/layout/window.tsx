@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai"; // Import useAtom
-import { windowRegistryAtom } from "../../atoms/windowAtoms"; // Import base registry
+import { windowRegistryAtom } from "@/application/atoms/windowAtoms"; // Import base registry
 import { useAtomValue } from "jotai"; // Use useAtomValue for read-only
 import {
   ResizeDirection,
   useWindowManagement,
-} from "../../hooks/useWindowManagement";
-import { Position, Size } from "../../types"; // Updated path, added Position
-import { cn } from "../../lib/utils";
+} from "@/application/hooks/useWindowManagement";
+import { Position, Size } from "@/types"; // Updated path, added Position
+import { cn } from "@/infrastructure/lib/utils";
 import {
   focusWindowAtom,
   minimizeWindowAtom,
   updateWindowPositionSizeAtom,
-} from "../../atoms/windowAtoms"; // Import Jotai atoms
-import { Minus, X } from "lucide-react"; // Import Minus icon
+} from "@/application/atoms/windowAtoms"; // Import Jotai atoms
+import { WindowControls } from "./WindowControls";
 
 interface WindowProps {
   windowId: string; // Unique identifier for this window instance
@@ -66,6 +66,48 @@ const Window: React.FC<WindowProps> = ({
   const updateWindowPositionSize = useAtom(updateWindowPositionSizeAtom)[1];
   const minimizeWindow = useAtom(minimizeWindowAtom)[1];
 
+  // Maximize/Restore state
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [prevSize, setPrevSize] = useState<Size | null>(null);
+  const [prevPosition, setPrevPosition] = useState<Position | null>(null);
+
+  // Maximize handler
+  const handleMaximize = () => {
+    setPrevSize(size);
+    setPrevPosition(position);
+    setIsMaximized(true);
+    // Set window to fill the entire screen (no margin)
+    updateWindowPositionSize({
+      id: windowId,
+      position: { x: 0, y: 0 },
+      size: {
+        width: windowDimensions.width,
+        height: windowDimensions.height,
+      },
+    });
+  };
+
+  // Restore handler
+  const handleRestore = () => {
+    if (prevSize && prevPosition) {
+      updateWindowPositionSize({
+        id: windowId,
+        position: prevPosition,
+        size: prevSize,
+      });
+    }
+    setIsMaximized(false);
+  };
+
+  // If window is resized/moved while maximized, update prevSize/prevPosition
+  useEffect(() => {
+    if (isMaximized) {
+      setPrevSize(prev => prev || size);
+      setPrevPosition(prev => prev || position);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMaximized]);
+
   // Effect to update dimensions on resize
   useEffect(() => {
     const handleResize = () => {
@@ -110,6 +152,10 @@ const Window: React.FC<WindowProps> = ({
     }
     : initialSize;
 
+  // Always use the latest position/size from the atom for rendering
+  const position = currentWindowState?.position ?? adjustedInitialPosition;
+  const size = currentWindowState?.size ?? adjustedInitialSize;
+
   // Callback for the hook to update global state
   const handleInteractionEnd = (
     id: string,
@@ -124,7 +170,8 @@ const Window: React.FC<WindowProps> = ({
     focusWindow(id);
   };
 
-  const { position, size, handleDragStart, handleResizeStart } =
+  // Use the hook only for drag/resize, not for canonical state
+  const { handleDragStart, handleResizeStart, isDragging, isResizing, position: dragPosition, size: dragSize } =
     useWindowManagement({
       windowId,
       initialSize: adjustedInitialSize,
@@ -134,6 +181,21 @@ const Window: React.FC<WindowProps> = ({
       onInteractionEnd: handleInteractionEnd,
       onFocus: handleFocus,
     });
+
+  // Use drag/resize position/size during interaction, otherwise atom state
+  // This ensures real-time, smooth dragging and resizing
+  let renderPosition: Position;
+  let renderSize: Size;
+  let windowTransitionClass = "transition-all duration-150";
+  if (isDragging || isResizing) {
+    renderPosition = dragPosition;
+    renderSize = dragSize;
+    windowTransitionClass = ""; // Remove transition during drag for instant feedback
+  } else {
+    renderPosition = position;
+    renderSize = size;
+    windowTransitionClass = "transition-all duration-150";
+  }
 
   // Don't render if not mounted (to prevent hydration mismatch) or not open
   if (!isMounted || !isOpen) {
@@ -219,8 +281,8 @@ const Window: React.FC<WindowProps> = ({
     handleFocus(windowId);
   };
 
-  // Hide resize handles on mobile/tablet
-  const shouldShowResizeHandles = !isMobileOrTablet;
+  // Hide resize handles when maximized or on mobile/tablet
+  const shouldShowResizeHandles = !isMobileOrTablet && !isMaximized;
 
   // Mobile-specific styling
   const mobileWindowStyles = isMobileOrTablet
@@ -235,15 +297,16 @@ const Window: React.FC<WindowProps> = ({
 
   return (
     <div
-      className={`absolute bg-background border border-border rounded-lg shadow-xl flex flex-col overflow-hidden ${
+      className={`$${isMaximized ? '' : 'absolute'} bg-background border border-border rounded-lg shadow-xl flex flex-col overflow-hidden ${windowTransitionClass} ${
         isMobileOrTablet ? "mobile-window" : ""
       }`}
       style={{
-        left: isMinimized ? "100vw" : `${position.x}px`,
-        top: isMinimized ? "0" : `${position.y}px`,
-        width: `${size.width}px`,
-        height: `${size.height}px`,
-        zIndex: zIndex, // Apply zIndex from global state
+        position: isMaximized ? 'fixed' : 'absolute',
+        left: isMaximized ? 0 : `${renderPosition.x}px`,
+        top: isMaximized ? 0 : `${renderPosition.y}px`,
+        width: isMaximized ? '100vw' : `${renderSize.width}px`,
+        height: isMaximized ? '100vh' : `${renderSize.height}px`,
+        zIndex: isMaximized ? 9999 : zIndex, // Ensure on top when maximized
         ...(isMinimized
           ? {
             position: "fixed",
@@ -261,33 +324,20 @@ const Window: React.FC<WindowProps> = ({
         className={`bg-primary px-3 py-2 border-b border-border flex justify-between items-center select-none h-10 rounded-t-md shadow-md ${
           isMobileOrTablet
             ? "mobile-title-bar px-4 bg-primary rounded-t-[0.375rem]"
-            : "cursor-move"
+            : !isMaximized ? "cursor-move" : ""
         }`}
-        onMouseDown={isMobileOrTablet ? undefined : handleDragStart} // Only allow dragging on desktop
+        onMouseDown={(!isMobileOrTablet && !isMaximized) ? handleDragStart : undefined} // Only allow dragging on desktop and not maximized
       >
         <h2 className="text-sm font-semibold text-primary-foreground truncate">
           {title}
         </h2>
-        <div className="flex items-center space-x-1">
-          {/* Minimize Button */}
-          <button
-            onClick={() => minimizeWindow(windowId)}
-            className="p-1 rounded hover:bg-primary/80 text-primary-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            aria-label="Minimize window"
-            title="Minimize"
-          >
-            <Minus size={16} />
-          </button>
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="p-1 rounded hover:bg-destructive/90 text-primary-foreground focus:outline-none focus:ring-1 focus:ring-destructive"
-            aria-label="Close window"
-            title="Close"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        <WindowControls
+          onMinimize={() => minimizeWindow(windowId)}
+          onMaximize={handleMaximize}
+          onRestore={handleRestore}
+          onClose={onClose}
+          isMaximized={isMaximized}
+        />
       </div>
 
       {/* Content Area */}
@@ -300,13 +350,21 @@ const Window: React.FC<WindowProps> = ({
             height: "1px",
             minHeight: 0,
             padding: 0,
+            position: "absolute",
+            width: "1px",
+            overflow: "hidden",
+            zIndex: -1,
+            // ARIA: hide from screen readers when minimized
+            visibility: "hidden",
           }
           : {}}
+        aria-hidden={isMinimized ? "true" : undefined}
+        tabIndex={isMinimized ? -1 : undefined}
       >
         {children}
       </div>
 
-      {/* Render Resize Handles only on desktop */}
+      {/* Render Resize Handles only on desktop and not maximized */}
       {shouldShowResizeHandles &&
         handles.map((handle) => (
           <div

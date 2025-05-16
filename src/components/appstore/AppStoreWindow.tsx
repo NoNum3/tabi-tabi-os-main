@@ -16,12 +16,12 @@ import {
     addAppToDashboardAtom,
     addedAppIdsAtom,
     removeAppFromDashboardAtom,
-} from "@/atoms/dashboardAtoms";
+} from "@/application/atoms/dashboardAtoms";
 import { AppCategory, appRegistry } from "@/config/appRegistry";
 import Image from "next/image";
 import { useI18n } from "@/locales/client";
 import { Grip, LayoutGrid, List, PlusCircle, Search, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/infrastructure/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type SortOption = "name-asc" | "name-desc";

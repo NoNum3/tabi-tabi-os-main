@@ -1,44 +1,42 @@
 "use client";
 
+// --- External Libraries ---
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 // import { DndProvider, DropTargetMonitor, useDrag, useDrop } from "react-dnd"; // DropTargetMonitor is unused
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { appRegistry } from "../config/appRegistry";
-import { playSound } from "../lib/utils"; // Import the sound utility
+
+// --- State Management (Jotai) ---
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+
+// --- Absolute Imports (aliases) ---
+import { appRegistry } from '@/config/appRegistry';
+import { useI18n } from '@/locales/client';
+import { AppRegistration } from '@/types';
+import { cn, playSound } from '@/infrastructure/lib/utils';
 import {
-  closeWindowAtom, // Write atom to close a window
-  // focusWindowAtom, // focusWindow variable is unused
-  openWindowAtom, // Write atom to open/focus a window
+  closeWindowAtom,
+  openWindowAtom,
   windowRegistryAtom,
-  // WindowState, // Import type if needed
-} from "../atoms/windowAtoms"; // Adjust path as necessary
-// import { v4 as uuidv4 } from "uuid"; // Import uuid for generating unique window IDs
-import Taskbar from "./layout/taskbar"; // Import the Taskbar
-import { useI18n } from "@/locales/client"; // Import useI18n
-// Import AppStoreWindow to render it directly
-// import { AppStoreWindow } from "./appstore/AppStoreWindow"; // Comment out if not used directly
-// --- Import the main Window component for rendering ---
-import Window from "./layout/window"; // Corrected: Default import
-// --- Import dashboard atoms ---
+} from '@/application/atoms/windowAtoms';
 import {
   addedAppIdsAtom,
   iconPositionsAtom,
-  // resetIconPositionsAtom, // Unused variable
   updateIconPositionAtom,
-} from "../atoms/dashboardAtoms";
-// --- Import display settings atoms ---
+} from '@/application/atoms/dashboardAtoms';
 import {
-  currentGridCellPixelSizeAtom, // <-- Use this derived atom
+  currentGridCellPixelSizeAtom,
   showGridLinesAtom,
-  // snapToGridAtom, // snapGrid variable is unused
-} from "@/atoms/displaySettingsAtoms";
-import { cn } from "@/lib/utils"; // Import cn utility
-// import { AppRegistration, Position, Size } from "@/types"; // Position and Size are unused. AppRegistration is used.
-import { AppRegistration } from "@/types";
+} from '@/application/atoms/displaySettingsAtoms';
 
+// --- Relative Imports ---
+import Taskbar from './layout/taskbar';
+import Window from './layout/window';
+// --- Import the main Window component for rendering ---
+// import { AppStoreWindow } from "./appstore/AppStoreWindow"; // Comment out if not used directly
+// --- Import dashboard atoms ---
+// import { v4 as uuidv4 } from "uuid"; // Import uuid for generating unique window IDs
 // --- Define GridPosition type --- //
 interface GridPosition {
   row: number;
@@ -368,13 +366,18 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
             >
               <div
                 style={{
-                  opacity: 0.5,
-                  filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
+                  opacity: 0.85,
+                  filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.6))",
                   width: "100%",
                   height: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  border: "2.5px dashed #3b82f6", // Tailwind blue-500
+                  borderRadius: 12,
+                  background: "rgba(59,130,246,0.08)", // blue-500/10
+                  transition: "box-shadow 0.2s, border 0.2s, background 0.2s",
+                  animation: "fadeInScale 0.18s cubic-bezier(.4,0,.2,1)",
                 }}
               >
                 <AppIconDisplay

@@ -7,110 +7,256 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      app_metadata: {
+      bookmark_folders: {
         Row: {
-          app_id: string
-          like_count: number | null
+          color: string | null
+          created_at: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string
+          is_pinned: boolean | null
+          name: string
+          parent_id: string | null
+          sort_order: number | null
+          symbol: string | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          app_id: string
-          like_count?: number | null
+          color?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          name: string
+          parent_id?: string | null
+          sort_order?: number | null
+          symbol?: string | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          app_id?: string
-          like_count?: number | null
+          color?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          name?: string
+          parent_id?: string | null
+          sort_order?: number | null
+          symbol?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookmark_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "bookmark_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bookmarks: {
         Row: {
-          created_at: string
+          color: string | null
+          created_at: string | null
+          custom_metadata: Json | null
+          deleted_at: string | null
+          description: string | null
+          favicon_url: string | null
+          folder_id: string | null
           id: string
+          is_favorite: boolean | null
+          is_pinned: boolean | null
+          last_visited_at: string | null
+          sort_order: number | null
+          symbol: string | null
+          tags: string[] | null
           title: string
-          type: string
+          updated_at: string | null
           url: string
           user_id: string
+          visit_count: number | null
         }
         Insert: {
-          created_at?: string
+          color?: string | null
+          created_at?: string | null
+          custom_metadata?: Json | null
+          deleted_at?: string | null
+          description?: string | null
+          favicon_url?: string | null
+          folder_id?: string | null
           id?: string
+          is_favorite?: boolean | null
+          is_pinned?: boolean | null
+          last_visited_at?: string | null
+          sort_order?: number | null
+          symbol?: string | null
+          tags?: string[] | null
           title: string
-          type?: string
+          updated_at?: string | null
           url: string
           user_id: string
+          visit_count?: number | null
         }
         Update: {
-          created_at?: string
+          color?: string | null
+          created_at?: string | null
+          custom_metadata?: Json | null
+          deleted_at?: string | null
+          description?: string | null
+          favicon_url?: string | null
+          folder_id?: string | null
           id?: string
+          is_favorite?: boolean | null
+          is_pinned?: boolean | null
+          last_visited_at?: string | null
+          sort_order?: number | null
+          symbol?: string | null
+          tags?: string[] | null
           title?: string
-          type?: string
+          updated_at?: string | null
           url?: string
           user_id?: string
+          visit_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "bookmark_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       calculator_history: {
         Row: {
-          created_at: string
-          expression: string | null
+          created_at: string | null
+          deleted_at: string | null
+          device_id: string | null
+          expression: string
           id: number
-          result: string | null
+          memory_value: number | null
+          notes: string | null
+          result: string
+          tags: string[] | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
-          expression?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          device_id?: string | null
+          expression: string
           id?: number
-          result?: string | null
+          memory_value?: number | null
+          notes?: string | null
+          result: string
+          tags?: string[] | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
-          expression?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          device_id?: string | null
+          expression?: string
           id?: number
-          result?: string | null
+          memory_value?: number | null
+          notes?: string | null
+          result?: string
+          tags?: string[] | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
       }
       calendar_events: {
         Row: {
+          all_day: boolean | null
           color: string | null
-          created_at: string
-          date: string
+          created_at: string | null
+          deleted_at: string | null
           description: string | null
+          end_time: string
           id: string
-          time: string | null
+          location: string | null
+          recurrence: string | null
+          recurrence_rule: Json | null
+          start_time: string
           title: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
+          all_day?: boolean | null
           color?: string | null
-          created_at?: string
-          date: string
+          created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
+          end_time: string
           id?: string
-          time?: string | null
+          location?: string | null
+          recurrence?: string | null
+          recurrence_rule?: Json | null
+          start_time: string
           title: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
+          all_day?: boolean | null
           color?: string | null
-          created_at?: string
-          date?: string
+          created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
+          end_time?: string
           id?: string
-          time?: string | null
+          location?: string | null
+          recurrence?: string | null
+          recurrence_rule?: Json | null
+          start_time?: string
           title?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
       }
       music_songs: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           seq_id: number
           title: string
@@ -118,7 +264,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           seq_id: number
           title: string
@@ -126,7 +272,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           seq_id?: number
           title?: string
@@ -164,28 +310,31 @@ export type Database = {
       }
       playlist_songs: {
         Row: {
-          id: number
-          playlist_id: string | null
+          created_at: string
+          id: string
+          playlist_id: string
           seq_id: number
           song_id: string
-          title: string
-          url: string
+          title: string | null
+          url: string | null
         }
         Insert: {
-          id?: number
-          playlist_id?: string | null
+          created_at?: string
+          id?: string
+          playlist_id: string
           seq_id: number
           song_id: string
-          title: string
-          url: string
+          title?: string | null
+          url?: string | null
         }
         Update: {
-          id?: number
-          playlist_id?: string | null
+          created_at?: string
+          id?: string
+          playlist_id?: string
           seq_id?: number
           song_id?: string
-          title?: string
-          url?: string
+          title?: string | null
+          url?: string | null
         }
         Relationships: [
           {
@@ -199,22 +348,22 @@ export type Database = {
       }
       playlists: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           name: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           name: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           name?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -223,88 +372,22 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           email: string | null
-          full_name: string | null
           id: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string | null
           id: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string | null
           id?: string
-        }
-        Relationships: []
-      }
-      todos: {
-        Row: {
-          completed: boolean
-          created_at: string
-          id: string
-          task: string
-          user_id: string
-        }
-        Insert: {
-          completed?: boolean
-          created_at?: string
-          id?: string
-          task: string
-          user_id: string
-        }
-        Update: {
-          completed?: boolean
-          created_at?: string
-          id?: string
-          task?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_app_likes: {
-        Row: {
-          app_id: string
-          id: number
-          liked_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          app_id: string
-          id?: number
-          liked_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          app_id?: string
-          id?: number
-          liked_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_preferences: {
-        Row: {
-          added_app_ids: string[] | null
-          app_order: string[] | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          added_app_ids?: string[] | null
-          app_order?: string[] | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          added_app_ids?: string[] | null
-          app_order?: string[] | null
-          updated_at?: string | null
-          user_id?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -430,6 +513,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
