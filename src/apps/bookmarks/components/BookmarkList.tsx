@@ -1,11 +1,12 @@
 import React from "react";
 import { useAtom, useSetAtom } from "jotai";
-import { bookmarksAtom, bookmarksLoadingAtom, bookmarksErrorAtom, updateBookmarkAtom, deleteBookmarkAtom, reorderBookmarksAtom } from "../hooks/useBookmarks";
+import { bookmarksAtom, bookmarksErrorAtom, updateBookmarkAtom, deleteBookmarkAtom, reorderBookmarksAtom } from "../hooks/useBookmarks";
 import type { Bookmark as BookmarkType } from "../types/bookmarkTypes";
 import { Button } from "@/components/ui/button";
 import { Star, StarOff, Edit2, Trash2, Bookmark as BookmarkIcon, GripVertical, BookmarkX, Plus, XCircle } from "lucide-react";
 import Image from "next/image";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { useI18n } from '@/locales/client';
 
 export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'custom', enableDragDrop = true }: {
   selectedFolder: string | null;
@@ -15,11 +16,11 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
   enableDragDrop?: boolean;
 }) => {
   const [bookmarks] = useAtom(bookmarksAtom);
-  const [loading] = useAtom(bookmarksLoadingAtom);
   const [error] = useAtom(bookmarksErrorAtom);
   const setUpdateBookmark = useSetAtom(updateBookmarkAtom);
   const setDeleteBookmark = useSetAtom(deleteBookmarkAtom);
   const reorderBookmarks = useSetAtom(reorderBookmarksAtom);
+  const t = useI18n();
 
   let filtered: BookmarkType[] = [];
   if (selectedFolder === 'RECYCLE_BIN') {
@@ -66,19 +67,24 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
 
   // Drag-and-drop logic
   const handleDragEnd = (result: DropResult) => {
+    if (!enableDragDrop) return;
     if (!result.destination) return;
     if (result.destination.index === result.source.index) return;
+    if (filtered.length < 2) return;
+    // Only reorder bookmarks in the current folder (filtered)
     const newOrder = Array.from(filtered);
     const [removed] = newOrder.splice(result.source.index, 1);
     newOrder.splice(result.destination.index, 0, removed);
+    // Update sort_order for all bookmarks in this folder
     reorderBookmarks(newOrder.map(b => b.id));
   };
 
-  if (loading) {
-    return <div className="flex flex-col items-center justify-center h-full text-muted-foreground">Loading bookmarks…</div>;
-  }
   if (error) {
-    return <div className="flex flex-col items-center justify-center h-full text-red-500" role="alert">{error}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-red-500" role="alert">
+        {t(error, { count: 1 }) !== error ? t(error, { count: 1 }) : error}
+      </div>
+    );
   }
   if (filtered.length === 0) {
     return (
@@ -86,7 +92,7 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
         <span className="mb-4 flex items-center justify-center w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/40 bg-muted">
           <BookmarkX className="size-10 opacity-70" aria-hidden="true" />
         </span>
-        <p className="font-medium mb-4">No bookmarks found in this folder.</p>
+        <p className="font-medium mb-4">{t('bookmarkNoBookmarks', { count: 1 })}</p>
         {onAddBookmark && selectedFolder !== 'RECYCLE_BIN' && (
           <button
             type="button"
@@ -98,7 +104,7 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
           </button>
         )}
         {onAddBookmark && selectedFolder !== 'RECYCLE_BIN' && (
-          <span className="mt-2 text-xs text-muted-foreground">Add your first bookmark</span>
+          <span className="mt-2 text-xs text-muted-foreground">{t('bookmarkAddFirstBookmark', { count: 1 })}</span>
         )}
       </div>
     );
@@ -107,7 +113,7 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
   return (
     <div className="relative h-full">
       <DragDropContext onDragEnd={enableDragDrop ? handleDragEnd : () => {}}>
-        <Droppable droppableId="bookmark-list">
+        <Droppable droppableId="bookmark-list" isDropDisabled={!enableDragDrop || filtered.length < 2}>
           {(provided) => (
             <ul className="space-y-2" ref={provided.innerRef} {...provided.droppableProps}>
               {filtered.map((b, idx) => (
@@ -181,11 +187,11 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
           <Button
             variant="ghost"
             size="icon"
-            aria-label={selectedFolder === 'RECYCLE_BIN' ? "Delete forever" : "Move to Recycle Bin"}
+            aria-label={selectedFolder === 'RECYCLE_BIN' ? t('bookmarkFolderRecycleBin', { count: 1 }) : "Move to Recycle Bin"}
             tabIndex={0}
             onClick={() => handleDelete(b)}
             className={selectedFolder === 'RECYCLE_BIN' ? "text-destructive" : "text-muted-foreground"}
-            title={selectedFolder === 'RECYCLE_BIN' ? "Delete forever" : "Move to Recycle Bin"}
+            title={selectedFolder === 'RECYCLE_BIN' ? t('bookmarkFolderRecycleBin', { count: 1 }) : "Move to Recycle Bin"}
           >
             {selectedFolder === 'RECYCLE_BIN' ? <XCircle className="size-5" /> : <Trash2 className="size-5" />}
           </Button>

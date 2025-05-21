@@ -8,37 +8,55 @@ import type { Bookmark, Folder } from "@/apps/bookmarks/types/bookmarkTypes";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useBookmarksRealtime } from "@/apps/bookmarks/hooks/useBookmarks";
 import { useFoldersRealtime } from "@/apps/bookmarks/hooks/useFolders";
-import { useAtom } from "jotai";
-import { fetchBookmarksAtom } from "@/apps/bookmarks/hooks/useBookmarks";
-
-const BOOKMARK_SORT_OPTIONS = [
-  { value: 'manual', label: 'Manual (Drag & Drop)' },
-  { value: 'title-asc', label: 'Title (A-Z)' },
-  { value: 'title-desc', label: 'Title (Z-A)' },
-  { value: 'date-desc', label: 'Date Added (Newest)' },
-  { value: 'date-asc', label: 'Date Added (Oldest)' },
-  { value: 'color', label: 'Color' },
-];
-
-const FOLDER_SORT_OPTIONS = [
-  { value: 'custom', label: 'Manual (Drag & Drop)' },
-  { value: 'custom-reverse', label: 'Manual (Reverse)' },
-  { value: 'alpha', label: 'A-Z' },
-  { value: 'alpha-desc', label: 'Z-A' },
-  { value: 'date', label: 'Date Added (Newest)' },
-  { value: 'date-asc', label: 'Date Added (Oldest)' },
-  { value: 'color', label: 'Color' },
-  { value: 'color-desc', label: 'Color (Reverse)' },
-  { value: 'symbol', label: 'Symbol' },
-];
+import { useAtom, useSetAtom } from "jotai";
+import { fetchBookmarksAtom, bookmarksErrorAtom } from "@/apps/bookmarks/hooks/useBookmarks";
+import { fetchFoldersAtom, foldersErrorAtom } from "@/apps/bookmarks/hooks/useFolders";
+import { useCurrentLocale } from "@/locales/client";
+import { WritableAtom } from "jotai";
+import { userAtom } from "@/application/atoms/authAtoms";
+import { useAtomValue } from "jotai";
+import { useI18n } from '@/locales/client';
 
 export const BookmarksApp = () => {
+  const t = useI18n();
+
+  const BOOKMARK_SORT_OPTIONS = [
+    { value: 'manual', label: t('bookmarkSortManual', { count: 1 }) },
+    { value: 'title-asc', label: t('bookmarkSortTitleAsc', { count: 1 }) },
+    { value: 'title-desc', label: t('bookmarkSortTitleDesc', { count: 1 }) },
+    { value: 'date-desc', label: t('bookmarkSortDateDesc', { count: 1 }) },
+    { value: 'date-asc', label: t('bookmarkSortDateAsc', { count: 1 }) },
+    { value: 'color', label: t('bookmarkSortColor', { count: 1 }) },
+  ];
+
+  const FOLDER_SORT_OPTIONS = [
+    { value: 'custom', label: t('folderSortManual', { count: 1 }) },
+    { value: 'custom-reverse', label: t('folderSortManualReverse', { count: 1 }) },
+    { value: 'alpha', label: t('folderSortAlpha', { count: 1 }) },
+    { value: 'alpha-desc', label: t('folderSortAlphaDesc', { count: 1 }) },
+    { value: 'date', label: t('folderSortDate', { count: 1 }) },
+    { value: 'date-asc', label: t('folderSortDateAsc', { count: 1 }) },
+    { value: 'color', label: t('folderSortColor', { count: 1 }) },
+    { value: 'color-desc', label: t('folderSortColorDesc', { count: 1 }) },
+    { value: 'symbol', label: t('folderSortSymbol', { count: 1 }) },
+  ];
+
   useBookmarksRealtime();
   useFoldersRealtime();
   const [, fetchBookmarks] = useAtom(fetchBookmarksAtom);
+  const setBookmarksError = useSetAtom(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>);
+  const [, fetchFolders] = useAtom(fetchFoldersAtom);
+  const setFoldersError = useSetAtom(foldersErrorAtom as WritableAtom<string | null, [string | null], void>);
+  const currentLocale = useCurrentLocale();
+  const user = useAtomValue(userAtom);
   React.useEffect(() => {
-    fetchBookmarks();
-  }, [fetchBookmarks]);
+    if (user) {
+      fetchBookmarks();
+      setBookmarksError(null);
+      fetchFolders();
+      setFoldersError(null);
+    }
+  }, [user, currentLocale, fetchBookmarks, setBookmarksError, fetchFolders, setFoldersError]);
 
   // Persist selectedFolder in localStorage
   const [selectedFolder, setSelectedFolder] = useState<string | null>(() => {
@@ -83,11 +101,11 @@ export const BookmarksApp = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background text-foreground transition-colors">
+    <div key={currentLocale} className="flex flex-col h-full bg-background text-foreground transition-colors">
       <BookmarkToolbar onAddFolder={handleAddFolder} />
       <div className="flex flex-row items-center gap-4 px-4 py-2 border-b border-border bg-background">
         <label className="flex items-center gap-2 text-sm">
-          Folder sort:
+          {t('folderSortLabel', { count: 1 })}
           <Select value={folderSort} onValueChange={(value) => setFolderSort(value as 'custom' | 'custom-reverse' | 'alpha' | 'alpha-desc' | 'date' | 'date-asc' | 'color' | 'color-desc' | 'symbol')}>
             <SelectTrigger className="min-w-[160px]">
               <SelectValue />
@@ -100,7 +118,7 @@ export const BookmarksApp = () => {
           </Select>
         </label>
         <label className="flex items-center gap-2 text-sm">
-          Bookmark sort:
+          {t('bookmarkSortLabel', { count: 1 })}
           <Select value={bookmarkSort} onValueChange={setBookmarkSort}>
             <SelectTrigger className="min-w-[180px]">
               <SelectValue />

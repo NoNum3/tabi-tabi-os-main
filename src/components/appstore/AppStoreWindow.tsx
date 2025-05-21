@@ -58,9 +58,7 @@ export const AppStoreWindow: React.FC = () => {
         .filter(([appId]) => appId !== "appStore")
         // Existing filters for search and category
         .filter(([appId, config]) => {
-            const name = t(appId as keyof ReturnType<typeof t>, {
-                count: 1,
-            });
+            const name = t(config.nameKey || appId, { count: 1 });
             const matchesSearch = name.toLowerCase().includes(
                 searchTerm.toLowerCase(),
             );
@@ -68,13 +66,9 @@ export const AppStoreWindow: React.FC = () => {
                 config.category === selectedCategory;
             return matchesSearch && matchesCategory;
         })
-        .sort(([appIdA], [appIdB]) => {
-            const nameA = t(appIdA as keyof ReturnType<typeof t>, {
-                count: 1,
-            });
-            const nameB = t(appIdB as keyof ReturnType<typeof t>, {
-                count: 1,
-            });
+        .sort(([, configA], [, configB]) => {
+            const nameA = t(configA.nameKey || "", { count: 1 });
+            const nameB = t(configB.nameKey || "", { count: 1 });
             if (sortOption === "name-asc") {
                 return nameA.localeCompare(nameB);
             }
@@ -141,12 +135,7 @@ export const AppStoreWindow: React.FC = () => {
                                 </SelectItem>
                                 {allCategories.map((category) => (
                                     <SelectItem key={category} value={category}>
-                                        {t(
-                                            category as keyof ReturnType<
-                                                typeof t
-                                            >,
-                                            { count: 1 },
-                                        )}
+                                        {t(`appStoreCategory${category.charAt(0).toUpperCase() + category.slice(1)}`, { count: 1 })}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -339,9 +328,7 @@ const AppCard: React.FC<AppCardProps> = (
         <>
             <Image
                 src={config.src}
-                alt={t(appId as keyof ReturnType<typeof t>, {
-                    count: 1,
-                })}
+                alt={t(config.nameKey || appId, { count: 1 })}
                 width={displayMode === "list"
                     ? 32
                     : displayMode === "compact-grid"
@@ -365,16 +352,13 @@ const AppCard: React.FC<AppCardProps> = (
                         "font-medium truncate",
                         displayMode === "list" ? "text-sm" : "text-xs",
                     )}
+                    title={t(config.nameKey || appId, { count: 1 })}
                 >
-                    {t(appId as keyof ReturnType<typeof t>, {
-                        count: 1,
-                    })}
+                    {t(config.nameKey || appId, { count: 1 })}
                 </p>
                 {displayMode !== "compact-grid" && (
                     <p className="text-xs text-muted-foreground truncate">
-                        {t(config.category as keyof ReturnType<typeof t>, {
-                            count: 1,
-                        })}
+                        {t(`appStoreCategory${config.category.charAt(0).toUpperCase() + config.category.slice(1)}`, { count: 1 })}
                     </p>
                 )}
             </div>

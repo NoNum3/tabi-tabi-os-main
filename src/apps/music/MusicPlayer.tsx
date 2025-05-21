@@ -11,7 +11,14 @@ import {
   Rewind,
   FastForward,
   MoreVertical,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  FileText,
+  Link2,
+  Repeat,
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 import {
   addPlaylist,
@@ -101,6 +108,8 @@ const MusicPlayer: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [prevVolume, setPrevVolume] = useState(volume);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [showVideo, setShowVideo] = useState(true);
+  const [loop, setLoop] = useState(false);
 
   // Refs
   const playerRef = useRef<ReactPlayer>(null);
@@ -609,6 +618,23 @@ const MusicPlayer: React.FC = () => {
   const youtubeWindow = Object.values(windowRegistry).find((w) => w.appId === "youtubePlayer");
   const isMinimized = youtubeWindow?.isMinimized;
 
+  // Download transcript stub
+  const handleDownloadTranscript = () => {
+    alert("Download transcript/CC is not implemented yet.");
+  };
+  // Copy video URL
+  const handleCopyUrl = () => {
+    if (currentSong?.url) {
+      navigator.clipboard.writeText(currentSong.url);
+    }
+  };
+  // Open in YouTube
+  const handleOpenInYoutube = () => {
+    if (currentSong?.url) {
+      window.open(currentSong.url, "_blank");
+    }
+  };
+
   if (!user) {
     return (
       <div className="p-4 text-center">
@@ -648,7 +674,7 @@ const MusicPlayer: React.FC = () => {
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onReady={handlePlayerReady}
-          showVideo={true}
+          showVideo={showVideo}
         />
         {/* Controls overlay: show mini controls if minimized, else main controls */}
         {isMinimized ? (
@@ -716,12 +742,59 @@ const MusicPlayer: React.FC = () => {
       {/* Main player UI, hidden when minimized */}
       {!isMinimized && (
         <>
+          {/* --- Seek Slider UI (like mini player) --- */}
+          <div className="flex items-center gap-2 w-full px-4 mt-2" style={{ maxWidth: 700, margin: '0 auto' }}>
+            <span className="text-xs text-white/70 min-w-[36px] text-right">
+              {formatTime(playedSeconds)}
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={duration || 1}
+              step={0.1}
+              value={playedSeconds}
+              onChange={e => {
+                setPlayedSeconds(Number(e.target.value));
+                playerRef.current?.seekTo(Number(e.target.value), 'seconds');
+              }}
+              className="flex-1 accent-primary"
+              style={{ accentColor: '#fff' }}
+              aria-label="Seek video"
+            />
+            <span className="text-xs text-white/70 min-w-[36px]">
+              {formatTime(duration)}
+            </span>
+          </div>
+          {/* --- End Seek Slider UI --- */}
           <div className="w-full flex flex-col items-center">
             <div className="w-full flex items-center justify-center gap-4 px-4 mt-4 mb-2">
               <button onClick={handlePrevious} className="p-2 rounded hover:bg-muted" aria-label="Previous"><Rewind size={22} /></button>
               <button onClick={() => setPlaying(!playing)} className="p-2 rounded bg-primary text-white hover:bg-primary/80" aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause size={28} /> : <Play size={28} />}</button>
               <button onClick={handleNext} className="p-2 rounded hover:bg-muted" aria-label="Next"><FastForward size={22} /></button>
-              <button className="p-2 rounded hover:bg-muted" aria-label="More"><MoreVertical size={22} /></button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 rounded hover:bg-muted" aria-label="More options" id="more-options-btn"><MoreVertical size={22} /></button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" aria-labelledby="more-options-btn">
+                  <DropdownMenuItem onClick={() => setShowVideo(v => !v)}>
+                    {showVideo ? <EyeOff size={16} className="mr-2" /> : <Eye size={16} className="mr-2" />}
+                    {showVideo ? "Hide Video" : "Show Video"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownloadTranscript}>
+                    <FileText size={16} className="mr-2" />Download Transcript/CC
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleCopyUrl}>
+                    <Link2 size={16} className="mr-2" />Copy Video URL
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleOpenInYoutube}>
+                    <ExternalLink size={16} className="mr-2" />Open in YouTube
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setLoop(l => !l)}>
+                    <Repeat size={16} className="mr-2" />{loop ? "Disable Loop" : "Loop Video"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           <MusicPlayerAddSongForm

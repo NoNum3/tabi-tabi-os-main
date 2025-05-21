@@ -97,7 +97,6 @@ export const clearAllAppState = (): boolean => {
     Object.keys(localStorage)
       .filter((key) => key.startsWith(BASE_STORAGE_KEY))
       .forEach((key) => localStorage.removeItem(key));
-    console.log("Cleared all tabiOS state from localStorage.");
     return true;
   } catch (error) {
     console.error("Could not clear all app state from localStorage:", error);

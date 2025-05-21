@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Crown, Lightbulb, RefreshCcw } from "lucide-react";
 import { cn } from "@/infrastructure/lib/utils";
+import { useI18n } from '@/locales/client';
 
 // --- Types ---
 type PieceType = "white" | "black";
@@ -89,6 +90,7 @@ const getVisualCoords = (
 
 // --- Component ---
 const CheckersApp: React.FC = () => {
+    const t = useI18n();
     const [board, setBoard] = useState<BoardState>(createInitialBoard());
     const [currentPlayer, setCurrentPlayer] = useState<PieceType>("white");
     const [selectedPiece, setSelectedPiece] = useState<Position | null>(null); // Position of selected piece
@@ -108,7 +110,7 @@ const CheckersApp: React.FC = () => {
     ); // 'white' means white at bottom
 
     // New state for tips
-    const [gameTip, setGameTip] = useState<string>("Select a piece to start.");
+    const [gameTip, setGameTip] = useState<string>(t('tipSelectPiece', { count: 1 }));
 
     // --- Core Game Logic --- //
 
@@ -254,27 +256,22 @@ const CheckersApp: React.FC = () => {
 
         let newTip = "";
         if (winner) {
-            newTip = "Game Over!";
+            newTip = t('tipGameOver', { count: 1 });
         } else if (forced) {
-            newTip =
-                "Tip: A jump is required! Choose a piece that can capture.";
+            newTip = t('tipJumpRequired', { count: 1 });
         } else if (piecesThatCanMove.length > 0) {
-            // Basic tips based on piece count or potential moves
             const opponentPieces = currentPlayer === "white"
                 ? blackPieces
                 : whitePieces;
             if (opponentPieces <= 3) {
-                newTip =
-                    "Tip: Opponent is low on pieces. Press your advantage!";
+                newTip = t('tipPressAdvantage', { count: 1 });
             } else if (whitePieces + blackPieces < 10) {
-                newTip = "Tip: Endgame! Every move counts.";
+                newTip = t('tipEndgame', { count: 1 });
             } else {
-                newTip =
-                    "Tip: Look for opportunities to advance or control the center.";
+                newTip = t('tipAdvanceCenter', { count: 1 });
             }
         } else {
-            // This case should trigger a win condition check
-            newTip = "Checking for game end...";
+            newTip = t('tipCheckingEnd', { count: 1 });
         }
         setGameTip(newTip);
 
@@ -313,11 +310,9 @@ const CheckersApp: React.FC = () => {
             );
             setSelectedPieceValidMoves(movesForSelected);
             if (movesForSelected.some((m) => m.jumped)) {
-                setGameTip(
-                    "Tip: Capture available! Select the green destination.",
-                );
+                setGameTip(t('tipCaptureAvailable', { count: 1 }));
             } else if (movesForSelected.length > 0) {
-                setGameTip("Tip: Select a blue destination square to move.");
+                setGameTip(t('tipSelectDestination', { count: 1 }));
             }
         }
     }, [
@@ -330,6 +325,7 @@ const CheckersApp: React.FC = () => {
         whitePieces,
         blackPieces,
         gameTip,
+        t
     ]);
 
     // --- Event Handlers --- //
@@ -366,22 +362,18 @@ const CheckersApp: React.FC = () => {
                 setSelectedPieceValidMoves(movesForThisPiece);
                 // Update tip based on selected piece's moves
                 if (movesForThisPiece.some((m) => m.jumped)) {
-                    setGameTip(
-                        "Tip: Capture available! Select the green destination.",
-                    );
+                    setGameTip(t('tipCaptureAvailable', { count: 1 }));
                 } else if (movesForThisPiece.length > 0) {
-                    setGameTip(
-                        "Tip: Select a blue destination square to move.",
-                    );
+                    setGameTip(t('tipSelectDestination', { count: 1 }));
                 } else {
                     // Should not happen if canSelect is true, but as fallback:
-                    setGameTip("Select a piece to move.");
+                    setGameTip(t('tipSelectPiece', { count: 1 }));
                 }
             } else {
                 setGameTip(
                     isJumpForced
-                        ? "Tip: Must select a piece that can jump!"
-                        : "Tip: This piece cannot move.",
+                        ? t('tipMustJump', { count: 1 })
+                        : t('tipCannotMove', { count: 1 }),
                 );
                 setSelectedPiece(null);
                 setSelectedPieceValidMoves([]);
@@ -492,7 +484,7 @@ const CheckersApp: React.FC = () => {
         setActivePlayerPieces([]); // Will be recalculated by effect
         setWinner(null);
         setIsMultiJumping(false);
-        setGameTip("New game started. White's turn."); // Reset tip
+        setGameTip(t('tipNewGame', { count: 1 })); // Reset tip
     };
 
     // --- Rendering --- //
@@ -563,7 +555,7 @@ const CheckersApp: React.FC = () => {
             <Card className="w-auto max-w-full max-h-full flex flex-col shadow-lg bg-card p-3 sm:p-4">
                 <CardHeader className="p-0 pb-2 border-b mb-2">
                     <CardTitle className="text-base font-medium flex items-center justify-between">
-                        <span>Checkers</span>
+                        <span>{t('checkers', { count: 1 })}</span>
                         <Button
                             variant="outline"
                             size="sm"
@@ -571,7 +563,7 @@ const CheckersApp: React.FC = () => {
                             className="gap-1 text-xs h-7"
                             disabled={isMultiJumping} // Disable reset mid-jump
                         >
-                            <RefreshCcw className="h-3 w-3" /> Reset
+                            <RefreshCcw className="h-3 w-3" /> {t('reset', { count: 1 })}
                         </Button>
                     </CardTitle>
                 </CardHeader>
@@ -588,7 +580,7 @@ const CheckersApp: React.FC = () => {
                         >
                             <div className="w-3 h-3 rounded-full bg-neutral-800 dark:bg-neutral-700 border border-black">
                             </div>
-                            Black: {blackPieces}
+                            {t('black', { count: 1 })}: {blackPieces}
                         </div>
                         <div
                             className={cn(
@@ -603,14 +595,10 @@ const CheckersApp: React.FC = () => {
                             )}
                         >
                             {winner
-                                ? `${
-                                    winner.charAt(0).toUpperCase() +
-                                    winner.slice(1)
-                                } Wins!`
-                                : `${
-                                    currentPlayer.charAt(0).toUpperCase() +
-                                    currentPlayer.slice(1)
-                                }'s Turn${isJumpForced ? " (Jump!)" : ""}`}
+                                ? t('tipGameOver', { count: 1 })
+                                : currentPlayer === "white"
+                                ? t('whitesTurn', { count: 1 })
+                                : t('blacksTurn', { count: 1 })}
                         </div>
                         <div
                             className={cn(
@@ -622,7 +610,7 @@ const CheckersApp: React.FC = () => {
                         >
                             <div className="w-3 h-3 rounded-full bg-white dark:bg-gray-200 border border-neutral-400 dark:border-gray-500">
                             </div>
-                            White: {whitePieces}
+                            {t('white', { count: 1 })}: {whitePieces}
                         </div>
                     </div>
 
@@ -813,14 +801,14 @@ const CheckersApp: React.FC = () => {
                 </CardContent>
                 <CardFooter className="p-0 pt-2 text-xs text-muted-foreground text-center border-t mt-2">
                     {winner
-                        ? "Game Over!"
+                        ? t('tipGameOver', { count: 1 })
                         : isMultiJumping
-                        ? "Complete the jump sequence!"
+                        ? t('tipCaptureAvailable', { count: 1 })
                         : selectedPieceValidMoves.length > 0
-                        ? "Select a destination square."
+                        ? t('tipSelectDestination', { count: 1 })
                         : isJumpForced
-                        ? "Must make a jump! Select piece."
-                        : "Select a piece to move."}
+                        ? t('tipJumpRequired', { count: 1 })
+                        : t('tipSelectPiece', { count: 1 })}
                 </CardFooter>
             </Card>
         </div>

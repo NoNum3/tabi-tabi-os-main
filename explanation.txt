@@ -1,0 +1,19 @@
+Tabi-OS: Interactive Tool Platform
+
+An interactive tool platform is a website where users can easily find, use, and enjoy many different tools in a playful, desktop-like environment.
+
+Tabi-OS is a web project I created to make using lots of different tools easy and enjoyable. My original idea was to build a website where users could find and use all the tools they might need in one place. However, I found that just listing tools made the site hard to navigate and not very fun to use every day.
+
+To solve this, I was inspired by the look and feel of a virtual desktop operating system. I wanted to make the experience more interactive and playful, like using a real OS, but in the browser. I learned React and Next.js, and used TypeScript and Tailwind CSS for animations and styling. I also used server-side rendering (SSR) for better performance.
+
+The journey was challenging—I had to rebuild the project many times (about 15 versions!) to get it right. Each time, I improved the design, navigation, and user experience. Now, Tabi-OS is a fun, modern web app where users can easily discover and use a variety of tools, all in one place.
+
+Tabi-OS：互動式工具平台
+
+互動式工具平台是一種網站，讓使用者可以在一個有趣、像桌面作業系統一樣的環境中，輕鬆找到、使用並享受各種不同的工具。
+
+Tabi-OS 是我創建的一個網頁專案，目的是讓使用各種不同工具變得簡單又有趣。最初我的想法是打造一個網站，讓使用者可以在同一個地方找到並使用所有需要的工具。但我發現，單純地列出工具讓網站難以導航，也不會讓人想每天使用。
+
+為了解決這個問題，我受到虛擬桌面作業系統的啟發，想讓體驗更互動、更有趣，就像在瀏覽器裡用一個真正的作業系統。我學習了 React 和 Next.js，並用 TypeScript 和 Tailwind CSS 來做動畫和設計，也用 SSR 來提升效能。
+
+這個過程很有挑戰性——我大約重做了 15 次才做對。每次都改進設計、導航和使用體驗。現在，Tabi-OS 是一個有趣、現代的網頁應用，讓使用者可以輕鬆發現並使用各種工具，全部集中在一個地方。

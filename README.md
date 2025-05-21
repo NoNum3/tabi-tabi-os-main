@@ -1,26 +1,46 @@
-# Tabi Tabi OS
+# Tabi-OS
 
-"Inspired by the Japanese word 'Tabi-Tabi' (often, frequently), this OS provides
-a streamlined toolkit of reusable utilities. We prioritize performance,
-minimalist design, and a great user experience, inviting users to rate and shape
-the tool collection through feedback.
+<p align="center">
+  <a href="#english-version">🇬🇧 English</a> | <a href="#繁體中文版本">🇹🇼 繁體中文</a>
+</p>
 
-**(繁體中文)**
-受日語「Tabi-Tabi」（たびたび，意為「經常、頻繁」）的啟發，此作業系統提供了一套流線型的可重用工具。我們優先考慮效能、簡約設計和卓越的使用者體驗，並邀請使用者透過評分和回饋來共同塑造工具集。
+<p align="center">
+  <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status" />
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
+  <img src="https://img.shields.io/badge/version-1.0.0-orange" alt="Version" />
+  <a href="#demo"><img src="https://img.shields.io/badge/demo-live-green" alt="Demo" /></a>
+</p>
 
-**(Bahasa Indonesia)** Terinspirasi dari kata Jepang 'Tabi-Tabi' (sering), OS
-ini menyediakan perangkat utilitas yang ramping dan dapat digunakan kembali.
-Kami memprioritaskan performa, desain minimalis, dan pengalaman pengguna yang
-luar biasa, mengundang pengguna untuk memberi peringkat dan membentuk koleksi
-alat melalui umpan balik.
+---
 
-Built with a cutting-edge stack including Next.js 15, React 19, and Tailwind CSS
-v4, Tabi Tabi OS offers a customizable and performant workspace. It features a
-**personalized dashboard**, an **app discovery** mechanism with community
-ratings, and a windowing system for multitasking. Leveraging Radix UI and
-shadcn/ui, it provides a collection of useful tools accessible from any browser.
-Ideal for anyone seeking a consistent and efficient toolkit for online
-activities.
+# <a name="english-version"></a>🇬🇧 English Version
+
+> **Tabi-OS** is inspired by the Japanese word 'Tabi-Tabi' (often, frequently). This OS provides a streamlined toolkit of reusable utilities. We prioritize performance, minimalist design, and a great user experience, inviting users to rate and shape the tool collection through feedback.
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Install dependencies
+bun install
+
+# 2. Start the development server
+bun run dev
+
+# 3. Run the linter
+bun run lint
+```
+
+---
+
+## 🎬 Demo
+
+> [Live Demo Coming Soon!](#) <!-- Replace # with your demo link -->
+
+![Tabi-OS Screenshot](https://placehold.co/800x400?text=Tabi-OS+Demo) <!-- Replace with real screenshot or GIF -->
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -28,208 +48,24 @@ activities.
 - **UI Library:** [React](https://reactjs.org/) v19.x
 - **State Management:** [Jotai](https://jotai.org/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) v4.x
-- **UI Components:** [Radix UI](https://www.radix-ui.com/),
-  [shadcn/ui](https://ui.shadcn.com/)
+- **UI Components:** [Radix UI](https://www.radix-ui.com/), [shadcn/ui](https://ui.shadcn.com/)
 - **Icons:** [Lucide React](https://lucide.dev/)
-- **Backend/DB:** [Supabase](https://supabase.io/) (for Auth, Likes, User
-  Preferences)
+- **Backend/DB:** [Supabase](https://supabase.io/) (for Auth, Likes, User Preferences)
 - **Language:** [TypeScript](https://www.typescriptlang.org/) v5.x
 - **Package Manager:** [Bun](https://bun.sh/) v1.x
 - **Linting:** [ESLint](https://eslint.org/)
 - **Git Hooks:** [Husky](https://typicode.github.io/husky/)
 - **Commit Linting:** [Commitlint](https://commitlint.js.org/)
 - **Containerization:** [Docker](https://www.docker.com/)
+- **Editor:** [Tiptap](https://tiptap.dev/)
+
+---
 
 ## 📁 Folder Structure
 
-```
-.
-├── .husky/                 # Husky git hooks configuration
-│
-├── public/                 # Static assets (icons, sounds, backgrounds)
-│
-├── src/
-│   ├── app/                # Next.js App Router pages & layouts
-│   │   ├── [locale]/       # Locale-based routes
-│   │   ├── api/            # API routes (e.g., NextAuth)
-│   │   └── (appFeatures)/  # Route groups for specific apps (e.g., (calculator))
-│   │
-│   ├── application/
-│   │   ├── atoms/          # Jotai state atoms (windowAtoms, authAtoms, dashboardAtoms, etc.)
-│   │   └── hooks/          # Custom React hooks
-│   │
-│   ├── components/         # Shared React components (Use /presentation/ instead? TBD)
-│   │   ├── ui/             # Shadcn UI components
-│   │   ├── layout/         # Core layout (Taskbar, Sidebar, Window, etc.)
-│   │   ├── apps/           # Specific app UI components (Calculator, MusicPlayer, etc.)
-│   │   ├── dashboard/      # Components for the user dashboard
-│   │   ├── appstore/       # Components for the app discovery/store view
-│   │   └── auth/           # Authentication components (SignInForm, etc.)
-│   │
-│   ├── config/             # App configuration (appRegistry.ts)
-│   │
-│   ├── infrastructure/
-│   │   ├── lib/            # Libraries, SDKs (Supabase client)
-│   │   └── utils/          # Utility functions (storage.ts)
-│   │
-│   ├── locales/            # Internationalization configuration & files
-│   │
-│   ├── styles/             # Global CSS, Tailwind base styles
-│   │
-│   └── types/              # Shared TypeScript types and interfaces
-│
-├── supabase/               # Supabase migrations and configuration
-│
-├── .dockerignore
-├── .env.local              # Local environment variables (GITIGNORED)
-├── .eslintrc.json          # ESLint configuration
-├── .gitignore
-├── Dockerfile
-├── README.md               # This file
-├── bun.lockb               # Bun lock file
-├── commitlint.config.mjs
-├── components.json         # shadcn/ui configuration
-├── docker-compose.yml
-├── next-env.d.ts
-├── next.config.ts
-├── package.json
-├── postcss.config.mjs
-└── tsconfig.json
-```
+Below is the recommended structure for the `src/` directory, matching the actual codebase. This organization makes it easy for contributors to find, add, or update code without breaking other features.
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) >= 18.x
-- [Bun](https://bun.sh/) >= 1.0.0
-- [Docker](https://www.docker.com/) (If running via Docker)
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone <your-repository-url>
-   cd tabi-tabi-os-main
-   ```
-
-2. Install dependencies with Bun:
-   ```bash
-   bun install
-   ```
-
-### Running the Development Server
-
-```bash
-bun run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the
-result.
-
-### Building for Production
-
-```bash
-bun run build
-```
-
-### Starting the Production Server
-
-```bash
-bun run start
-```
-
-### Linting Code
-
-```bash
-bun run lint
-```
-
-### Running with Docker
-
-1. Build the Docker image:
-
-   ```bash
-   docker build -t tabi-tabi-os .
-   ```
-
-2. Run the container:
-
-   ```bash
-   docker run -p 3000:3000 tabi-tabi-os
-   ```
-
-   Alternatively, using docker-compose:
-
-   ```bash
-   docker-compose up -d
-   ```
-
-## 📝 Development Guidelines
-
-### Commit Message Format
-
-This project uses [Conventional Commits](https://www.conventionalcommits.org/)
-for standardized commit messages:
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-Common types:
-
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code changes that neither fix bugs nor add features
-- `test`: Adding or modifying tests
-- `chore`: Changes to the build process or auxiliary tools
-
-Commit messages are enforced using commitlint and Husky.
-
-### Key Concepts & Rules
-
-- **Refer to the `/rules - Copy/` directory** for detailed guidelines on:
-  - Project Structure & Code Organization
-  - Component Design (Client vs. Server, Shadcn)
-  - State Management (Jotai)
-  - Window System Integration
-  - App Integration (Dashboard, Discovery, Likes)
-  - Storage & Persistence (LocalStorage, Supabase Sync)
-  - Naming Conventions
-  - Development Workflow
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes using the conventional commit format
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-## 📦 App Structure & Adding New Apps
-
-To make Tabi Tabi OS easy to extend and maintain, **each app is organized as a
-self-contained folder** under `src/apps/`. This lets contributors add new apps
-or update existing ones without needing to touch global code, window system, or
-other apps.
-
-### Recommended Folder Structure (Detailed)
-
-Below is the recommended structure for the `src/` directory. This organization
-makes it easy for contributors to find, add, or update code without breaking
-other features.
-
-```
+```text
 src/
   apps/                       # All user-facing apps (each in its own folder)
     clock/
@@ -244,18 +80,19 @@ src/
       ...                     # Same structure as above
     ...
 
-  presentation/
     components/
-      ui/                     # Shared UI components (Shadcn, Radix, etc.)
-      layout/                 # Layout components (Window, Taskbar, Sidebar)
-      dashboard/              # Dashboard-specific components
-      appstore/               # App discovery/store components
-      auth/                   # Authentication UI (SignInForm, etc.)
+    ui/                       # Shared UI components (Shadcn, Radix, etc.)
+    layout/                   # Layout components (Window, Taskbar, Sidebar, etc.)
+    appstore/                 # App store/discovery components
+    auth/                     # Authentication UI (SignInForm, etc.)
+    desktop/                  # Desktop icon and related components
+    debug/                    # Debugging tools/components
+    shared/                   # Shared components (e.g., LoadingSpinner)
+    providers/                # Context providers (Theme, Auth, Jotai, etc.)
 
   application/
-    atoms/                    # Truly global Jotai atoms (window, auth, dashboard)
-    hooks/                    # Global custom hooks (used by multiple apps)
-    types/                    # Shared types/interfaces used across the app
+    atoms/                    # Global Jotai atoms (window, auth, etc.)
+    hooks/                    # Global custom hooks
 
   config/
     appRegistry.ts            # Central registry for all available apps
@@ -263,110 +100,136 @@ src/
 
   infrastructure/
     lib/                      # External libraries, SDKs (e.g., Supabase client)
-    utils/                    # Utility functions (localStorage, formatting, etc.)
 
-  locales/                    # Internationalization (i18n) files
-  styles/                     # Global CSS, Tailwind config
+  utils/                      # Utility functions (localStorage, formatting, etc.)
+  types/                      # Shared types/interfaces
+  locales/                    # i18n files
+  styles/                     # Global styles
 
-  # (Other folders as needed)
+  app/                        # Next.js app directory (routing, layouts, API)
+    [locale]/                 # Localized pages/layouts
+    api/                      # API routes
 ```
 
-#### Folder Descriptions
+> 💡 **Contributor Note:**
+> - Keep all app logic inside your app folder (under `src/apps/`).
+> - Use global atoms/hooks only for truly global state (in `src/application/`).
+> - Place shared UI in `src/components/ui/` and shared logic in `src/utils/` or `src/types/`.
+> - Name files and folders clearly and consistently.
+> - Document your app with a README.md if it has complex logic.
+> - Avoid cross-app imports unless absolutely necessary.
+> - Test your app independently before submitting a PR.
+> - Follow the naming conventions and code guidelines in this README.
 
-- **`src/apps/`**: Each app is a folder containing all its logic (components,
-  atoms, hooks, config, types). Contributors should add new apps here.
-- **`src/presentation/components/ui/`**: Shared UI building blocks (buttons,
-  modals, etc.). Use Shadcn/Radix here.
-- **`src/presentation/components/layout/`**: Core layout (window system,
-  taskbar, sidebar). Only core maintainers should modify.
-- **`src/presentation/components/dashboard/`**: Dashboard grid, icon, and
-  related UI.
-- **`src/presentation/components/appstore/`**: App discovery/store UI.
-- **`src/application/atoms/`**: Global state (window, auth, dashboard).
-  App-specific state should stay in the app folder.
-- **`src/application/hooks/`**: Global hooks used by multiple features/apps.
-- **`src/application/types/`**: Shared types/interfaces.
-- **`src/config/`**: App registry and global config.
-- **`src/infrastructure/lib/`**: External service integrations (e.g., Supabase
-  client).
-- **`src/infrastructure/utils/`**: Utility functions (localStorage, formatting,
-  etc.).
-- **`src/locales/`**: i18n files.
-- **`src/styles/`**: Global styles.
+---
 
-### How to Add a New App
+# <a name="繁體中文版本"></a>🇹🇼 繁體中文版本
 
-1. **Create a new folder** under `src/apps/your-app/`.
-2. **Add your components, atoms, hooks, config, and types** inside that folder.
-3. **Export your main app component and config in `index.ts`** (see other apps
-   for examples).
-4. **Register your app** by adding it to `src/config/appRegistry.ts`.
-5. **(Optional) Add a README.md** in your app folder for app-specific
-   documentation.
-6. **Submit a Pull Request!**
+> **Tabi-OS** 名稱源自日語「たびたび」（意為「經常、頻繁」）。本作業系統提供一套流線型、可重用的工具組。我們重視效能、極簡設計與卓越的使用者體驗，並邀請用戶透過評分與回饋共同完善工具集。
 
-**You do NOT need to touch the window system, dashboard, or other apps.**
+---
 
-#### Example: `src/apps/clock/index.ts`
+## 🚀 快速開始
 
-```typescript
-import { ClockApp } from "./components/ClockApp";
-import { clockAtom } from "./atoms/clockAtom";
-import { CLOCK_ICON } from "./config";
+```bash
+# 1. 安裝依賴
+bun install
 
-export default {
-   appId: "clock",
-   title: "Clock",
-   icon: CLOCK_ICON,
-   component: ClockApp,
-   atom: clockAtom,
-   // ...other config
-};
+# 2. 啟動開發伺服器
+bun run dev
+
+# 3. 執行 Lint
+bun run lint
 ```
 
-#### Example: Registering Your App
+---
 
-In `src/config/appRegistry.ts`:
+## 🎬 線上展示
 
-```typescript
-import clock from "@/apps/clock";
-import calculator from "@/apps/calculator";
-// ...
+> [即將推出！](#) <!-- 可替換為實際 Demo 連結 -->
 
-export const appRegistry = [clock, calculator /* ... */];
+![Tabi-OS Screenshot](https://placehold.co/800x400?text=Tabi-OS+Demo) <!-- 可替換為實際截圖或 GIF -->
+
+---
+
+## 🛠️ 技術棧
+
+- **框架：** [Next.js](https://nextjs.org/) v15.x
+- **UI 函式庫：** [React](https://reactjs.org/) v19.x
+- **狀態管理：** [Jotai](https://jotai.org/)
+- **樣式：** [Tailwind CSS](https://tailwindcss.com/) v4.x
+- **UI 元件：** [Radix UI](https://www.radix-ui.com/)、[shadcn/ui](https://ui.shadcn.com/)
+- **圖示：** [Lucide React](https://lucide.dev/)
+- **後端/資料庫：** [Supabase](https://supabase.io/)（用於認證、按讚、偏好設定）
+- **語言：** [TypeScript](https://www.typescriptlang.org/) v5.x
+- **套件管理：** [Bun](https://bun.sh/) v1.x
+- **Lint 工具：** [ESLint](https://eslint.org/)
+- **Git Hooks：** [Husky](https://typicode.github.io/husky/)
+- **Commit Lint：** [Commitlint](https://commitlint.js.org/)
+- **容器化：** [Docker](https://www.docker.com/)
+- **編輯器：** [Tiptap](https://tiptap.dev/)
+
+---
+
+## 📁 資料夾結構
+
+以下是 `src/` 目錄的推薦結構，與實際專案一致。這種組織方式讓貢獻者能夠輕鬆找到、添加或更新程式碼，而不會影響其他功能。
+
+```text
+src/
+  apps/                       # 所有用戶應用程式（每個 app 一個資料夾）
+    clock/
+      components/             # 應用程式專屬 React 元件
+      atoms/                  # 應用程式專屬 Jotai atoms（狀態）
+      hooks/                  # 應用程式專屬自定義 hooks
+      config.ts               # 應用程式設定（icon、預設大小等）
+      types.ts                # 應用程式專屬 TypeScript 型別
+      index.ts                # 應用程式註冊主入口
+      README.md               # （選用）應用程式說明文件
+    calculator/
+      ...                     # 同上結構
+    ...
+
+  components/
+    ui/                       # 共用 UI 元件（Shadcn、Radix 等）
+    layout/                   # 佈局元件（Window、Taskbar、Sidebar 等）
+    appstore/                 # 應用程式商店/探索元件
+    auth/                     # 認證 UI（登入表單等）
+    desktop/                  # 桌面圖示及相關元件
+    debug/                    # 除錯工具/元件
+    shared/                   # 共用元件（如 LoadingSpinner）
+    providers/                # Context 提供者（Theme, Auth, Jotai 等）
+
+  application/
+    atoms/                    # 全域 Jotai atoms（window、auth 等）
+    hooks/                    # 全域自定義 hooks
+
+  config/
+    appRegistry.ts            # 所有可用 app 的註冊中心
+    ...                       # 其他全域設定檔
+
+  infrastructure/
+    lib/                      # 外部函式庫、SDK（如 Supabase client）
+
+  utils/                      # 工具函式（localStorage、格式化等）
+  types/                      # 共用型別/介面
+  locales/                    # 多語系檔案
+  styles/                     # 全域樣式
+
+  app/                        # Next.js app 目錄（路由、佈局、API）
+    [locale]/                 # 多語系頁面/佈局
+    api/                      # API 路由
 ```
 
-### Best Practices for Contributors
-
-- **Keep all app logic inside your app folder.**
-- **Use global atoms/hooks only for truly global state.**
-- **Name files and folders clearly and consistently.**
-- **Document your app with a README.md if it has complex logic.**
-- **Avoid cross-app imports unless absolutely necessary.**
-- **Use shared UI components from `src/presentation/components/ui/` for
-  consistency.**
-- **Test your app independently before submitting a PR.**
-- **Follow the naming conventions and code guidelines in this README.**
-
-### Why This Structure?
-
-- **Isolation:** Contributors can work on an app without breaking others.
-- **Discoverability:** All code for an app is in one place.
-- **Open Source Friendly:** New apps can be added as PRs with minimal risk.
-- **Scalability:** Hundreds of apps can be managed without cluttering global
-  folders.
-- **Maintainability:** Easy to refactor, update, or remove apps without side
-  effects.
-
-### Global Features
-
-- **Window system, dashboard, app store, and shared UI** remain in their own
-  folders.
-- **App registration:** The global `appRegistry.ts` just imports from each app's
-  `index.ts` and registers it.
-- **Shared atoms/hooks:** If truly global, keep in `src/application/atoms/` or
-  `src/application/hooks/`. But most app state should be local to the app
-  folder.
+> 💡 **貢獻者注意：**
+> - 請將所有 app 邏輯維持在 app 資料夾內（`src/apps/`）。
+> - 僅將真正全域的狀態放在全域 atoms/hooks（`src/application/`）。
+> - 共用 UI 請放在 `src/components/ui/`，共用邏輯請放在 `src/utils/` 或 `src/types/`。
+> - 檔案與資料夾命名需清楚且一致。
+> - 若 app 較複雜，請於 app 資料夾內補充 README.md。
+> - 除非必要，避免跨 app 引用。
+> - PR 前請獨立測試你的 app。
+> - 請遵循本 README 的命名與程式碼規範。
 
 ---
 
@@ -377,24 +240,3 @@ For more details, see the [Development Guidelines](#-development-guidelines) and
 
 This project is licensed under the MIT License - see the LICENSE file for
 details.
-
-## 🙏 Acknowledgements
-
-This project utilizes and acknowledges the contributions of the following
-open-source software:
-
-- [Next.js](https://nextjs.org/) - The React Framework
-- [React](https://react.dev/) - UI Library
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-First CSS Framework
-- [shadcn/ui](https://ui.shadcn.com/) - Re-usable UI components
-- [Radix UI](https://www.radix-ui.com/) - Primitives for building accessible
-  design systems
-- [Lucide React](https://lucide.dev/) - Icon library
-- [Jotai](https://jotai.org/) - State management
-- [Tiptap](https://tiptap.dev/) - Headless WYSIWYG editor framework
-- [TypeScript](https://www.typescriptlang.org/) - Superset of JavaScript
-- [Bun](https://bun.sh/) - JavaScript runtime & toolkit
-- [Husky](https://typicode.github.io/husky/) - Git hooks manager
-- [Commitlint](https://commitlint.js.org/) - Commit message linter
-- [ESLint](https://eslint.org/) - Code linter
-- [Supabase](https://supabase.io/) - Backend as a Service

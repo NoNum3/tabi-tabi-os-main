@@ -3,11 +3,11 @@
 import { useAtom } from "jotai";
 import { profileAtom, userAtom } from "@/application/atoms/authAtoms";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { SignInForm, SignUpForm } from "./AuthForms";
 import { supabase } from "@/infrastructure/lib/supabaseClient";
+import Image from 'next/image';
 
 export const UserMenu = () => {
     const [user] = useAtom(userAtom);
@@ -18,6 +18,11 @@ export const UserMenu = () => {
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         // Optionally clear atoms or show toast
+    };
+
+    // Helper to check if profile_picture is a valid URL
+    const isValidProfilePicture = (url: string | null | undefined) => {
+        return !!url && url.startsWith('http');
     };
 
     if (!user) {
@@ -46,16 +51,21 @@ export const UserMenu = () => {
 
     return (
         <div className="flex flex-col items-center gap-2 p-2">
-            <Avatar className="w-10 h-10">
-                <AvatarImage
-                    src={profile?.avatar_url || undefined}
-                    alt={profile?.username || user.email || "User"}
-                />
-                <AvatarFallback>
-                    {(profile?.username || user.email || "U").slice(0, 2)
-                        .toUpperCase()}
-                </AvatarFallback>
-            </Avatar>
+            <div className="w-10 h-10 rounded-full overflow-hidden border flex items-center justify-center bg-gray-200">
+                {user && isValidProfilePicture(profile?.profile_picture) ? (
+                    <Image
+                        src={profile?.profile_picture ?? ''}
+                        alt={profile?.username || user.email || "User"}
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                        style={{ objectFit: 'cover' }}
+                        priority={true}
+                    />
+                ) : (
+                    <span className="text-base font-bold text-gray-400">{(profile?.username || user?.email || "U").slice(0, 2).toUpperCase()}</span>
+                )}
+            </div>
             <div className="text-sm font-semibold text-center">
                 {profile?.username || user.email}
             </div>

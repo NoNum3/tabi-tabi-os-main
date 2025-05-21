@@ -6,9 +6,11 @@ import { supabase } from "@/infrastructure/lib/supabaseClient";
 export interface Profile {
     id: string; // uuid
     username: string | null;
-    avatar_url: string | null;
+    profile_picture: string | null;
     email: string;
     created_at: string | null;
+    // points?: number | null;
+    // level?: number | null;
 }
 
 export const sessionAtom = atom<Session | null>(null);

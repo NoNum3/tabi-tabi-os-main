@@ -17,7 +17,7 @@ import Notepad from "@/apps/notepad/Notepad";
 import WeatherWidget from "@/apps/weather/WeatherWidget";
 import SimpleCalendar from "@/apps/calendar/SimpleCalendar";
 import QuotesWidget from "@/apps/quotes/QuotesWidget";
-import BookmarksApp from "@/apps/bookmarks";
+import { BookmarksApp } from "@/apps/bookmarks/BookmarksApp";
 
 // Define categories
 export type AppCategory =
@@ -35,6 +35,7 @@ export interface AppRegistryEntry {
   minSize?: Size;
   category: AppCategory; // Added category field
   requiresAuth?: boolean; // Added for authentication requirement
+  nameKey?: string; // Added for translation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: React.ComponentType<any>;
 }
@@ -66,14 +67,16 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.5, 0.6, { width: 350, height: 350 }, { width: 900, height: 700 }),
     minSize: { width: 350, height: 350 },
     category: "System",
+    nameKey: "settingsAppName",
     component: SettingsApp,
   },
   // --- Add the App Store entry --- //
   appStore: {
-    src: "/icons/settings.png",
+    src: "/icons/app-store.png",
     defaultSize: getResponsiveSize(0.6, 0.7, { width: 400, height: 400 }, { width: 1100, height: 800 }),
     minSize: { width: 400, height: 400 },
     category: "System",
+    nameKey: "appStoreTitle",
     // Use React.lazy to break circular dependency
     component: React.lazy(() => import("@/components/appstore/AppStoreWindow").then(m => ({ default: m.AppStoreWindow }))),
   },
@@ -83,6 +86,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.35, 0.6, { width: 220, height: 300 }, { width: 600, height: 900 }),
     minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
+    nameKey: "clockAppName",
     component: ClockApp,
   },
   youtubePlayer: {
@@ -90,6 +94,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.7, 0.7, { width: 400, height: 320 }, { width: 1200, height: 900 }),
     minSize: { width: 400, height: 320 },
     category: "Entertainment",
+    nameKey: "musicAppName",
     component: MusicPlayer, // Still uses the same component
   },
   notepad: { // New entry for Notepad
@@ -98,13 +103,16 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     minSize: { width: 300, height: 320 },
     category: "Productivity",
     requiresAuth: true, // Notepad now requires authentication
+    nameKey: "notepadAppName",
     component: Notepad,
   },
   bookmarks: {
-    src: "/icons/settings.png", // TEMP: Use settings icon for now
+    src: "/icons/bookmark.png",
     defaultSize: getResponsiveSize(0.5, 0.6, { width: 320, height: 400 }, { width: 900, height: 700 }),
     minSize: { width: 320, height: 400 },
     category: "Productivity",
+    requiresAuth: true,
+    nameKey: "bookmarkAppName",
     component: BookmarksApp,
   },
   ambience: {
@@ -113,6 +121,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.4, 0.2, { width: 220, height: 120 }, { width: 600, height: 300 }),
     minSize: { width: 220, height: 120 },
     category: "Entertainment", // Assign category
+    nameKey: "ambienceAppName",
     component: AmbiencePlayer,
   },
   calculator: {
@@ -121,6 +130,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.3, 0.7, { width: 220, height: 320 }, { width: 600, height: 900 }),
     minSize: { width: 220, height: 320 },
     category: "Utilities", // Assign category
+    nameKey: "calculatorAppName",
     component: Calculator,
   },
   miniGames: {
@@ -129,6 +139,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.5, 0.5, { width: 300, height: 300 }, { width: 900, height: 700 }),
     minSize: { width: 300, height: 300 },
     category: "Games", // Assign category
+    nameKey: "miniGamesAppName",
     component: MiniGames,
   },
   converter: {
@@ -137,6 +148,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.45, 0.5, { width: 280, height: 320 }, { width: 800, height: 700 }),
     minSize: { width: 280, height: 320 },
     category: "Utilities", // Assign category
+    nameKey: "converterAppName",
     component: ConverterApp,
   },
   qrReader: {
@@ -145,6 +157,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.4, 0.5, { width: 220, height: 300 }, { width: 700, height: 700 }),
     minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
+    nameKey: "qrReaderAppName",
     component: QRCodeReader,
   },
   drawingPad: {
@@ -153,6 +166,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.5, 0.5, { width: 300, height: 300 }, { width: 900, height: 700 }),
     minSize: { width: 300, height: 300 },
     category: "Entertainment", // Assign category
+    nameKey: "drawingPadAppName",
     component: DrawingPadApp,
   },
   passwordGenerator: {
@@ -161,6 +175,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.4, 0.5, { width: 220, height: 300 }, { width: 700, height: 700 }),
     minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
+    nameKey: "passwordGeneratorAppName",
     component: PasswordGeneratorApp,
   },
   hashGenerator: {
@@ -169,6 +184,7 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.4, 0.5, { width: 220, height: 300 }, { width: 700, height: 700 }),
     minSize: { width: 220, height: 300 },
     category: "Utilities", // Assign category
+    nameKey: "hashGeneratorAppName",
     component: HashGeneratorApp,
   },
   checkers: {
@@ -177,13 +193,15 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.5, 0.6, { width: 320, height: 400 }, { width: 900, height: 700 }),
     minSize: { width: 320, height: 400 },
     category: "Games", // Assign category
+    nameKey: "checkersAppName",
     component: CheckersApp,
   },
   weather: {
     src: "/icons/weather.png",
-    defaultSize: getResponsiveSize(0.35, 0.25, { width: 180, height: 120 }, { width: 600, height: 400 }),
-    minSize: { width: 180, height: 120 },
+    defaultSize: getResponsiveSize(0.35, 0.55, { width: 180, height: 220 }, { width: 500, height: 700 }),
+    minSize: { width: 150, height: 180 },
     category: "Utilities",
+    nameKey: "weatherAppName",
     component: WeatherWidget,
   },
   calendar: {
@@ -191,13 +209,15 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     defaultSize: getResponsiveSize(0.45, 0.4, { width: 220, height: 220 }, { width: 800, height: 700 }),
     minSize: { width: 220, height: 220 },
     category: "Productivity",
+    nameKey: "calendarAppName",
     component: SimpleCalendar,
   },
   quotes: {
     src: "/icons/quotes.png",
-    defaultSize: getResponsiveSize(0.3, 0.2, { width: 150, height: 100 }, { width: 500, height: 300 }),
-    minSize: { width: 150, height: 100 },
+    defaultSize: getResponsiveSize(0.3, 0.5, { width: 150, height: 200 }, { width: 400, height: 600 }),
+    minSize: { width: 120, height: 180 },
     category: "Entertainment",
+    nameKey: "quotesAppName",
     component: QuotesWidget,
   },
   // Add other apps here using a unique key (appId)

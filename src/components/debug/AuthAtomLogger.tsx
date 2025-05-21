@@ -9,15 +9,15 @@ export const AuthAtomLogger = (): null => {
   const isLoadingAuth = useAtomValue(authLoadingAtom);
 
   useEffect(() => {
-    console.log("[AuthAtomLogger] user:", user);
+    // console.log("[AuthAtomLogger] user:", user);
   }, [user]);
 
   useEffect(() => {
-    console.log("[AuthAtomLogger] profile:", profile);
+    // console.log("[AuthAtomLogger] profile:", profile);
   }, [profile]);
 
   useEffect(() => {
-    console.log("[AuthAtomLogger] isLoadingAuth:", isLoadingAuth);
+    // console.log("[AuthAtomLogger] isLoadingAuth:", isLoadingAuth);
   }, [isLoadingAuth]);
 
   return null;

@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, KeyRound, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from '@/locales/client';
 
 const LOWERCASE_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const UPPERCASE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -16,6 +17,7 @@ const NUMBER_CHARS = "0123456789";
 const SYMBOL_CHARS = '!@#$%^&*()_+-=[]{}:"|,.<>/?';
 
 const PasswordGeneratorApp: React.FC = () => {
+    const t = useI18n();
     const [password, setPassword] = useState<string>("");
     const [length, setLength] = useState<number>(16);
     const [includeUppercase, setIncludeUppercase] = useState<boolean>(true);
@@ -31,8 +33,8 @@ const PasswordGeneratorApp: React.FC = () => {
         if (includeSymbols) characterPool += SYMBOL_CHARS;
 
         if (characterPool === "") {
-            toast.error("Error", {
-                description: "Please select at least one character type.",
+            toast.error(t('error', { count: 1 }), {
+                description: t('selectAtLeastOneType', { count: 1 }),
                 duration: 3000,
             });
             setPassword("");
@@ -53,6 +55,7 @@ const PasswordGeneratorApp: React.FC = () => {
         includeUppercase,
         includeNumbers,
         includeSymbols,
+        t
     ]);
 
     useEffect(() => {
@@ -64,14 +67,14 @@ const PasswordGeneratorApp: React.FC = () => {
         if (!password) return;
         try {
             await navigator.clipboard.writeText(password);
-            toast.success("Copied!", {
-                description: "Password copied to clipboard.",
+            toast.success(t('copied', { count: 1 }), {
+                description: t('passwordCopied', { count: 1 }),
                 duration: 2000,
             });
         } catch (err) {
             console.error("Failed to copy password: ", err);
-            toast.error("Copy Failed", {
-                description: "Could not copy password.",
+            toast.error(t('copyFailed', { count: 1 }), {
+                description: t('passwordCopyFailed', { count: 1 }),
                 duration: 2000,
             });
         }
@@ -83,7 +86,7 @@ const PasswordGeneratorApp: React.FC = () => {
                 <CardHeader>
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <KeyRound className="h-4 w-4" />
-                        Password Generator
+                        {t('passwordGenerator', { count: 1 })}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col gap-4 pt-4">
@@ -93,9 +96,9 @@ const PasswordGeneratorApp: React.FC = () => {
                             type="text"
                             value={password}
                             readOnly
-                            placeholder="Generated password will appear here"
+                            placeholder={t('generatedPasswordPlaceholder', { count: 1 })}
                             className="pr-10 text-sm font-mono tracking-wider bg-muted"
-                            aria-label="Generated Password"
+                            aria-label={t('passwordWillAppearHere', { count: 1 })}
                         />
                         <Button
                             variant="ghost"
@@ -103,7 +106,7 @@ const PasswordGeneratorApp: React.FC = () => {
                             className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                             onClick={handleCopy}
                             disabled={!password}
-                            title="Copy password"
+                            title={t('copyPassword', { count: 1 })}
                         >
                             <Copy className="h-4 w-4" />
                         </Button>
@@ -113,7 +116,7 @@ const PasswordGeneratorApp: React.FC = () => {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <Label htmlFor="length" className="text-xs">
-                                Password Length
+                                {t('passwordLength', { count: 1 })}
                             </Label>
                             <span className="text-sm font-medium">
                                 {length}
@@ -142,7 +145,7 @@ const PasswordGeneratorApp: React.FC = () => {
                                 htmlFor="lowercase"
                                 className="text-xs cursor-pointer"
                             >
-                                Include Lowercase (a-z)
+                                {t('includeLowercase', { count: 1 })}
                             </Label>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -155,7 +158,7 @@ const PasswordGeneratorApp: React.FC = () => {
                                 htmlFor="uppercase"
                                 className="text-xs cursor-pointer"
                             >
-                                Include Uppercase (A-Z)
+                                {t('includeUppercase', { count: 1 })}
                             </Label>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -168,7 +171,7 @@ const PasswordGeneratorApp: React.FC = () => {
                                 htmlFor="numbers"
                                 className="text-xs cursor-pointer"
                             >
-                                Include Numbers (0-9)
+                                {t('includeNumbers', { count: 1 })}
                             </Label>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -181,7 +184,7 @@ const PasswordGeneratorApp: React.FC = () => {
                                 htmlFor="symbols"
                                 className="text-xs cursor-pointer"
                             >
-                                Include Symbols (!@#...)
+                                {t('includeSymbols', { count: 1 })}
                             </Label>
                         </div>
                     </div>
@@ -189,7 +192,7 @@ const PasswordGeneratorApp: React.FC = () => {
                     {/* Regenerate Button */}
                     <Button onClick={generatePassword} className="mt-auto">
                         <RefreshCw className="mr-2 h-4 w-4" />
-                        Regenerate
+                        {t('regenerate', { count: 1 })}
                     </Button>
                 </CardContent>
             </Card>

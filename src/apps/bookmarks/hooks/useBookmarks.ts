@@ -14,11 +14,14 @@ export const fetchBookmarksAtom = atom(
   null,
   async (get, set) => {
     const user = get(userAtom);
-    set(bookmarksLoadingAtom, true);
+    const bookmarks = get(bookmarksAtom);
+    if (!bookmarks || bookmarks.length === 0) {
+      set(bookmarksLoadingAtom, true);
+    }
     set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, null);
     if (!user) {
       set(bookmarksLoadingAtom, false);
-      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "User not logged in");
+      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "bookmarkUserNotLoggedIn");
       set(bookmarksAtom, []);
       return;
     }
@@ -46,7 +49,7 @@ export const addBookmarkAtom = atom(
     set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, null);
     if (!user) {
       set(bookmarksLoadingAtom, false);
-      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "User not logged in");
+      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "bookmarkUserNotLoggedIn");
       return;
     }
     const insertData: TablesInsert<'bookmarks'> = {
@@ -79,7 +82,7 @@ export const updateBookmarkAtom = atom(
     set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, null);
     if (!user) {
       set(bookmarksLoadingAtom, false);
-      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "User not logged in");
+      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "bookmarkUserNotLoggedIn");
       return;
     }
     const { error } = await supabase
@@ -117,7 +120,7 @@ export const deleteBookmarkAtom = atom(
     set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, null);
     if (!user) {
       set(bookmarksLoadingAtom, false);
-      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "User not logged in");
+      set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "bookmarkUserNotLoggedIn");
       return;
     }
     const { error } = await supabase

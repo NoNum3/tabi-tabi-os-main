@@ -13,7 +13,11 @@ export const fetchFoldersAtom = atom(
   null,
   async (get, set) => {
     const user = get(userAtom);
-    set(foldersLoadingAtom, true);
+    // Only show loading if folders are empty (initial load)
+    const folders = get(foldersAtom);
+    if (!folders || folders.length === 0) {
+      set(foldersLoadingAtom, true);
+    }
     set(foldersErrorAtom as WritableAtom<string | null, [string | null], void>, null);
     if (!user) {
       set(foldersLoadingAtom, false);

@@ -56,8 +56,18 @@ export const useWindowManagement = ({
   // Sync local state with props when not dragging/resizing
   useEffect(() => {
     if (!isDragging && !isResizing) {
-      setPosition(initialPosition);
-      setSize(initialSize);
+      setPosition((prev) => {
+        if (prev.x !== initialPosition.x || prev.y !== initialPosition.y) {
+          return initialPosition;
+        }
+        return prev;
+      });
+      setSize((prev) => {
+        if (prev.width !== initialSize.width || prev.height !== initialSize.height) {
+          return initialSize;
+        }
+        return prev;
+      });
     }
   }, [initialPosition, initialSize, isDragging, isResizing]);
 

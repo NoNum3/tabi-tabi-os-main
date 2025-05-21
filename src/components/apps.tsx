@@ -3,12 +3,11 @@
 // --- External Libraries ---
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-// import { DndProvider, DropTargetMonitor, useDrag, useDrop } from "react-dnd"; // DropTargetMonitor is unused
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-// --- State Management (Jotai) ---
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { userAtom } from '@/application/atoms/authAtoms';
+import { toast } from 'sonner';
 
 // --- Absolute Imports (aliases) ---
 import { appRegistry } from '@/config/appRegistry';
@@ -27,7 +26,6 @@ import {
 } from '@/application/atoms/dashboardAtoms';
 import {
   currentGridCellPixelSizeAtom,
-  showGridLinesAtom,
 } from '@/application/atoms/displaySettingsAtoms';
 
 // --- Relative Imports ---
@@ -149,6 +147,7 @@ const DraggableAppIcon: React.FC<DraggableAppIconProps> = React.memo(
         className="transition-opacity duration-150"
         onClick={() => onSelect(app.id)}
         onDoubleClick={() => onDoubleClick(app.id)}
+        data-app-icon-cell
       >
         <AppIconDisplay
           appId={app.id}
@@ -179,20 +178,60 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
     handleDoubleClick,
   }) => {
     const [iconPositions] = useAtom(iconPositionsAtom);
-    // const addedAppIds = useAtomValue(addedAppIdsAtom); // Removed as it's unused
     const updatePosition = useSetAtom(updateIconPositionAtom);
     const cellSize = useAtomValue(currentGridCellPixelSizeAtom); // <-- Read pixel size
-    // const [snapGrid] = useAtom(snapToGridAtom); // snapGrid variable is unused
-    const [showGridLines] = useAtom(showGridLinesAtom);
-    // State for the drop preview indicator
-    const [previewTarget, setPreviewTarget] = useState<GridPosition | null>(
-      null,
-    );
 
+    const [previewTarget, setPreviewTarget] = useState<GridPosition | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    // Removed iconHolderRef - drop target is the scroll container now
 
-    // Removed maxOccupiedRow/Col calculation and totalGridWidth/Height - CSS grid handles sizing
+    // Helper to get grid gap and cell size from computed style
+    const getGridMetrics = () => {
+      const grid = scrollContainerRef.current;
+      if (!grid) return null;
+      const style = window.getComputedStyle(grid);
+      const gap = parseFloat(style.gap || style.rowGap || '0');
+      // Find the first icon cell
+      const firstCell = grid.querySelector('[data-app-icon-cell]');
+      let cellWidth = cellSize, cellHeight = cellSize;
+      if (firstCell) {
+        const rect = (firstCell as HTMLElement).getBoundingClientRect();
+        cellWidth = rect.width;
+        cellHeight = rect.height;
+      }
+      // Calculate columns
+      const gridRect = grid.getBoundingClientRect();
+      const columns = Math.max(1, Math.round((gridRect.width + gap) / (cellWidth + gap)));
+      return { cellWidth, cellHeight, gap, columns, gridRect };
+    };
+
+    // Helper to find the closest cell to a given mouse position
+    const getClosestCell = (clientX: number, clientY: number) => {
+      const metrics = getGridMetrics();
+      if (!metrics) return { row: 0, col: 0 };
+      const { cellWidth, cellHeight, gap, columns, gridRect } = metrics;
+      // Calculate mouse position relative to grid
+      const x = clientX - gridRect.left + scrollContainerRef.current!.scrollLeft;
+      const y = clientY - gridRect.top + scrollContainerRef.current!.scrollTop;
+      // Find the closest col/row by minimizing distance to cell center
+      let minDist = Infinity, bestRow = 0, bestCol = 0;
+      // Estimate max rows (enough to cover the grid)
+      const maxRows = 30;
+      for (let row = 0; row < maxRows; row++) {
+        for (let col = 0; col < columns; col++) {
+          const cellLeft = col * (cellWidth + gap);
+          const cellTop = row * (cellHeight + gap);
+          const centerX = cellLeft + cellWidth / 2;
+          const centerY = cellTop + cellHeight / 2;
+          const dist = Math.hypot(centerX - x, centerY - y);
+          if (dist < minDist) {
+            minDist = dist;
+            bestRow = row;
+            bestCol = col;
+          }
+        }
+      }
+      return { row: bestRow, col: bestCol };
+    };
 
     const [{ isOver }, drop] = useDrop<DragItem, void, { isOver: boolean }>(
       () => ({
@@ -204,24 +243,8 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
             setPreviewTarget(null);
             return;
           }
-
-          const scrollContainerRect = scrollContainerRef.current
-            .getBoundingClientRect();
-          const scrollTop = scrollContainerRef.current.scrollTop;
-          const scrollLeft = scrollContainerRef.current.scrollLeft;
-
-          const dropX = delta.x - scrollContainerRect.left + scrollLeft;
-          const dropY = delta.y - scrollContainerRect.top + scrollTop;
-
-          // Calculate effective size including gap for coordinate division
-          const gapSize = 4; // Defined in the grid CSS
-          const effectiveCellSize = cellSize + gapSize;
-
-          // Calculate target grid cell using effective size
-          const targetCol = Math.max(0, Math.floor(dropX / effectiveCellSize));
-          const targetRow = Math.max(0, Math.floor(dropY / effectiveCellSize));
+          const { row: targetRow, col: targetCol } = getClosestCell(delta.x, delta.y);
           const newTarget = { row: targetRow, col: targetCol };
-
           if (
             previewTarget?.row !== newTarget.row ||
             previewTarget?.col !== newTarget.col
@@ -231,62 +254,31 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
                 id !== item.appId && pos.row === targetRow &&
                 pos.col === targetCol,
             );
-            // Only show preview for valid (non-occupied) target cells
             setPreviewTarget(isOccupied ? null : newTarget);
-            // console.log(`[DesktopGrid] Hover preview target: ${isOccupied ? 'null (occupied)' : JSON.stringify(newTarget)}`);
           }
         },
         drop: (item, monitor) => {
+          let targetRow = previewTarget?.row;
+          let targetCol = previewTarget?.col;
+          if (targetRow === undefined || targetCol === undefined) {
+            const clientOffset = monitor.getClientOffset();
+            if (clientOffset) {
+              const { row, col } = getClosestCell(clientOffset.x, clientOffset.y);
+              targetRow = row;
+              targetCol = col;
+            } else {
+              targetRow = 0;
+              targetCol = 0;
+            }
+          }
           setPreviewTarget(null); // Clear preview on actual drop
-          console.log(
-            `[DesktopGrid] Drop function *EXECUTED* for ${item.appId}`,
-          );
           const currentIconPositions = iconPositions;
-
-          // Log the positions being checked
-          console.log(
-            "[DesktopGrid Drop] Checking against positions:",
-            JSON.stringify(currentIconPositions, null, 2),
-          );
-
-          const effectiveCellSize = cellSize + 4; // Cell size including gap
-
-          let targetCol = Math.max(
-            0,
-            Math.floor(
-              (monitor.getClientOffset()!.x -
-                scrollContainerRef.current!.getBoundingClientRect().left +
-                scrollContainerRef.current!.scrollLeft) / effectiveCellSize,
-            ),
-          );
-          let targetRow = Math.max(
-            0,
-            Math.floor(
-              (monitor.getClientOffset()!.y -
-                scrollContainerRef.current!.getBoundingClientRect().top +
-                scrollContainerRef.current!.scrollTop) / effectiveCellSize,
-            ),
-          );
-
-          console.log(
-            `[DesktopGrid Drop] Initial target for ${item.appId}: R${targetRow}, C${targetCol}`,
-          );
-
-          // Ensure target is not negative
-          targetRow = Math.max(0, targetRow);
-          targetCol = Math.max(0, targetCol);
-
-          // Check if the target cell is occupied by another icon
           const isOccupied = Object.entries(currentIconPositions).some(
             ([id, pos]) =>
               id !== item.appId && pos.row === targetRow &&
               pos.col === targetCol,
           );
-
-          if (!isOccupied) {
-            console.log(
-              `[DesktopGrid Drop] Target R${targetRow}, C${targetCol} is NOT occupied for ${item.appId}. Updating position.`,
-            );
+          if (!isOccupied && targetRow !== undefined && targetCol !== undefined) {
             updatePosition({
               appId: item.appId,
               position: {
@@ -294,12 +286,6 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
                 col: targetCol,
               },
             });
-          } else {
-            console.log(
-              `[DesktopGrid Drop] Target R${targetRow}, C${targetCol} IS OCCUPIED for ${item.appId}. No position update.`,
-            );
-            // Handle collision: maybe find nearest empty spot, or revert to original, or nothing.
-            // For now, we do nothing if it's occupied, meaning the icon effectively can't be dropped there.
           }
         },
       }),
@@ -314,14 +300,18 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
         ref={scrollContainerRef} // Ref for the main scrollable area
         className={cn(
           "relative flex-grow p-2 overflow-auto w-full h-full",
-          showGridLines ? "debug-grid-lines" : "", // Conditional class for grid lines
+          "grid",
+          "gap-2 sm:gap-3 md:gap-4",
+          "touch-pan-y touch-manipulation",
+          "min-h-[60vh] max-h-[100dvh]",
         )}
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(auto-fill, minmax(${cellSize}px, 1fr))`,
+          gridTemplateColumns:
+            typeof window !== 'undefined' && window.innerWidth < 640
+              ? `repeat(2, minmax(0, 1fr))`
+              : `repeat(auto-fill, minmax(${cellSize}px, 1fr))`,
           gridAutoRows: `${cellSize}px`,
-          gap: "4px", // Consistent gap
-          alignContent: "start", // Align items to the start of the grid
+          alignContent: "start",
         }}
         // onClick={() => handleSelectIcon(null)} // Deselect on empty space click handled elsewhere
       >
@@ -336,10 +326,73 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
               isSelected={selectedAppId === app.id}
               onSelect={handleSelectIcon}
               onDoubleClick={handleDoubleClick}
+              data-app-icon-cell
             />
           );
         })}
-        {/* Drop Preview Indicator */}
+        {/* Drop Target Cell Placeholder (behind the dragged icon) */}
+        {previewTarget && isOver && (() => {
+          // Debug logging
+          // --- TEMP: Render placeholder regardless of occupation for debugging ---
+          // if (isOccupied) return null;
+          // Find the app being dragged (for faded icon)
+          const draggingAppId = dashboardApps.find((app) =>
+            app.id === selectedAppId
+          )?.id || Object.keys(iconPositions)[0];
+          const draggingApp = dashboardApps.find((app) =>
+            app.id === draggingAppId
+          );
+          return (
+            <div
+              style={{
+                gridRowStart: previewTarget.row + 1,
+                gridColumnStart: previewTarget.col + 1,
+                width: `${cellSize}px`,
+                height: `${cellSize}px`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                zIndex: 5, // Lower than the floating preview
+                position: "relative",
+              }}
+              aria-label="Drop target"
+              role="presentation"
+            >
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "2.5px dashed #2563eb", // Tailwind blue-600
+                  borderRadius: 16,
+                  background: "rgba(59,130,246,0.10)", // blue-500/10
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0.7,
+                  transition: "box-shadow 0.2s, border 0.2s, background 0.2s, transform 0.18s cubic-bezier(.4,0,.2,1)",
+                  boxShadow: "0 0 0 2px #2563eb44",
+                }}
+                aria-hidden="true"
+              >
+                {draggingApp && (
+                  <AppIconDisplay
+                    appId={draggingApp.id}
+                    appNameKey={draggingApp.nameKey}
+                    src={draggingApp.src}
+                    isSelected={false}
+                    cellSizeClass={cellSize < 64
+                      ? "text-xs"
+                      : cellSize < 80
+                      ? "text-[11px]"
+                      : "text-xs"}
+                  />
+                )}
+              </div>
+            </div>
+          );
+        })()}
+        {/* Drop Preview Indicator (floating, above the drop cell) */}
         {previewTarget && isOver && (() => {
           // Find the app being dragged
           const draggingAppId = dashboardApps.find((app) =>
@@ -360,25 +413,29 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
                 alignItems: "center",
                 justifyContent: "center",
                 pointerEvents: "none",
-                zIndex: 2,
+                zIndex: 20,
                 position: "relative",
               }}
+              aria-label="Drop target preview"
+              role="presentation"
             >
               <div
                 style={{
-                  opacity: 0.85,
-                  filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.6))",
-                  width: "100%",
-                  height: "100%",
+                  opacity: 0.7,
+                  filter: "drop-shadow(0 8px 32px rgba(37,99,235,0.7)) drop-shadow(0 0px 0px #000)",
+                  width: "110%",
+                  height: "110%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "2.5px dashed #3b82f6", // Tailwind blue-500
-                  borderRadius: 12,
-                  background: "rgba(59,130,246,0.08)", // blue-500/10
-                  transition: "box-shadow 0.2s, border 0.2s, background 0.2s",
+                  border: "3.5px solid #2563eb", // Tailwind blue-600
+                  borderRadius: 18,
+                  background: "rgba(59,130,246,0.18)", // blue-500/15
+                  transition: "box-shadow 0.2s, border 0.2s, background 0.2s, transform 0.18s cubic-bezier(.4,0,.2,1)",
+                  transform: "scale(1.08)",
                   animation: "fadeInScale 0.18s cubic-bezier(.4,0,.2,1)",
                 }}
+                aria-hidden="true"
               >
                 <AppIconDisplay
                   appId={draggingApp.id}
@@ -401,16 +458,25 @@ const DesktopGrid: React.FC<DesktopGridProps> = React.memo(
 );
 DesktopGrid.displayName = "DesktopGrid";
 
+// Helper to get the localized app name
+export function getAppName(app: AppRegistration, t: ReturnType<typeof useI18n>): string {
+  const key = app.nameKey || app.id;
+  let label = t(key, { count: 1 });
+  if (label === key) {
+    label = app.id.charAt(0).toUpperCase() + app.id.slice(1);
+  }
+  return label;
+}
+
 // Main component to display all app icons and windows
 export const AppsIcons = () => {
+  const user = useAtomValue(userAtom);
   const windows = useAtomValue(windowRegistryAtom);
   const openWindow = useSetAtom(openWindowAtom);
   const closeWindow = useSetAtom(closeWindowAtom);
-  // const focusWindow = useSetAtom(focusWindowAtom); // focusWindow variable is unused
   const t = useI18n();
 
   const addedAppIds = useAtomValue(addedAppIdsAtom);
-
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
@@ -452,7 +518,7 @@ export const AppsIcons = () => {
         // Construct the AppRegistration object
         return {
           id: appId,
-          nameKey: appId, // Use the key as the nameKey
+          nameKey: config.nameKey || appId, // Use the correct nameKey from appRegistry, fallback to appId
           src: config.src,
           defaultSize: config.defaultSize,
           minSize: config.minSize,
@@ -462,14 +528,6 @@ export const AppsIcons = () => {
       })
       .filter((app): app is AppRegistration => app !== null); // Simple filter for non-null
   }, [addedAppIds]);
-
-  // Log dashboardApps only when it changes
-  useEffect(() => {
-    console.log(
-      "[AppsIcons] Rendering DesktopGrid with dashboardApps:",
-      JSON.stringify(dashboardApps.map((app) => app.id), null, 2),
-    );
-  }, [dashboardApps]);
 
   // Define handleCloseWindow first
   const handleCloseWindow = useCallback(
@@ -483,15 +541,28 @@ export const AppsIcons = () => {
   // Now define openAppWindow, which depends on handleCloseWindow
   const openAppWindow = useCallback(
     (appId: string) => {
-      console.log("[AppsIcons] Attempting to open app:", appId); // <-- Log entry
+      // Sign-in and availability checks (same as Sidebar)
+      const signInRequiredApps = [
+        "notepad",
+        "music", // assuming this is the id for YouTube Music
+        "bookmarks",
+        "calculator",
+        "calendar"
+      ];
+      if (signInRequiredApps.includes(appId) && !user) {
+        toast(t('signInRequiredToast', { count: 1 }));
+        return;
+      }
+      const isAvailable = appId in appRegistry && addedAppIds.includes(appId);
+      if (!isAvailable) {
+        toast(t('appUnavailableToast', { count: 1 }));
+        return;
+      }
       const appConfig = dashboardApps.find((app) => app.id === appId);
 
       if (!appConfig) {
-        console.error(`[AppsIcons] App config not found for ${appId}`); // <-- Log error
         return;
       }
-
-      console.log("[AppsIcons] Found app config:", appConfig); // <-- Log config
 
       playSound("/sounds/open.mp3");
       const windowInstanceId = `${appId}-instance-${Date.now()}`;
@@ -499,24 +570,19 @@ export const AppsIcons = () => {
       const windowPayload = {
         id: windowInstanceId,
         appId: appId,
-        title: t(appConfig.nameKey as keyof ReturnType<typeof t>, {}),
+        title: getAppName(appConfig, t),
         minSize: appConfig.minSize,
         initialSize: appConfig.defaultSize,
         children: React.createElement(appConfig.component, {
           windowId: windowInstanceId,
-          onClose: () => handleCloseWindow(windowInstanceId), // Pass handleCloseWindow
+          onClose: () => handleCloseWindow(windowInstanceId),
         }),
       };
-
-      console.log(
-        "[AppsIcons] Calling openWindow with payload:",
-        windowPayload,
-      ); // <-- Log payload
 
       openWindow(windowPayload);
       setSelectedIcon(appId);
     },
-    [dashboardApps, openWindow, t, handleCloseWindow], // Added handleCloseWindow dependency
+    [dashboardApps, openWindow, t, handleCloseWindow, user, addedAppIds], // Added handleCloseWindow and user dependencies
   );
 
   const handleDoubleClick = useCallback(
@@ -553,14 +619,21 @@ export const AppsIcons = () => {
     });
 
     if (windowsToCloseNow.length > 0) {
-      console.warn(
-        "Closing windows with app IDs not found in appRegistry:", // Modified log message
-        windowsToCloseNow,
-      );
       windowsToCloseNow.forEach((id) => closeWindow(id));
     }
     // Keep dependencies, appRegistry is static so doesn't need to be listed
   }, [windows, closeWindow, windowsToRender]); // Removed dashboardApps from dependencies
+
+  // Add event listener for 'open-app' to open apps from sidebar
+  useEffect(() => {
+    const handler = (event: CustomEvent) => {
+      if (event.detail && event.detail.appId) {
+        openAppWindow(event.detail.appId);
+      }
+    };
+    window.addEventListener('open-app', handler as EventListener);
+    return () => window.removeEventListener('open-app', handler as EventListener);
+  }, [openAppWindow]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -590,15 +663,6 @@ export const AppsIcons = () => {
           app.id === windowState.appId
         );
 
-        // *** ADD THIS LOG ***
-        if (windowState.appId === "appStore") {
-          console.log(
-            "[AppsIcons] Rendering App Store window with state:",
-            JSON.stringify(windowState, null, 2),
-          );
-        }
-        // *** END OF ADDED LOG ***
-
         // If config is missing, window closing is handled by the useEffect above
         if (!appConfig || !appConfig.component) {
           return null;
@@ -623,8 +687,7 @@ export const AppsIcons = () => {
             {/* Use default imported Window */}
             <Window
               windowId={windowState.id}
-              title={windowState.title ||
-                t(appConfig.nameKey as keyof ReturnType<typeof t>, {})}
+              title={getAppName(appConfig, t)}
               isOpen={windowState.isOpen && !windowState.isMinimized}
               onClose={() => handleCloseWindow(windowState.id)}
               initialPosition={windowState.position}
@@ -648,3 +711,5 @@ export const AppsIcons = () => {
     </DndProvider>
   );
 };
+
+export default AppsIcons;

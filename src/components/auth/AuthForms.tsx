@@ -17,6 +17,8 @@ import { useSignUp } from "@/application/hooks/useSignUp";
 import { toast } from "sonner";
 import { playSound } from "@/infrastructure/lib/utils";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useI18n } from "@/locales/client";
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface AuthFormProps {
     open: boolean;
@@ -24,6 +26,7 @@ interface AuthFormProps {
 }
 
 export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
+    const t = useI18n();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { signIn, loading, error } = useSignIn();
@@ -55,9 +58,9 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Sign In</DialogTitle>
+                    <DialogTitle><VisuallyHidden>Sign In</VisuallyHidden></DialogTitle>
                     <DialogDescription>
-                        Enter your email and password to sign in.
+                        {t("signInDesc", { count: 1 })}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSignIn}>
@@ -100,7 +103,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading}>
-                            {loading ? "Signing In..." : "Sign In"}
+                            {loading ? t("signIn", { count: 1 }) + "..." : t("signIn", { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -110,15 +113,15 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
 };
 
 export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
+    const t = useI18n();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
-    const [avatarUrl, setAvatarUrl] = useState("");
     const { signUp, loading, error } = useSignUp();
 
     const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const success = await signUp({ email, password, username, avatar_url: avatarUrl });
+        const success = await signUp({ email, password, username });
         if (success) {
             toast("Sign Up Successful", {
                 description: "Please check your email inbox for a confirmation link to activate your account.",
@@ -137,10 +140,9 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Sign Up</DialogTitle>
+                    <DialogTitle><VisuallyHidden>Sign Up</VisuallyHidden></DialogTitle>
                     <DialogDescription>
-                        Create a new account. Username must be 3-20 characters
-                        (letters, numbers, _). Optionally, add a profile picture URL.
+                        {t("signUpDesc", { count: 1 })}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSignUp}>
@@ -194,21 +196,6 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                                 autoComplete="new-password"
                             />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="avatar-url-signup" className="text-right">
-                                Profile Picture URL
-                            </Label>
-                            <Input
-                                id="avatar-url-signup"
-                                type="url"
-                                value={avatarUrl}
-                                onChange={(e) => setAvatarUrl(e.target.value)}
-                                className="col-span-3"
-                                placeholder="https://example.com/avatar.png"
-                                disabled={loading}
-                                autoComplete="photo"
-                            />
-                        </div>
                         {error && (
                             <p className="col-span-4 text-center text-sm text-destructive">
                                 {error}
@@ -217,7 +204,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading}>
-                            {loading ? "Signing Up..." : "Sign Up"}
+                            {loading ? t("signUp", { count: 1 }) + "..." : t("signUp", { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </form>

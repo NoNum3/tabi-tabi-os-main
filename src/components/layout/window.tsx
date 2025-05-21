@@ -285,46 +285,57 @@ const Window: React.FC<WindowProps> = ({
   const shouldShowResizeHandles = !isMobileOrTablet && !isMaximized;
 
   // Mobile-specific styling
-  const mobileWindowStyles = isMobileOrTablet
+  const mobileWindowStyles: React.CSSProperties = isMobileOrTablet
     ? {
-      borderRadius: "0.375rem", // Match menubar's rounded-md (0.375rem)
-      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
-      transition: "all 0.2s ease-in-out",
-      // Add border styling to match menubar
-      border: "2px solid var(--secondary)", // Match the menubar's border-secondary border-2
-    }
+        position: 'fixed',
+        left: 0,
+        top: 48, // below the mobile menubar (h-12 = 48px)
+        width: '100vw',
+        height: 'calc(100dvh - 48px)',
+        minWidth: '100vw',
+        minHeight: 'calc(100dvh - 48px)',
+        maxWidth: '100vw',
+        maxHeight: 'calc(100dvh - 48px)',
+        borderRadius: 0,
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+        border: 'none',
+        zIndex: 9999,
+      }
     : {};
 
   return (
     <div
-      className={`$${isMaximized ? '' : 'absolute'} bg-background border border-border rounded-lg shadow-xl flex flex-col overflow-hidden ${windowTransitionClass} ${
-        isMobileOrTablet ? "mobile-window" : ""
+      className={`bg-background border border-border rounded-lg shadow-xl flex flex-col overflow-hidden ${windowTransitionClass} ${
+        isMobileOrTablet ? "mobile-window" : isMaximized ? '' : 'absolute'
       }`}
-      style={{
-        position: isMaximized ? 'fixed' : 'absolute',
-        left: isMaximized ? 0 : `${renderPosition.x}px`,
-        top: isMaximized ? 0 : `${renderPosition.y}px`,
-        width: isMaximized ? '100vw' : `${renderSize.width}px`,
-        height: isMaximized ? '100vh' : `${renderSize.height}px`,
-        zIndex: isMaximized ? 9999 : zIndex, // Ensure on top when maximized
-        ...(isMinimized
-          ? {
-            position: "fixed",
-            display: "flex",
-            opacity: 1,
-            pointerEvents: "none",
-          }
-          : { display: "flex" }),
-        ...mobileWindowStyles,
-      }}
+      style={
+        isMobileOrTablet
+          ? mobileWindowStyles
+          : ({
+              position: isMaximized ? 'fixed' : 'absolute',
+              left: isMaximized ? 0 : `${renderPosition.x}px`,
+              top: isMaximized ? 0 : `${renderPosition.y}px`,
+              width: isMaximized ? '100vw' : `${renderSize.width}px`,
+              height: isMaximized ? '100vh' : `${renderSize.height}px`,
+              zIndex: isMaximized ? 9999 : zIndex,
+              ...(isMinimized
+                ? {
+                    position: "fixed" as React.CSSProperties['position'],
+                    display: "flex",
+                    opacity: 1,
+                    pointerEvents: "none",
+                  }
+                : { display: "flex" }),
+            } as React.CSSProperties)
+      }
       onMouseDown={handleWindowFocus} // Bring window to front on click
     >
       {/* Title Bar */}
       <div
-        className={`bg-primary px-3 py-2 border-b border-border flex justify-between items-center select-none h-10 rounded-t-md shadow-md ${
+        className={`bg-primary px-3 py-2 border-b border-border flex justify-between items-center select-none h-10 ${
           isMobileOrTablet
-            ? "mobile-title-bar px-4 bg-primary rounded-t-[0.375rem]"
-            : !isMaximized ? "cursor-move" : ""
+            ? "mobile-title-bar px-4 bg-primary rounded-none"
+            : !isMaximized ? "cursor-move rounded-t-md" : ""
         }`}
         onMouseDown={(!isMobileOrTablet && !isMaximized) ? handleDragStart : undefined} // Only allow dragging on desktop and not maximized
       >

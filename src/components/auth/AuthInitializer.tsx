@@ -27,7 +27,6 @@ export const AuthInitializer: FC = () => {
 
     const fetchAndSetProfile = useCallback(async (user: User) => {
         try {
-            console.log("[Auth] Fetching profile for user:", user.id);
             const { data, error, status } = await supabase
                 .from("profiles")
                 .select("*")
@@ -45,16 +44,13 @@ export const AuthInitializer: FC = () => {
                     ...data,
                     username: typedData.username ?? typedData.full_name ?? null,
                 };
-                console.log("[Auth] Profile fetched:", patchedProfile);
                 setProfile(patchedProfile as Profile);
                 localStorage.setItem("cachedProfile", JSON.stringify(patchedProfile));
             } else {
-                console.log("[Auth] No profile found");
                 setProfile(null); // No profile found
                 localStorage.removeItem("cachedProfile");
             }
-        } catch (error) {
-            console.error("[Auth] Error fetching profile:", error);
+        } catch {
             setProfile(null); // Set profile to null on error
             localStorage.removeItem("cachedProfile");
         }
@@ -69,7 +65,6 @@ export const AuthInitializer: FC = () => {
         if (cached) {
             try {
                 setProfile(JSON.parse(cached));
-                console.log("[Auth] Loaded cached profile from localStorage");
             } catch {
                 localStorage.removeItem("cachedProfile");
             }
@@ -77,22 +72,19 @@ export const AuthInitializer: FC = () => {
 
         // Get initial session
         supabase.auth.getSession().then(async ({ data: { session } }) => {
-            console.log("[Auth] Initial session:", session);
             setSession(session);
             setUser(session?.user ?? null);
             if (session?.user) {
                 await fetchAndSetProfile(session.user);
             }
             setLoading(false); // Loading finished after initial check
-        }).catch((error) => {
-            console.error("[Auth] Error getting initial session:", error);
+        }).catch(() => {
             setLoading(false); // Ensure loading is false even on error
         });
 
         // Set up the onAuthStateChange listener
         const { data: authListener } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                console.log("[Auth] onAuthStateChange event:", event, session);
                 setLoading(true); // Set loading true during auth state changes
                 setSession(session);
                 setUser(session?.user ?? null);
@@ -110,9 +102,6 @@ export const AuthInitializer: FC = () => {
                 } else if (event === "SIGNED_OUT") {
                     setProfile(null);
                     localStorage.removeItem("cachedProfile");
-                    console.log(
-                        "[Auth] User signed out, profile set to null",
-                    );
                 }
                 setLoading(false); // Loading finished after processing event
             },

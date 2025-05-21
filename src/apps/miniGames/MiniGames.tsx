@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { CircleDot, Coins, Dices, HelpCircle, RefreshCw } from "lucide-react"; // Icons
 import { cn } from "@/infrastructure/lib/utils"; // Import cn utility
+import { useI18n } from '@/locales/client';
 
 // --- Helper Functions ---
 const getRandomInt = (min: number, max: number): number => {
@@ -24,6 +25,7 @@ const getRandomElement = <T,>(arr: T[]): T => {
 
 // 1. Dice Roller
 const DiceRoller: React.FC = () => {
+    const t = useI18n();
     const [numDice, setNumDice] = useState(1);
     const [results, setResults] = useState<number[]>([]);
     const [total, setTotal] = useState(0);
@@ -41,13 +43,13 @@ const DiceRoller: React.FC = () => {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Dices size={20} /> Dice Roller
+                    <Dices size={20} /> {t('diceRoller', { count: 1 })}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                     <Label htmlFor="numDice" className="whitespace-nowrap">
-                        Number of Dice:
+                        {t('number', { count: 1 })} {t('dice', { count: 1 })}:
                     </Label>
                     <Input
                         id="numDice"
@@ -62,10 +64,10 @@ const DiceRoller: React.FC = () => {
                         className="w-20 h-8"
                     />
                 </div>
-                <Button onClick={rollDice}>Roll Dice</Button>
+                <Button onClick={rollDice}>{t('rollDice', { count: 1 })}</Button>
                 {results.length > 0 && (
                     <div className="mt-4 p-3 bg-muted rounded-md text-center">
-                        <p className="text-lg font-semibold mb-2">Results:</p>
+                        <p className="text-lg font-semibold mb-2">{t('results', { count: 1 }) || 'Results:'}</p>
                         <div className="flex flex-wrap justify-center gap-2 mb-2">
                             {results.map((res, i) => (
                                 <span
@@ -77,7 +79,7 @@ const DiceRoller: React.FC = () => {
                             ))}
                         </div>
                         <p className="text-foreground font-medium">
-                            Total: {total}
+                            {t('total', { count: 1 }) || 'Total:'} {total}
                         </p>
                     </div>
                 )}
@@ -88,6 +90,7 @@ const DiceRoller: React.FC = () => {
 
 // 2. Coin Flip
 const CoinFlip: React.FC = () => {
+    const t = useI18n();
     const [numCoins, setNumCoins] = useState(1);
     const [results, setResults] = useState<string[]>([]);
     const [counts, setCounts] = useState({ heads: 0, tails: 0 });
@@ -109,13 +112,13 @@ const CoinFlip: React.FC = () => {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Coins size={20} /> Coin Flip
+                    <Coins size={20} /> {t('coin', { count: 1 })}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                     <Label htmlFor="numCoins" className="whitespace-nowrap">
-                        Number of Coins:
+                        {t('number', { count: 1 })} {t('coin', { count: 1 })}:
                     </Label>
                     <Input
                         id="numCoins"
@@ -130,10 +133,10 @@ const CoinFlip: React.FC = () => {
                         className="w-20 h-8"
                     />
                 </div>
-                <Button onClick={flipCoins}>Flip Coins</Button>
+                <Button onClick={flipCoins}>{t('flipCoins', { count: 1 })}</Button>
                 {results.length > 0 && (
                     <div className="mt-4 p-3 bg-muted rounded-md text-center">
-                        <p className="text-lg font-semibold mb-2">Results:</p>
+                        <p className="text-lg font-semibold mb-2">{t('results', { count: 1 }) || 'Results:'}</p>
                         <div className="flex flex-wrap justify-center gap-2 mb-2 text-sm max-h-24 overflow-y-auto p-1 border border-border bg-background rounded">
                             {results.map((res, i) => (
                                 <span
@@ -150,7 +153,7 @@ const CoinFlip: React.FC = () => {
                             ))}
                         </div>
                         <p className="text-foreground font-medium">
-                            Heads: {counts.heads}, Tails: {counts.tails}
+                            {t('heads', { count: 1 }) || 'Heads:'} {counts.heads}, {t('tails', { count: 1 }) || 'Tails:'} {counts.tails}
                         </p>
                     </div>
                 )}
@@ -161,6 +164,7 @@ const CoinFlip: React.FC = () => {
 
 // 3. Random Number Generator
 const RandomNumberGenerator: React.FC = () => {
+    const t = useI18n();
     const [min, setMin] = useState(1);
     const [max, setMax] = useState(100);
     const [result, setResult] = useState<number | null>(null);
@@ -173,12 +177,12 @@ const RandomNumberGenerator: React.FC = () => {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <RefreshCw size={20} /> Random Number
+                    <RefreshCw size={20} /> {t('number', { count: 1 })}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col gap-4">
                 <div className="flex items-center gap-2">
-                    <Label htmlFor="minNum">Min:</Label>
+                    <Label htmlFor="minNum">{t('min', { count: 1 }) || 'Min:'}</Label>
                     <Input
                         id="minNum"
                         type="number"
@@ -186,7 +190,7 @@ const RandomNumberGenerator: React.FC = () => {
                         onChange={(e) => setMin(parseInt(e.target.value) || 0)}
                         className="w-24 h-8"
                     />
-                    <Label htmlFor="maxNum">Max:</Label>
+                    <Label htmlFor="maxNum">{t('max', { count: 1 }) || 'Max:'}</Label>
                     <Input
                         id="maxNum"
                         type="number"
@@ -196,10 +200,10 @@ const RandomNumberGenerator: React.FC = () => {
                         className="w-24 h-8"
                     />
                 </div>
-                <Button onClick={generateNumber}>Generate</Button>
+                <Button onClick={generateNumber}>{t('generate', { count: 1 }) || 'Generate'}</Button>
                 {result !== null && (
                     <div className="mt-4 p-3 bg-muted rounded-md text-center">
-                        <p className="text-lg font-semibold mb-2">Result:</p>
+                        <p className="text-lg font-semibold mb-2">{t('result', { count: 1 }) || 'Result:'}</p>
                         <p className="text-3xl font-bold text-primary">
                             {result}
                         </p>
@@ -212,6 +216,7 @@ const RandomNumberGenerator: React.FC = () => {
 
 // 4. Yes/No/Maybe Picker
 const YesNoMaybe: React.FC = () => {
+    const t = useI18n();
     const answers = ["Yes", "No", "Maybe"];
     const [result, setResult] = useState<string | null>(null);
 
@@ -223,11 +228,11 @@ const YesNoMaybe: React.FC = () => {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <HelpCircle size={20} /> Yes / No / Maybe
+                    <HelpCircle size={20} /> {t('yesNo', { count: 1 })}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col items-center justify-center gap-4">
-                <Button onClick={pickAnswer} size="lg">Ask the Oracle</Button>
+                <Button onClick={pickAnswer} size="lg">{t('askOracle', { count: 1 }) || 'Ask the Oracle'}</Button>
                 {result !== null && (
                     <div className="mt-4 p-3 bg-muted rounded-md text-center">
                         <p className="text-3xl font-bold text-primary">
@@ -242,6 +247,7 @@ const YesNoMaybe: React.FC = () => {
 
 // 5. Random Activity Suggestion
 const ActivitySuggestion: React.FC = () => {
+    const t = useI18n();
     const activities = [
         "Read a chapter of a book",
         "Go for a short walk",
@@ -266,13 +272,11 @@ const ActivitySuggestion: React.FC = () => {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <CircleDot size={20} /> Activity Suggestion
+                    <CircleDot size={20} /> {t('activity', { count: 1 })}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col items-center justify-center gap-4">
-                <Button onClick={getSuggestion} size="lg">
-                    Suggest an Activity
-                </Button>
+                <Button onClick={getSuggestion} size="lg">{t('suggestActivity', { count: 1 }) || 'Suggest an Activity'}</Button>
                 {suggestion !== null && (
                     <div className="mt-4 p-3 bg-muted rounded-md text-center">
                         <p className="text-xl font-semibold text-primary">
@@ -287,6 +291,7 @@ const ActivitySuggestion: React.FC = () => {
 
 // 6. Would You Rather
 const WouldYouRather: React.FC = () => {
+    const t = useI18n();
     const questions = [
         { a: "Be able to fly", b: "Be able to turn invisible" },
         { a: "Have unlimited money", b: "Have unlimited time" },
@@ -308,18 +313,18 @@ const WouldYouRather: React.FC = () => {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <HelpCircle size={20} /> Would You Rather
+                    <HelpCircle size={20} /> {t('wyr', { count: 1 })}
                 </CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col items-center justify-center gap-4 text-center">
-                <Button onClick={getQuestion} size="lg">New Question</Button>
+                <Button onClick={getQuestion} size="lg">{t('newQuestion', { count: 1 }) || 'New Question'}</Button>
                 {question !== null && (
                     <div className="mt-4 p-3 bg-muted rounded-md w-full">
                         <p className="text-lg font-semibold mb-2">
-                            Would you rather...
+                            {t('wyrQuestion', { count: 1 }) || 'Would you rather...'}
                         </p>
                         <p className="text-primary mb-1">{question.a}</p>
-                        <p className="text-muted-foreground font-bold">OR</p>
+                        <p className="text-muted-foreground font-bold">{t('or', { count: 1 }) || 'OR'}</p>
                         <p className="text-primary mt-1">{question.b}</p>
                     </div>
                 )}
@@ -330,16 +335,17 @@ const WouldYouRather: React.FC = () => {
 
 // --- Main MiniGames Component ---
 const MiniGames: React.FC = () => {
+    const t = useI18n();
     return (
         <div className="w-full h-full p-2 bg-background text-foreground">
             <Tabs defaultValue="dice" className="w-full h-full flex flex-col">
                 <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 mb-2">
-                    <TabsTrigger value="dice">Dice</TabsTrigger>
-                    <TabsTrigger value="coin">Coin</TabsTrigger>
-                    <TabsTrigger value="number">Number</TabsTrigger>
-                    <TabsTrigger value="yesno">Yes/No</TabsTrigger>
-                    <TabsTrigger value="activity">Activity</TabsTrigger>
-                    <TabsTrigger value="wyr">WYR</TabsTrigger>
+                    <TabsTrigger value="dice">{t('dice', { count: 1 })}</TabsTrigger>
+                    <TabsTrigger value="coin">{t('coin', { count: 1 })}</TabsTrigger>
+                    <TabsTrigger value="number">{t('number', { count: 1 })}</TabsTrigger>
+                    <TabsTrigger value="yesno">{t('yesNo', { count: 1 })}</TabsTrigger>
+                    <TabsTrigger value="activity">{t('activity', { count: 1 })}</TabsTrigger>
+                    <TabsTrigger value="wyr">{t('wyr', { count: 1 })}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="dice" className="flex-grow">
                     <DiceRoller />

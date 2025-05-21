@@ -1,0 +1,19 @@
+{
+  "appName": "Checkers",
+  "tipSelectDestination": "Tip: Select a blue destination square to move.",
+  "tipCaptureAvailable": "Tip: Capture available! Select the green destination.",
+  "tipSelectPiece": "Select a piece to move.",
+  "tipMustJump": "Tip: Must select a piece that can jump!",
+  "tipCannotMove": "Tip: This piece cannot move.",
+  "tipCheckingEnd": "Checking for game end...",
+  "tipNewGame": "New game started. White's turn.",
+  "tipGameOver": "Game over!",
+  "tipJumpRequired": "Tip: Jump required!",
+  "tipPressAdvantage": "Tip: Press your advantage!",
+  "tipEndgame": "Tip: Endgame - play carefully!",
+  "tipAdvanceCenter": "Tip: Advance toward the center.",
+  "whitesTurn": "White's turn",
+  "blacksTurn": "Black's turn",
+  "white": "White",
+  "black": "Black"
+} 

@@ -9,6 +9,7 @@ import { addBookmarkAtom, updateBookmarkAtom, bookmarksLoadingAtom, bookmarksErr
 import { foldersAtom } from "../hooks/useFolders";
 import type { Bookmark } from "../types/bookmarkTypes";
 import { WritableAtom } from "jotai";
+import { useI18n } from '@/locales/client';
 
 const EMOJI_OPTIONS = ["⭐", "🔖", "📚", "💡", "🔥", "🎵", "📺", "📝", "🔗", "📦", "🧩", "📁", "🧠", "🌟", "🚀", "❤️", "💻", "📷", "🎮", "🛒", "🏷️"];
 
@@ -33,6 +34,7 @@ export const BookmarkModal = ({ open, onClose, bookmark, folderId }: {
   const [error, setError] = useAtom(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>);
   const [symbol, setSymbol] = useState<string>("");
   const [color, setColor] = useState<string>("");
+  const t = useI18n();
 
   useEffect(() => {
     if (bookmark) {
@@ -68,7 +70,7 @@ export const BookmarkModal = ({ open, onClose, bookmark, folderId }: {
     const tagArr = tags.split(",").map(t => t.trim()).filter(Boolean);
     const data = {
       url: url.trim(),
-      title: title.trim() || "",
+      title: title.trim() || url.trim(),
       description: description.trim() || null,
       tags: tagArr.length ? tagArr : null,
       is_favorite: isFavorite,
@@ -95,45 +97,45 @@ export const BookmarkModal = ({ open, onClose, bookmark, folderId }: {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
     >
       <div className="bg-card rounded-xl shadow-lg w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold mb-4">{isEdit ? "Edit Bookmark" : "Add Bookmark"}</h2>
+        <h2 className="text-lg font-semibold mb-4">{isEdit ? t('bookmarkEdit', { count: 1 }) : t('bookmarkAdd', { count: 1 })}</h2>
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">URL</span>
-            <Input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://example.com" required aria-label="Bookmark URL" />
+            <span className="font-medium">{t('bookmarkUrl', { count: 1 })}</span>
+            <Input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder={t('bookmarkUrlPlaceholder', { count: 1 })} required aria-label="Bookmark URL" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Title</span>
-            <Input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Bookmark title" aria-label="Bookmark title" />
+            <span className="font-medium">{t('bookmarkTitle', { count: 1 })}</span>
+            <Input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder={t('bookmarkTitlePlaceholder', { count: 1 })} aria-label="Bookmark title (optional)" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Description</span>
-            <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe this bookmark (optional)" rows={2} aria-label="Bookmark description" />
+            <span className="font-medium">{t('bookmarkDescription', { count: 1 })}</span>
+            <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder={t('bookmarkDescriptionPlaceholder', { count: 1 })} rows={2} aria-label="Bookmark description" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Tags</span>
-            <Input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder="e.g. work, docs" aria-label="Bookmark tags" />
+            <span className="font-medium">{t('bookmarkTags', { count: 1 })}</span>
+            <Input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder={t('bookmarkTagsPlaceholder', { count: 1 })} aria-label="Bookmark tags" />
           </label>
           <label className="flex items-center gap-2">
             <Checkbox id="favorite" checked={isFavorite} onCheckedChange={v => setIsFavorite(!!v)} aria-label="Favorite" />
-            <span>Favorite</span>
+            <span>{t('bookmarkFavorite', { count: 1 })}</span>
             <Star className="size-4 text-yellow-400" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Folder</span>
+            <span className="font-medium">{t('bookmarkFolder', { count: 1 })}</span>
             <select
               value={selectedFolderId || ""}
               onChange={e => setSelectedFolderId(e.target.value || null)}
               className="border border-border rounded px-2 py-1 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
               aria-label="Bookmark folder"
             >
-              <option value="">All Bookmarks</option>
+              <option value="">{t('bookmarkAllBookmarks', { count: 1 })}</option>
               {folders.map(f => (
                 <option key={f.id} value={f.id}>{f.name}</option>
               ))}
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Symbol (emoji)</span>
+            <span className="font-medium">{t('bookmarkSymbol', { count: 1 })}</span>
             <select value={symbol} onChange={e => setSymbol(e.target.value)} aria-label="Bookmark symbol" className="border border-border rounded px-2 py-1 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-colors">
               <option value="">None</option>
               {EMOJI_OPTIONS.map((emoji) => (
@@ -145,7 +147,11 @@ export const BookmarkModal = ({ open, onClose, bookmark, folderId }: {
             <span className="font-medium">Color</span>
             <input type="color" value={color} onChange={e => setColor(e.target.value)} aria-label="Bookmark color" className="w-10 h-8 p-0 border-none bg-transparent" />
           </label>
-          {error && <div className="text-red-500 text-sm" role="alert">{error}</div>}
+          {error && (
+            <div className="text-destructive text-sm mt-2" role="alert">
+              {t(error, { count: 1 }) !== error ? t(error, { count: 1 }) : error}
+            </div>
+          )}
           <div className="flex justify-end gap-2 mt-4">
             <Button type="button" variant="outline" onClick={onClose} aria-label="Cancel" disabled={loading}>Cancel</Button>
             <Button type="submit" variant="default" aria-label={isEdit ? "Save changes" : "Add bookmark"} disabled={loading}>{loading ? "Saving..." : isEdit ? "Save" : "Add"}</Button>

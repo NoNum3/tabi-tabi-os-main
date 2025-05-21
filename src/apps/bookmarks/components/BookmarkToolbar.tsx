@@ -8,6 +8,7 @@ import { bookmarksAtom } from "../hooks/useBookmarks";
 import { foldersAtom } from "../hooks/useFolders";
 import { userAtom } from "@/application/atoms/authAtoms";
 import { supabase } from "@/infrastructure/lib/supabaseClient";
+import { useI18n } from '@/locales/client';
 
 export const BookmarkToolbar = ({ onAddFolder }: {
   onAddFolder?: () => void;
@@ -16,6 +17,7 @@ export const BookmarkToolbar = ({ onAddFolder }: {
   const [bookmarks] = useAtom(bookmarksAtom);
   const [folders] = useAtom(foldersAtom);
   const [user] = useAtom(userAtom);
+  const t = useI18n();
 
   // Helper: recursively build folder tree
   function buildExportFolders(parentId: string | null): ExportFolder[] {
@@ -132,10 +134,10 @@ export const BookmarkToolbar = ({ onAddFolder }: {
   return (
     <div className="flex items-center gap-2 p-4 border-b border-border bg-background">
       <Button variant="secondary" aria-label="Add folder" onClick={onAddFolder}>
-        <FolderPlus className="size-4" /> Add Folder
+        <FolderPlus className="size-4" /> {t('folderAdd', { count: 1 })}
       </Button>
       <Button variant="outline" aria-label="Import bookmarks" onClick={handleImportClick}>
-        <Upload className="size-4" /> Import
+        <Upload className="size-4" /> {t('bookmarkImport', { count: 1 })}
         <input
           ref={fileInputRef}
           type="file"
@@ -146,7 +148,7 @@ export const BookmarkToolbar = ({ onAddFolder }: {
         />
       </Button>
       <Button variant="outline" aria-label="Export bookmarks" onClick={handleExport}>
-        <Download className="size-4" /> Export
+        <Download className="size-4" /> {t('bookmarkExport', { count: 1 })}
       </Button>
     </div>
   );

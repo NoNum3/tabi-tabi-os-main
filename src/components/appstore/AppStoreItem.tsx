@@ -30,12 +30,10 @@ export const AppStoreItem: React.FC<AppStoreItemProps> = ({ app }) => {
     const isAdded = false; // TODO: Get from user dashboard state
 
     const handleLike = () => {
-        console.log("Like clicked for:", app.id);
         // TODO: Implement like logic (update state, call backend)
     };
 
     const handleAddRemove = () => {
-        console.log("Add/Remove clicked for:", app.id);
         // TODO: Implement add/remove logic (update dashboard state)
     };
 

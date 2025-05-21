@@ -369,24 +369,30 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar_url: string | null
           created_at: string | null
           email: string | null
           id: string
+          last_password_change: string | null
+          last_profile_update: string | null
+          profile_picture: string | null
           username: string | null
         }
         Insert: {
-          avatar_url?: string | null
           created_at?: string | null
           email?: string | null
           id: string
+          last_password_change?: string | null
+          last_profile_update?: string | null
+          profile_picture?: string | null
           username?: string | null
         }
         Update: {
-          avatar_url?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
+          last_password_change?: string | null
+          last_profile_update?: string | null
+          profile_picture?: string | null
           username?: string | null
         }
         Relationships: []
