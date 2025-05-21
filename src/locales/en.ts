@@ -483,4 +483,10 @@ export default {
     profilePicUploadSuccess: "Profile picture updated successfully!",
     profilePicUploadError: "Failed to update profile picture.",
     profilePicCriteria: "Image only, max 2MB",
+    changeProfilePicture: "Change Profile Picture",
+    uploadFile: "Upload File",
+    imageUrl: "Image URL",
+    chooseFile: "Choose File",
+    noFileChosen: "No file chosen",
+    delete: "Delete",
 } as const;
