@@ -21,6 +21,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:locale/robots.txt',
+        destination: '/robots.txt',
+      },
+      {
+        source: '/robots.txt',
+        destination: '/robots.txt',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

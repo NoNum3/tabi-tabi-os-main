@@ -19,6 +19,9 @@ export default {
     reloadRequiredTitle: "Reload Required",
     reloadRequiredDesc: "Your login state may be out of sync. Please reload the page to continue.",
     applyChange: "Apply Changes",
+    signUpCheckEmail: "Please check your email inbox for a confirmation link to activate your account.",
+    signUpSuccess: "Sign Up Successful",
+    signUpEmailUsed: "This email is already registered.",
 
     // ===== App Names =====
     clock: "Clock",
@@ -507,4 +510,10 @@ export default {
     chars: 'chars',
     waitSeconds: 'Wait {seconds}s',
     submit: 'Submit',
+    signInSuccess: "Signed In Successfully",
+    signInWelcome: "Welcome back! You have signed in successfully.",
+    signInFailed: "Sign In Failed",
+    signOutSuccess: "Signed Out",
+    signOutGoodbye: "You have been signed out successfully.",
+    signOutFailed: "Sign Out Failed",
 } as const;

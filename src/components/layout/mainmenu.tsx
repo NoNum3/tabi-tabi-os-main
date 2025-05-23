@@ -238,14 +238,14 @@ function Mainmenu() {
     const { error } = await supabase.auth.signOut();
     if (error) {
       playSound("/sounds/error.mp3");
-      toast("Sign Out Failed", {
+      toast(t("signOutFailed", { count: 1 }), {
         description: error.message,
         duration: 6000,
       });
     } else {
       playSound("/sounds/notify.mp3");
-      toast("Signed Out", {
-        description: "You have been signed out successfully.",
+      toast(t("signOutSuccess", { count: 1 }), {
+        description: t("signOutGoodbye", { count: 1 }),
         duration: 6000,
       });
     }

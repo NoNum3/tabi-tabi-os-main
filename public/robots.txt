@@ -1,0 +1,45 @@
+User-agent: *
+# Allow main public pages
+Allow: /
+
+# Disallow sensitive or non-public areas
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /app/
+Disallow: /private/
+Disallow: /src/
+Disallow: /config/
+Disallow: /infrastructure/
+Disallow: /supabase/
+Disallow: /node_modules/
+Disallow: /static/
+Disallow: /public/
+Disallow: /types/
+Disallow: /tests/
+Disallow: /locales/
+
+# Block all query parameters (prevent duplicate content)
+Disallow: /*?
+
+# Allow robots to access CSS, JS, images for proper rendering
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.webp$
+Allow: /*.svg$
+
+# Sitemap (update this to your real sitemap URL before production)
+Sitemap: https://your-domain.com/sitemap.xml
+
+# --- Optional: Block all bots on staging/dev environments ---
+# User-agent: *
+# Disallow: /
+
+# --- Optional: Block specific bad bots ---
+# User-agent: BadBot
+# Disallow: /
+
+# --- Optional: Set crawl delay (rarely needed) ---
+# Crawl-delay: 5 

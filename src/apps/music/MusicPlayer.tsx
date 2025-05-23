@@ -4,21 +4,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAtom, useSetAtom, useAtomValue } from "jotai";
 import ReactPlayer from "react-player/youtube";
 import {
-  Volume2,
-  VolumeX,
-  Play,
-  Pause,
-  Rewind,
-  FastForward,
-  MoreVertical,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  FileText,
-  Link2,
-  Repeat,
+  Fullscreen,
+  Captions,
 } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 import {
   addPlaylist,
@@ -108,13 +96,17 @@ const MusicPlayer: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [prevVolume, setPrevVolume] = useState(volume);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [showVideo, setShowVideo] = useState(true);
-  const [loop, setLoop] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+  const [availableResolutions, setAvailableResolutions] = useState(["auto"]); // Start with auto only
+  const [currentResolution, setCurrentResolution] = useState("auto");
+  const [lastRequestedResolution, setLastRequestedResolution] = useState("auto");
 
   // Refs
   const playerRef = useRef<ReactPlayer>(null);
   const ignoreEvents = useRef(false);
   const timeUpdateInterval = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Use Jotai atom for playlists
   const [playlists] = useAtom(userPlaylistsAtom);
@@ -303,29 +295,52 @@ const MusicPlayer: React.FC = () => {
   ]);
 
   // ---- ADD RELIABLE onReady HANDLER ----
+  const updateAvailableQualities = useCallback((tryCount = 0) => {
+    if (playerRef.current) {
+      const player = playerRef.current.getInternalPlayer();
+      if (player && typeof player.getAvailableQualityLevels === "function") {
+        const qualities = player.getAvailableQualityLevels();
+        if (Array.isArray(qualities) && qualities.length > 1) {
+          const labelMap = {
+            highres: "4320p",
+            hd2160: "2160p",
+            hd1440: "1440p",
+            hd1080: "1080p",
+            hd720: "720p",
+            large: "480p",
+            medium: "360p",
+            small: "240p",
+            tiny: "144p",
+            auto: "auto",
+          } as const;
+          const mapped = qualities.map((q: keyof typeof labelMap) => labelMap[q] || q);
+          setAvailableResolutions(["auto", ...mapped.filter(q => q !== "auto")]);
+        } else if (tryCount < 3) {
+          setTimeout(() => updateAvailableQualities(tryCount + 1), 1000);
+        }
+      }
+    }
+  }, []);
+
   const handlePlayerReady = useCallback(() => {
     if (!playerRef.current) return;
-
     try {
       const player = playerRef.current.getInternalPlayer();
       if (player && typeof player.setVolume === "function") {
         globalYoutubePlayer = player as YouTubePlayerWithMethods;
         globalYoutubePlayer.setVolume(isMuted ? 0 : volume * 100);
         setIsPlayerReady(true);
-
-        // Now sync state once the player is confirmed ready and referenced
+        updateAvailableQualities();
         if (!initialSyncDone) {
           syncPlayerState();
         }
       } else {
         console.warn("Internal player or setVolume not available onReady");
-        // Optionally try again after a short delay if needed
-        // setTimeout(handlePlayerReady, 200);
       }
     } catch (error) {
       console.error("Error getting internal player onReady:", error);
     }
-  }, [volume, isMuted, initialSyncDone, syncPlayerState]);
+  }, [volume, isMuted, initialSyncDone, syncPlayerState, updateAvailableQualities]);
 
   // Initial sync on component mount
   useEffect(() => {
@@ -612,26 +627,64 @@ const MusicPlayer: React.FC = () => {
   };
 
   const windowRegistry = useAtomValue(windowRegistryAtom);
-  const setWindowRegistry = useSetAtom(windowRegistryAtom);
 
   // Find the youtubePlayer window state
   const youtubeWindow = Object.values(windowRegistry).find((w) => w.appId === "youtubePlayer");
   const isMinimized = youtubeWindow?.isMinimized;
 
-  // Download transcript stub
-  const handleDownloadTranscript = () => {
-    alert("Download transcript/CC is not implemented yet.");
-  };
-  // Copy video URL
-  const handleCopyUrl = () => {
-    if (currentSong?.url) {
-      navigator.clipboard.writeText(currentSong.url);
+  const handleToggleFullscreen = () => {
+    const el = containerRef.current;
+    if (!document.fullscreenElement && el) {
+      el.requestFullscreen();
+      setIsFullscreen(true);
+    } else if (document.fullscreenElement) {
+      document.exitFullscreen();
+      setIsFullscreen(false);
     }
   };
-  // Open in YouTube
-  const handleOpenInYoutube = () => {
-    if (currentSong?.url) {
-      window.open(currentSong.url, "_blank");
+
+  const handleToggleSubtitles = () => {
+    setSubtitlesEnabled((prev) => !prev);
+    // TODO: Integrate with YouTube API for real subtitle toggling
+  };
+
+  const labelToCode = (label: string) => {
+    const codeMap = {
+      "4320p": "highres",
+      "2160p": "hd2160",
+      "1440p": "hd1440",
+      "1080p": "hd1080",
+      "720p": "hd720",
+      "480p": "large",
+      "360p": "medium",
+      "240p": "small",
+      "144p": "tiny",
+      "auto": "auto",
+    } as const;
+    return codeMap[label as keyof typeof codeMap] || label;
+  };
+
+  const handleChangeResolution = (res: string) => {
+    setCurrentResolution(res);
+    setLastRequestedResolution(res);
+    if (playerRef.current) {
+      const player = playerRef.current.getInternalPlayer();
+      if (player && typeof player.setPlaybackQuality === "function") {
+        const code = labelToCode(res);
+        player.setPlaybackQuality(code);
+      }
+    }
+  };
+
+  const handlePlay = () => {
+    setPlaying(true);
+    updateAvailableQualities();
+    if (lastRequestedResolution !== "auto" && playerRef.current) {
+      const player = playerRef.current.getInternalPlayer();
+      if (player && typeof player.setPlaybackQuality === "function") {
+        const code = labelToCode(lastRequestedResolution);
+        player.setPlaybackQuality(code);
+      }
     }
   };
 
@@ -659,6 +712,7 @@ const MusicPlayer: React.FC = () => {
         aria-hidden={!currentSong}
       >
         <MusicPlayerVideo
+          containerRef={containerRef}
           currentSong={queue[currentSongIndex] || null}
           playing={playing}
           isPlayerReady={isPlayerReady}
@@ -671,132 +725,36 @@ const MusicPlayer: React.FC = () => {
           onError={() => {}}
           onBuffer={() => {}}
           onBufferEnd={() => {}}
-          onPlay={() => setPlaying(true)}
+          onPlay={handlePlay}
           onPause={() => setPlaying(false)}
           onReady={handlePlayerReady}
-          showVideo={showVideo}
+          showVideo={true}
+          isFullscreen={isFullscreen}
+          playedSeconds={playedSeconds}
+          duration={duration}
+          onSeek={value => {
+            setPlayedSeconds(value);
+            playerRef.current?.seekTo(value, 'seconds');
+          }}
+          onTogglePlay={() => setPlaying(!playing)}
+          onPrev={handlePrevious}
+          onNext={handleNext}
+          onToggleMute={toggleMute}
+          onToggleFullscreen={handleToggleFullscreen}
+          setVolume={setVolume}
+          availableResolutions={availableResolutions}
+          currentResolution={currentResolution}
+          onChangeResolution={handleChangeResolution}
+          subtitlesEnabled={subtitlesEnabled}
+          onToggleSubtitles={handleToggleSubtitles}
         />
-        {/* Controls overlay: show mini controls if minimized, else main controls */}
-        {isMinimized ? (
-          <div className="absolute inset-0 flex flex-col justify-between p-2 pointer-events-none">
-            <div className="flex items-center justify-between px-2 py-1 cursor-grab bg-neutral-800 rounded-t pointer-events-auto" style={{ borderBottom: "1px solid #fff2" }}>
-              <span className="text-xs text-white/80 select-none">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="12" y1="8" x2="12" y2="16" /></svg>
-              </span>
-              <span className="text-xs text-white/60 font-medium truncate max-w-[120px]">{currentSong?.title}</span>
-              <button
-                onClick={() => {
-                  if (!youtubeWindow) return;
-                  setWindowRegistry((prev) => ({
-                    ...prev,
-                    [youtubeWindow.id]: { ...youtubeWindow, isMinimized: false },
-                  }));
-                }}
-                className="p-1 ml-2 rounded hover:bg-white/10 pointer-events-auto"
-                aria-label="Maximize"
-                title="Maximize"
-              >
-                <MoreVertical size={16} color="#fff" />
-              </button>
-            </div>
-            <div className="flex flex-col items-center gap-2 w-full mt-2 pointer-events-auto">
-              <div className="flex items-center gap-2 w-full">
-                <span className="text-xs text-white/70 min-w-[36px] text-right">{formatTime(playedSeconds)}</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 1}
-                  step={0.1}
-                  value={playedSeconds}
-                  onChange={e => { setPlayedSeconds(Number(e.target.value)); playerRef.current?.seekTo(Number(e.target.value), 'seconds'); }}
-                  className="flex-1 accent-primary"
-                  style={{ accentColor: '#fff' }}
-                  aria-label="Seek video"
-                />
-                <span className="text-xs text-white/70 min-w-[36px]">{formatTime(duration)}</span>
-              </div>
-              <div className="flex items-center gap-2 w-full justify-center">
-                <button onClick={() => setPlaying((p) => !p)} className="p-1 rounded hover:bg-white/10" aria-label={playing ? "Pause" : "Play"}>
-                  {playing ? <Pause size={18} color="#fff" /> : <Play size={18} color="#fff" />}
-                </button>
-                <button onClick={handlePrevious} className="p-1 rounded hover:bg-white/10" aria-label="Previous"><Rewind size={16} color="#fff" /></button>
-                <button onClick={handleNext} className="p-1 rounded hover:bg-white/10" aria-label="Next"><FastForward size={16} color="#fff" /></button>
-                <button onClick={toggleMute} className="p-1 rounded hover:bg-white/10" aria-label={isMuted ? "Unmute" : "Mute"}>
-                  {isMuted ? <VolumeX size={16} color="#fff" /> : <Volume2 size={16} color="#fff" />}
-                </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={volume}
-                  onChange={e => setVolume(Number(e.target.value))}
-                  className="w-16 mx-1 accent-primary"
-                  style={{ accentColor: "#fff" }}
-                />
-              </div>
-            </div>
-          </div>
-        ) : null}
       </div>
       {/* Main player UI, hidden when minimized */}
       {!isMinimized && (
         <>
           {/* --- Seek Slider UI (like mini player) --- */}
-          <div className="flex items-center gap-2 w-full px-4 mt-2" style={{ maxWidth: 700, margin: '0 auto' }}>
-            <span className="text-xs text-white/70 min-w-[36px] text-right">
-              {formatTime(playedSeconds)}
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={duration || 1}
-              step={0.1}
-              value={playedSeconds}
-              onChange={e => {
-                setPlayedSeconds(Number(e.target.value));
-                playerRef.current?.seekTo(Number(e.target.value), 'seconds');
-              }}
-              className="flex-1 accent-primary"
-              style={{ accentColor: '#fff' }}
-              aria-label="Seek video"
-            />
-            <span className="text-xs text-white/70 min-w-[36px]">
-              {formatTime(duration)}
-            </span>
-          </div>
+          {/* Removed seek slider UI here */}
           {/* --- End Seek Slider UI --- */}
-          <div className="w-full flex flex-col items-center">
-            <div className="w-full flex items-center justify-center gap-4 px-4 mt-4 mb-2">
-              <button onClick={handlePrevious} className="p-2 rounded hover:bg-muted" aria-label="Previous"><Rewind size={22} /></button>
-              <button onClick={() => setPlaying(!playing)} className="p-2 rounded bg-primary text-white hover:bg-primary/80" aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause size={28} /> : <Play size={28} />}</button>
-              <button onClick={handleNext} className="p-2 rounded hover:bg-muted" aria-label="Next"><FastForward size={22} /></button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-2 rounded hover:bg-muted" aria-label="More options" id="more-options-btn"><MoreVertical size={22} /></button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" aria-labelledby="more-options-btn">
-                  <DropdownMenuItem onClick={() => setShowVideo(v => !v)}>
-                    {showVideo ? <EyeOff size={16} className="mr-2" /> : <Eye size={16} className="mr-2" />}
-                    {showVideo ? "Hide Video" : "Show Video"}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleDownloadTranscript}>
-                    <FileText size={16} className="mr-2" />Download Transcript/CC
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleCopyUrl}>
-                    <Link2 size={16} className="mr-2" />Copy Video URL
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleOpenInYoutube}>
-                    <ExternalLink size={16} className="mr-2" />Open in YouTube
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setLoop(l => !l)}>
-                    <Repeat size={16} className="mr-2" />{loop ? "Disable Loop" : "Loop Video"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
           <MusicPlayerAddSongForm
             newSongUrl={newSongUrl}
             setNewSongUrl={setNewSongUrl}
@@ -818,6 +776,40 @@ const MusicPlayer: React.FC = () => {
             playlists={playlists || []}
             onAddPlaylist={handleAddPlaylist}
           />
+          {/* Custom Controls Overlay */}
+          {!isMinimized && (
+            <div className="absolute bottom-4 left-0 w-full flex justify-center items-center gap-4 z-20 pointer-events-auto" style={{ pointerEvents: 'auto' }}>
+              <button
+                onClick={handleToggleFullscreen}
+                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                className="p-2 rounded hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                tabIndex={0}
+              >
+                <Fullscreen size={22} />
+              </button>
+              <button
+                onClick={handleToggleSubtitles}
+                aria-label={subtitlesEnabled ? "Disable Subtitles" : "Enable Subtitles"}
+                className={`p-2 rounded hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary ${subtitlesEnabled ? 'bg-primary text-white' : ''}`}
+                tabIndex={0}
+              >
+                <Captions size={22} />
+              </button>
+              <label htmlFor="resolution-select" className="sr-only">Video Resolution</label>
+              <select
+                id="resolution-select"
+                value={currentResolution}
+                onChange={e => handleChangeResolution(e.target.value)}
+                className="p-2 rounded bg-background border border-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Select video resolution"
+                tabIndex={0}
+              >
+                {availableResolutions.map(res => (
+                  <option key={res} value={res}>{res}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </>
       )}
     </div>

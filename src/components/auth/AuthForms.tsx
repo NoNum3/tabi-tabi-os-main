@@ -41,13 +41,13 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
         const success = await signIn({ identifier: email, password });
         if (success) {
             playSound("/sounds/signed-in.mp3");
-            toast("Signed In Successfully", {
-                description: "Welcome back! You have signed in successfully.",
+            toast(t("signInSuccess", { count: 1 }), {
+                description: `${t("signInWelcome", { count: 1 })} (${email})`,
                 duration: 6000,
             });
             onOpenChange(false);
         } else if (error) {
-            toast("Sign In Failed", {
+            toast(t("signInFailed", { count: 1 }), {
                 description: error,
                 duration: 6000,
             });
@@ -117,17 +117,21 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
-    const { signUp, loading, error } = useSignUp();
+    const { signUp, loading, error, duplicateEmail } = useSignUp();
+    const [localError, setLocalError] = useState<string | null>(null);
 
     const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLocalError(null);
         const success = await signUp({ email, password, username });
         if (success) {
-            toast("Sign Up Successful", {
-                description: "Please check your email inbox for a confirmation link to activate your account.",
+            toast(t("signUpSuccess", { count: 1 }), {
+                description: `${t("signUpCheckEmail", { count: 1 })} (${email})`,
                 duration: 8000,
             });
             onOpenChange(false);
+        } else if (duplicateEmail) {
+            setLocalError(t("signUpEmailUsed", { count: 1 }));
         } else if (error) {
             toast("Sign Up Failed", {
                 description: error,
@@ -178,8 +182,15 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                                 required
                                 disabled={loading}
                                 autoComplete="username"
+                                aria-invalid={!!localError}
+                                aria-describedby={localError ? "email-signup-error" : undefined}
                             />
                         </div>
+                        {localError && (
+                            <p id="email-signup-error" className="col-span-4 text-center text-sm text-destructive">
+                                {localError}
+                            </p>
+                        )}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password-signup" className="text-right">
                                 Password
@@ -196,7 +207,8 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                                 autoComplete="new-password"
                             />
                         </div>
-                        {error && (
+                        {/* Show other errors (not duplicate email) */}
+                        {error && !duplicateEmail && (
                             <p className="col-span-4 text-center text-sm text-destructive">
                                 {error}
                             </p>

@@ -19,6 +19,15 @@ export default {
     reloadRequiredTitle: "需要重新載入",
     reloadRequiredDesc: "您的登入狀態可能已不同步，請重新載入頁面以繼續。",
     applyChange: "套用變更",
+    signUpCheckEmail: "請至您的信箱收取啟用帳號的確認信件。",
+    signInSuccess: "登入成功",
+    signInWelcome: "歡迎回來！您已成功登入。",
+    signInFailed: "登入失敗",
+    signOutSuccess: "已登出",
+    signOutGoodbye: "您已成功登出。",
+    signOutFailed: "登出失敗",
+    signUpSuccess: "註冊成功",
+    signUpEmailUsed: "此電子郵件已被註冊。",
 
     // ===== App Names =====
     clock: "時鐘",

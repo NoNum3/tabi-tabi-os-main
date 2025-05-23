@@ -1,4 +1,4 @@
-Tabi-OS: Interactive Tool Platform
+ite Tabi-OS: Interactive Tool Platform
 
 An interactive tool platform is a website where users can easily find, use, and enjoy many different tools in a playful, desktop-like environment.
 

@@ -63,7 +63,7 @@ bun run lint
 
 ## 📁 Folder Structure
 
-Below is the recommended structure for the `src/` directory, matching the actual codebase. This organization makes it easy for contributors to find, add, or update code without breaking other features.
+Below is the actual structure for the `src/` directory, matching the codebase. This organization makes it easy for contributors to find, add, or update code without breaking other features.
 
 ```text
 src/
@@ -80,7 +80,7 @@ src/
       ...                     # Same structure as above
     ...
 
-    components/
+  components/
     ui/                       # Shared UI components (Shadcn, Radix, etc.)
     layout/                   # Layout components (Window, Taskbar, Sidebar, etc.)
     appstore/                 # App store/discovery components
@@ -100,11 +100,12 @@ src/
 
   infrastructure/
     lib/                      # External libraries, SDKs (e.g., Supabase client)
+    utils/                    # Utility functions (e.g., report.ts for bug/feedback, localStorage helpers)
 
-  utils/                      # Utility functions (localStorage, formatting, etc.)
+  locales/                    # i18n files (en.ts, zh-TW.ts, etc.)
+  styles/                     # Global styles (Tailwind, etc.)
   types/                      # Shared types/interfaces
-  locales/                    # i18n files
-  styles/                     # Global styles
+  utils/                      # (Legacy) Utility functions (may be migrated to infrastructure/utils)
 
   app/                        # Next.js app directory (routing, layouts, API)
     [locale]/                 # Localized pages/layouts
@@ -114,12 +115,13 @@ src/
 > 💡 **Contributor Note:**
 > - Keep all app logic inside your app folder (under `src/apps/`).
 > - Use global atoms/hooks only for truly global state (in `src/application/`).
-> - Place shared UI in `src/components/ui/` and shared logic in `src/utils/` or `src/types/`.
+> - Place shared UI in `src/components/ui/` and shared logic in `src/infrastructure/utils/` or `src/types/`.
 > - Name files and folders clearly and consistently.
 > - Document your app with a README.md if it has complex logic.
 > - Avoid cross-app imports unless absolutely necessary.
 > - Test your app independently before submitting a PR.
 > - Follow the naming conventions and code guidelines in this README.
+> - **Report/Feedback modals:** Cooldown is persisted for 30 minutes (even after refresh) and supports i18n (English/Chinese).
 
 ---
 
@@ -173,7 +175,7 @@ bun run lint
 
 ## 📁 資料夾結構
 
-以下是 `src/` 目錄的推薦結構，與實際專案一致。這種組織方式讓貢獻者能夠輕鬆找到、添加或更新程式碼，而不會影響其他功能。
+以下是 `src/` 目錄的實際結構，與專案一致。這種組織方式讓貢獻者能夠輕鬆找到、添加或更新程式碼，而不會影響其他功能。
 
 ```text
 src/
@@ -210,11 +212,12 @@ src/
 
   infrastructure/
     lib/                      # 外部函式庫、SDK（如 Supabase client）
+    utils/                    # 工具函式（如 report.ts、localStorage helpers）
 
-  utils/                      # 工具函式（localStorage、格式化等）
+  locales/                    # 多語系檔案（en.ts、zh-TW.ts 等）
+  styles/                     # 全域樣式（Tailwind 等）
   types/                      # 共用型別/介面
-  locales/                    # 多語系檔案
-  styles/                     # 全域樣式
+  utils/                      # （舊）工具函式（可能已遷移至 infrastructure/utils）
 
   app/                        # Next.js app 目錄（路由、佈局、API）
     [locale]/                 # 多語系頁面/佈局
@@ -224,12 +227,13 @@ src/
 > 💡 **貢獻者注意：**
 > - 請將所有 app 邏輯維持在 app 資料夾內（`src/apps/`）。
 > - 僅將真正全域的狀態放在全域 atoms/hooks（`src/application/`）。
-> - 共用 UI 請放在 `src/components/ui/`，共用邏輯請放在 `src/utils/` 或 `src/types/`。
+> - 共用 UI 請放在 `src/components/ui/`，共用邏輯請放在 `src/infrastructure/utils/` 或 `src/types/`。
 > - 檔案與資料夾命名需清楚且一致。
 > - 若 app 較複雜，請於 app 資料夾內補充 README.md。
 > - 除非必要，避免跨 app 引用。
 > - PR 前請獨立測試你的 app。
 > - 請遵循本 README 的命名與程式碼規範。
+> - **回報/回饋表單：** 冷卻時間 30 分鐘（即使重新整理也會記憶），並支援中英文 i18n。
 
 ---
 
