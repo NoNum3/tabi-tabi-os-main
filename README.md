@@ -1,23 +1,18 @@
 # Tabi-OS
 
-<p align="center">
-  <a href="#english-version">🇬🇧 English</a> | <a href="#繁體中文版本">🇹🇼 繁體中文</a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build Status" />
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
-  <img src="https://img.shields.io/badge/version-1.0.0-orange" alt="Version" />
-  <a href="#demo"><img src="https://img.shields.io/badge/demo-live-green" alt="Demo" /></a>
-</p>
+[🇬🇧 English](#english) | [🇹🇼 繁體中文](#繁體中文)
 
 ---
 
-# <a name="english-version"></a>🇬🇧 English Version
+## 🌏 About Tabi-OS | 關於 Tabi-OS
 
-> **Tabi-OS** is inspired by the Japanese word 'Tabi-Tabi' (often, frequently). This OS provides a streamlined toolkit of reusable utilities. We prioritize performance, minimalist design, and a great user experience, inviting users to rate and shape the tool collection through feedback.
+**Tabi-OS** is a modular, user-driven desktop platform inspired by the Japanese word 'Tabi-Tabi' (often, frequently). It provides a streamlined toolkit of reusable utilities, prioritizing performance, minimalist design, and a great user experience. Users can rate and shape the tool collection through feedback.
+
+**Tabi-OS** 名稱源自日語「たびたび」（意為「經常、頻繁」）。本作業系統提供一套流線型、可重用的工具組，重視效能、極簡設計與卓越的使用者體驗，並邀請用戶透過評分與回饋共同完善工具集。
 
 ---
+
+## English
 
 ## 🚀 Quick Start
 
@@ -32,6 +27,10 @@ bun run dev
 bun run lint
 ```
 
+> **Troubleshooting:**
+> - Make sure you have [Bun](https://bun.sh/) installed (`bun --version`).
+> - If you see errors, try deleting `node_modules` and running `bun install` again.
+
 ---
 
 ## 🎬 Demo
@@ -44,20 +43,20 @@ bun run lint
 
 ## 🛠️ Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org/) v15.x
-- **UI Library:** [React](https://reactjs.org/) v19.x
-- **State Management:** [Jotai](https://jotai.org/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) v4.x
-- **UI Components:** [Radix UI](https://www.radix-ui.com/), [shadcn/ui](https://ui.shadcn.com/)
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **Backend/DB:** [Supabase](https://supabase.io/) (for Auth, Likes, User Preferences)
-- **Language:** [TypeScript](https://www.typescriptlang.org/) v5.x
-- **Package Manager:** [Bun](https://bun.sh/) v1.x
-- **Linting:** [ESLint](https://eslint.org/)
-- **Git Hooks:** [Husky](https://typicode.github.io/husky/)
-- **Commit Linting:** [Commitlint](https://commitlint.js.org/)
-- **Containerization:** [Docker](https://www.docker.com/)
-- **Editor:** [Tiptap](https://tiptap.dev/)
+- **Framework:** [Next.js](https://nextjs.org/) v15.x — Modern React framework for SSR and routing
+- **UI Library:** [React](https://reactjs.org/) v19.x — Component-based UI
+- **State Management:** [Jotai](https://jotai.org/) — Atomic, scalable state
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) v4.x — Utility-first CSS
+- **UI Components:** [Radix UI](https://www.radix-ui.com/), [shadcn/ui](https://ui.shadcn.com/) — Accessible, customizable UI
+- **Icons:** [Lucide React](https://lucide.dev/) — Icon library
+- **Backend/DB:** [Supabase](https://supabase.io/) — Auth, likes, user preferences
+- **Language:** [TypeScript](https://www.typescriptlang.org/) v5.x — Type safety
+- **Package Manager:** [Bun](https://bun.sh/) v1.x — Fast JS runtime & package manager
+- **Linting:** [ESLint](https://eslint.org/) — Code quality
+- **Git Hooks:** [Husky](https://typicode.github.io/husky/) — Pre-commit checks
+- **Commit Linting:** [Commitlint](https://commitlint.js.org/) — Commit message standards
+- **Containerization:** [Docker](https://www.docker.com/) — Easy deployment
+- **Editor:** [Tiptap](https://tiptap.dev/) — Rich text editing
 
 ---
 
@@ -112,24 +111,56 @@ src/
     api/                      # API routes
 ```
 
-> 💡 **Contributor Note:**
-> - Keep all app logic inside your app folder (under `src/apps/`).
-> - Use global atoms/hooks only for truly global state (in `src/application/`).
-> - Place shared UI in `src/components/ui/` and shared logic in `src/infrastructure/utils/` or `src/types/`.
-> - Name files and folders clearly and consistently.
-> - Document your app with a README.md if it has complex logic.
-> - Avoid cross-app imports unless absolutely necessary.
-> - Test your app independently before submitting a PR.
-> - Follow the naming conventions and code guidelines in this README.
-> - **Report/Feedback modals:** Cooldown is persisted for 30 minutes (even after refresh) and supports i18n (English/Chinese).
+> 💡 **How to add your own app:**
+> - Create a new folder under `src/apps/your-app/`.
+> - Add your components, config, and logic inside your app folder.
+> - Export your app config and main component in `index.ts`.
+> - See [CONTRIBUTING.md](./CONTRIBUTING.md) for full details.
 
 ---
 
-# <a name="繁體中文版本"></a>🇹🇼 繁體中文版本
+## 🤝 How to Contribute
 
-> **Tabi-OS** 名稱源自日語「たびたび」（意為「經常、頻繁」）。本作業系統提供一套流線型、可重用的工具組。我們重視效能、極簡設計與卓越的使用者體驗，並邀請用戶透過評分與回饋共同完善工具集。
+We welcome all contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines on:
+- Setting up your environment
+- Coding standards
+- Creating new apps
+- Submitting pull requests
+- Accessibility and performance requirements
 
 ---
+
+## 🌐 Code of Conduct
+
+Please be respectful and inclusive. See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for details.
+
+---
+
+## ❓ FAQ
+
+**Q: How do I add a new app?**
+- A: Create a folder in `src/apps/`, add your code, and export your config/component in `index.ts`. No global changes needed!
+
+**Q: How do I run tests?**
+- A: Use `bun test` (if tests are available for your app).
+
+**Q: How do I add translations?**
+- A: Add or update `en.json`, `zh-TW.json`, etc. in `src/locales/` or your app's `locales/` folder.
+
+**Q: What if my PR fails lint or test checks?**
+- A: Please fix all issues before requesting review.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+[⬆ Back to top](#tabi-os)
+
+---
+
+## 繁體中文
 
 ## 🚀 快速開始
 
@@ -144,6 +175,10 @@ bun run dev
 bun run lint
 ```
 
+> **疑難排解：**
+> - 請確認已安裝 [Bun](https://bun.sh/)（`bun --version`）。
+> - 若遇到錯誤，請刪除 `node_modules` 並重新執行 `bun install`。
+
 ---
 
 ## 🎬 線上展示
@@ -156,20 +191,20 @@ bun run lint
 
 ## 🛠️ 技術棧
 
-- **框架：** [Next.js](https://nextjs.org/) v15.x
-- **UI 函式庫：** [React](https://reactjs.org/) v19.x
-- **狀態管理：** [Jotai](https://jotai.org/)
-- **樣式：** [Tailwind CSS](https://tailwindcss.com/) v4.x
-- **UI 元件：** [Radix UI](https://www.radix-ui.com/)、[shadcn/ui](https://ui.shadcn.com/)
-- **圖示：** [Lucide React](https://lucide.dev/)
-- **後端/資料庫：** [Supabase](https://supabase.io/)（用於認證、按讚、偏好設定）
-- **語言：** [TypeScript](https://www.typescriptlang.org/) v5.x
-- **套件管理：** [Bun](https://bun.sh/) v1.x
-- **Lint 工具：** [ESLint](https://eslint.org/)
-- **Git Hooks：** [Husky](https://typicode.github.io/husky/)
-- **Commit Lint：** [Commitlint](https://commitlint.js.org/)
-- **容器化：** [Docker](https://www.docker.com/)
-- **編輯器：** [Tiptap](https://tiptap.dev/)
+- **框架：** [Next.js](https://nextjs.org/) v15.x — 現代 React 框架，支援 SSR 與路由
+- **UI 函式庫：** [React](https://reactjs.org/) v19.x — 元件化 UI
+- **狀態管理：** [Jotai](https://jotai.org/) — 原子化、可擴展狀態
+- **樣式：** [Tailwind CSS](https://tailwindcss.com/) v4.x — 實用優先 CSS
+- **UI 元件：** [Radix UI](https://www.radix-ui.com/)、[shadcn/ui](https://ui.shadcn.com/) — 無障礙、可自訂 UI
+- **圖示：** [Lucide React](https://lucide.dev/) — 圖示庫
+- **後端/資料庫：** [Supabase](https://supabase.io/) — 認證、按讚、偏好設定
+- **語言：** [TypeScript](https://www.typescriptlang.org/) v5.x — 型別安全
+- **套件管理：** [Bun](https://bun.sh/) v1.x — 快速 JS 執行環境與套件管理
+- **Lint 工具：** [ESLint](https://eslint.org/) — 程式碼品質
+- **Git Hooks：** [Husky](https://typicode.github.io/husky/) — 提交前檢查
+- **Commit Lint：** [Commitlint](https://commitlint.js.org/) — Commit 訊息規範
+- **容器化：** [Docker](https://www.docker.com/) — 部署方便
+- **編輯器：** [Tiptap](https://tiptap.dev/) — 富文本編輯
 
 ---
 
@@ -224,23 +259,49 @@ src/
     api/                      # API 路由
 ```
 
-> 💡 **貢獻者注意：**
-> - 請將所有 app 邏輯維持在 app 資料夾內（`src/apps/`）。
-> - 僅將真正全域的狀態放在全域 atoms/hooks（`src/application/`）。
-> - 共用 UI 請放在 `src/components/ui/`，共用邏輯請放在 `src/infrastructure/utils/` 或 `src/types/`。
-> - 檔案與資料夾命名需清楚且一致。
-> - 若 app 較複雜，請於 app 資料夾內補充 README.md。
-> - 除非必要，避免跨 app 引用。
-> - PR 前請獨立測試你的 app。
-> - 請遵循本 README 的命名與程式碼規範。
-> - **回報/回饋表單：** 冷卻時間 30 分鐘（即使重新整理也會記憶），並支援中英文 i18n。
+> 💡 **如何新增自己的 app：**
+> - 在 `src/apps/your-app/` 下建立新資料夾。
+> - 將元件、設定與邏輯都放在 app 資料夾內。
+> - 在 `index.ts` 匯出 app 設定與主元件。
+> - 詳細請見 [CONTRIBUTING.md](./CONTRIBUTING.md)。
 
 ---
 
-For more details, see the [Development Guidelines](#-development-guidelines) and
-[Project Structure](#-folder-structure) sections above.
+## 🤝 如何貢獻
 
-## 📜 License
+歡迎各種貢獻！請參閱 [CONTRIBUTING.md](./CONTRIBUTING.md) 以獲得詳細指引：
+- 環境設置
+- 程式碼規範
+- 新增應用程式
+- 提交 Pull Request
+- 無障礙與效能要求
 
-This project is licensed under the MIT License - see the LICENSE file for
-details.
+---
+
+## 🌐 行為準則
+
+請保持尊重與包容。詳見 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)。
+
+---
+
+## ❓ 常見問題
+
+**問：如何新增 app？**
+- 答：在 `src/apps/` 建立資料夾，新增程式碼，並在 `index.ts` 匯出設定/元件，無需全域更動！
+
+**問：如何執行測試？**
+- 答：執行 `bun test`（如有測試）。
+
+**問：如何新增翻譯？**
+- 答：在 `src/locales/` 或 app 的 `locales/` 資料夾新增或更新 `en.json`、`zh-TW.json` 等。
+
+**問：PR 沒通過 lint 或測試怎麼辦？**
+- 答：請先修正所有問題再請求審查。
+
+---
+
+## 📜 授權
+
+本專案採用 MIT 授權，詳見 LICENSE 檔案。
+
+[⬆ 回到頂部](#tabi-os)
