@@ -8,6 +8,33 @@ To solve this, I was inspired by the look and feel of a virtual desktop operatin
 
 The journey was challenging—I had to rebuild the project many times (about 15 versions!) to get it right. Each time, I improved the design, navigation, and user experience. Now, Tabi-OS is a fun, modern web app where users can easily discover and use a variety of tools, all in one place.
 
+---
+
+## Advantages & Disadvantages of Tabi-OS (English)
+
+### Advantages
+- **Modern Tech Stack:** Uses Next.js (v15), React (v19), TypeScript, and Tailwind CSS for a fast, maintainable, and scalable codebase.
+- **Server-Side Rendering (SSR):** Improves SEO and initial load performance, especially for first-time visitors.
+- **Component Modularity:** Each app is isolated in its own folder, making it easy to add, update, or remove features without breaking others.
+- **Auto-Discovery:** New apps are auto-registered—no need for global code changes.
+- **i18n Support:** Full internationalization (English/Chinese) for all UI and feedback/reporting.
+- **Persistent State:** Features like report/feedback cooldowns are persisted in localStorage, surviving refreshes and browser restarts.
+- **Accessible & Responsive:** Follows accessibility best practices and works on desktop and mobile.
+- **Playful UX:** The desktop-like interface is engaging and familiar, making tool discovery fun.
+- **Supabase Integration:** Provides authentication, cloud sync, and scalable backend features.
+- **Open Source & Extensible:** Easy for contributors to add new tools or improve existing ones.
+
+### Disadvantages / Trade-offs
+- **SSR Complexity:** Server-side rendering adds complexity to deployment and debugging.
+- **Bundle Size:** Including many tools and UI libraries can increase the initial bundle size.
+- **Learning Curve:** New contributors must be familiar with Next.js, React, TypeScript, and the project's modular structure.
+- **State Management:** Jotai is simple but may require more boilerplate for complex global state.
+- **Mobile UX:** While responsive, some desktop metaphors may not be as intuitive on small screens.
+- **Cold Start:** SSR and cloud functions (e.g., Supabase) may have cold start latency on some hosts.
+- **Browser Storage Limits:** Persistent cooldowns and settings use localStorage, which has size and privacy limitations.
+
+---
+
 Tabi-OS：互動式工具平台
 
 互動式工具平台是一種網站，讓使用者可以在一個有趣、像桌面作業系統一樣的環境中，輕鬆找到、使用並享受各種不同的工具。
@@ -17,4 +44,166 @@ Tabi-OS 是我創建的一個網頁專案，目的是讓使用各種不同工具
 為了解決這個問題，我受到虛擬桌面作業系統的啟發，想讓體驗更互動、更有趣，就像在瀏覽器裡用一個真正的作業系統。我學習了 React 和 Next.js，並用 TypeScript 和 Tailwind CSS 來做動畫和設計，也用 SSR 來提升效能。
 
 這個過程很有挑戰性——我大約重做了 15 次才做對。每次都改進設計、導航和使用體驗。現在，Tabi-OS 是一個有趣、現代的網頁應用，讓使用者可以輕鬆發現並使用各種工具，全部集中在一個地方。
-est practi
+
+---
+
+## 優點與缺點（繁體中文）
+
+### 優點
+- **現代技術棧：** 採用 Next.js (v15)、React (v19)、TypeScript、Tailwind CSS，維護性與擴展性高。
+- **伺服器端渲染（SSR）：** 提升 SEO 與首次載入效能。
+- **模組化設計：** 每個 app 獨立於資料夾，方便新增、修改或移除功能。
+- **自動註冊：** 新 app 自動被平台發現，無需全域修改。
+- **多語系支援：** 全介面與回報/回饋皆支援中英文。
+- **狀態持久化：** 回報/回饋冷卻時間等狀態會記憶於 localStorage，重整或關閉瀏覽器也不會消失。
+- **無障礙與響應式：** 遵循 a11y 標準，桌機與手機皆可用。
+- **互動式體驗：** 桌面 OS 風格，讓工具探索更有趣。
+- **Supabase 整合：** 提供認證、雲端同步、可擴展後端。
+- **開源易擴充：** 歡迎貢獻新工具或改進現有功能。
+
+### 缺點／取捨
+- **SSR 複雜度：** 伺服器端渲染讓部署與除錯更複雜。
+- **初始載入體積：** 多工具與 UI 函式庫會增加 bundle 大小。
+- **學習曲線：** 新貢獻者需熟悉 Next.js、React、TypeScript 與專案結構。
+- **狀態管理：** Jotai 簡單但全域狀態較多時需額外設計。
+- **行動裝置 UX：** 桌面概念在小螢幕上不一定直覺。
+- **冷啟動延遲：** SSR 與雲端服務（如 Supabase）在某些主機上有冷啟動延遲。
+- **瀏覽器儲存限制：** localStorage 有容量與隱私限制。
+
+---
+
+## How to Present Tabi-OS to Your Professor (PowerPoint Structure)
+
+### Recommended Slide Structure (English)
+
+1. **Title Slide**
+   - Project name: Tabi-OS: Interactive Tool Platform
+   - Your name, date, (optional: logo/screenshot)
+
+2. **Project Overview**
+   - What is Tabi-OS? (1-2 sentences)
+   - Main goal: playful, desktop-like web platform for discovering and using many tools in one place
+
+3. **Motivation & Inspiration**
+   - Why you built it (problem with tool discoverability, boring lists)
+   - Inspiration: virtual desktop OS, playful UX
+
+4. **Key Features**
+   - Modular app system (each tool is an app)
+   - Auto-discovery of new apps
+   - Persistent state (e.g., report/feedback cooldown)
+   - i18n (English/Chinese)
+   - Accessibility (a11y), responsive design
+   - Supabase integration (auth, cloud sync, feedback)
+   - Feedback/reporting system
+
+5. **Tech Stack**
+   - Next.js, React, TypeScript, Tailwind CSS, Jotai, Supabase, Shadcn/Radix UI, ESLint, Husky, Commitlint, Docker, Bun
+
+6. **Architecture & Folder Structure**
+   - Diagram or bullet list of main folders (apps, components, application, infrastructure, config, public, locales)
+   - Explain modularity and separation of concerns
+
+7. **User Experience & Accessibility**
+   - Desktop-like interface, drag-and-drop, window system
+   - Keyboard navigation, semantic HTML, color contrast
+   - Mobile responsiveness
+
+8. **Advantages & Trade-offs**
+   - List main advantages (performance, modularity, SSR, i18n, etc.)
+   - List main trade-offs (SSR complexity, bundle size, learning curve, etc.)
+
+9. **Demo (Screenshots or Live)**
+   - Show key screens: dashboard, app store, feedback modal, etc.
+   - (If live, do a quick walkthrough)
+
+10. **Challenges & Solutions**
+    - Major challenges (SSR, i18n, state persistence)
+    - How you solved them (modular code, localStorage, error boundaries, etc.)
+
+11. **Future Improvements**
+    - Planned features (changelog, about page, login/cloud sync, etc.)
+    - Ideas for community contributions
+
+12. **Q&A**
+    - Invite questions
+
+13. **Thank You / Contact**
+    - Your contact info (optional)
+    - "Thank you for your attention!"
+
+#### Extra Tips for a Great Presentation
+- Use visuals: diagrams, screenshots, icons
+- Keep slides focused (1 main idea per slide)
+- Bullet points > paragraphs
+- Practice timing (8–12 minutes total)
+- Be ready to show code or demo if asked
+- Prepare to answer questions about design choices, tech stack, and challenges
+
+---
+
+### 推薦簡報結構（繁體中文）
+
+1. **標題頁**
+   - 專案名稱：Tabi-OS：互動式工具平台
+   - 你的名字、日期、（可選：Logo/截圖）
+
+2. **專案簡介**
+   - 什麼是 Tabi-OS？（1-2 句話）
+   - 主要目標：在瀏覽器中提供像桌面作業系統一樣的多工具平台
+
+3. **動機與靈感**
+   - 為什麼要做這個（工具難找、列表無聊）
+   - 靈感來源：虛擬桌面 OS、互動式 UX
+
+4. **主要功能**
+   - 模組化 app 系統（每個工具一個 app）
+   - 自動發現新 app
+   - 狀態持久化（如回報/回饋冷卻）
+   - 多語系（中英文）
+   - 無障礙（a11y）、響應式設計
+   - Supabase 整合（認證、雲端同步、回饋）
+   - 回報/回饋系統
+
+5. **技術棧**
+   - Next.js、React、TypeScript、Tailwind CSS、Jotai、Supabase、Shadcn/Radix UI、ESLint、Husky、Commitlint、Docker、Bun
+
+6. **架構與資料夾結構**
+   - 主要資料夾圖或條列（apps、components、application、infrastructure、config、public、locales）
+   - 說明模組化與職責分離
+
+7. **使用者體驗與無障礙**
+   - 桌面風格介面、拖曳、視窗系統
+   - 鍵盤操作、語意化 HTML、色彩對比
+   - 行動裝置支援
+
+8. **優點與取捨**
+   - 主要優點（效能、模組化、SSR、多語系等）
+   - 主要取捨（SSR 複雜度、bundle 大小、學習曲線等）
+
+9. **Demo（截圖或現場展示）**
+   - 展示主要畫面：主頁、app 商店、回饋表單等
+   - （如可，現場操作）
+
+10. **挑戰與解決方案**
+    - 主要挑戰（SSR、多語系、狀態持久化）
+    - 解決方式（模組化、localStorage、錯誤邊界等）
+
+11. **未來規劃**
+    - 預計功能（changelog、about、登入/雲端同步等）
+    - 社群貢獻想法
+
+12. **Q&A**
+    - 歡迎提問
+
+13. **感謝/聯絡方式**
+    - 聯絡資訊（可選）
+    - "感謝聆聽！"
+
+#### 簡報加分小技巧
+- 多用圖示、截圖、流程圖
+- 每頁只講一個重點
+- 條列重點，避免大段文字
+- 練習時間控制（8–12 分鐘）
+- 準備好現場展示或程式碼
+- 準備回答設計、技術選型、挑戰等問題
