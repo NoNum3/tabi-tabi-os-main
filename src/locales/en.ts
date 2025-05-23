@@ -474,7 +474,6 @@ export default {
     customColor: "Custom Color",
     resetToDefault: "Reset to Default",
     apply: "Apply",
-    cancel: "Cancel",
 
     // ===== Toasts & Notifications =====
     appUnavailableToast: "This app isn't available. Please add it from the App Store or log in.",
@@ -489,4 +488,23 @@ export default {
     chooseFile: "Choose File",
     noFileChosen: "No file chosen",
     delete: "Delete",
+
+    // ===== Report/Feedback Modal =====
+    reportBug: 'Report a Bug',
+    sendFeedback: 'Send Feedback',
+    reportDescriptionLabel: 'Description',
+    reportDescriptionPlaceholder: 'Describe the bug (min {min} chars). What happened? Steps to reproduce? Example: "When I click Save, nothing happens."',
+    reportDescriptionError: 'Description must be at least {min} characters.',
+    reportEmailLabel: 'Email (optional)',
+    reportThankYou: 'Thank you for your report!',
+    reportError: 'Failed to submit. Please try again later.',
+    feedbackDescriptionLabel: 'Feedback',
+    feedbackDescriptionPlaceholder: 'Share your thoughts (min {min} chars). What do you like? What could be better? Example: "I love the dark mode, but wish there was a search feature."',
+    feedbackDescriptionError: 'Feedback must be at least {min} characters.',
+    feedbackEmailLabel: 'Email (optional)',
+    feedbackThankYou: 'Thank you for your feedback!',
+    feedbackError: 'Failed to submit. Please try again later.',
+    chars: 'chars',
+    waitSeconds: 'Wait {seconds}s',
+    submit: 'Submit',
 } as const;

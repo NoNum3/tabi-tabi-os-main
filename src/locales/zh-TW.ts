@@ -244,7 +244,6 @@ export default {
     timerEdit: "編輯",
     timerDelete: "刪除",
     timerConfirm: "確認",
-    timerCancel: "取消",
     timerTimeUp: "時間到！",
     timerSelectTimezone: "選擇時區...",
     timerCommonTimezones: "常用時區",
@@ -493,7 +492,6 @@ export default {
 
     // ===== Common UI Actions =====
     apply: "套用",
-    cancel: "取消",
     back: "返回",
     selected: "已選取",
     customColor: "自訂顏色",
@@ -519,4 +517,23 @@ export default {
     chooseFile: '選擇檔案',
     noFileChosen: '尚未選擇檔案',
     delete: '刪除',
+
+    // ===== Report/Feedback Modal =====
+    reportBug: '回報錯誤',
+    sendFeedback: '提供回饋',
+    reportDescriptionLabel: '描述',
+    reportDescriptionPlaceholder: '請描述錯誤（至少 {min} 字）。發生了什麼？如何重現？例如：「當我點擊儲存時，沒有反應。」',
+    reportDescriptionError: '描述至少需 {min} 字。',
+    reportEmailLabel: '電子郵件（選填）',
+    reportThankYou: '感謝您的回報！',
+    reportError: '提交失敗，請稍後再試。',
+    feedbackDescriptionLabel: '回饋',
+    feedbackDescriptionPlaceholder: '請分享您的想法（至少 {min} 字）。您喜歡什麼？有什麼可以改進？例如：「我喜歡深色模式，但希望有搜尋功能。」',
+    feedbackDescriptionError: '回饋至少需 {min} 字。',
+    feedbackEmailLabel: '電子郵件（選填）',
+    feedbackThankYou: '感謝您的回饋！',
+    feedbackError: '提交失敗，請稍後再試。',
+    chars: '字',
+    waitSeconds: '請等待 {seconds} 秒',
+    submit: '送出',
 } as const;

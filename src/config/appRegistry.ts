@@ -36,6 +36,9 @@ export interface AppRegistryEntry {
   category: AppCategory; // Added category field
   requiresAuth?: boolean; // Added for authentication requirement
   nameKey?: string; // Added for translation
+  version?: string;
+  lastUpdated?: string;
+  changelog?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: React.ComponentType<any>;
 }
@@ -114,6 +117,9 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     requiresAuth: true,
     nameKey: "bookmarkAppName",
     component: BookmarksApp,
+    version: "2024.06.08-1",
+    lastUpdated: "2024-06-08",
+    changelog: "Initial release with Supabase sync, folders, and accessibility improvements.",
   },
   ambience: {
     // name: "Ambience", // Removed

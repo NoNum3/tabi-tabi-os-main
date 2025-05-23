@@ -397,6 +397,62 @@ export type Database = {
         }
         Relationships: []
       }
+      app_reports: {
+        Row: {
+          id: string;
+          app_id: string;
+          app_version: string;
+          type: 'bug' | 'feedback';
+          description: string;
+          email: string | null;
+          screenshot: string | null;
+          created_at: string;
+          user_id: string | null;
+          status: 'new' | 'reviewed' | 'closed';
+          ip_address: string | null;
+          user_agent: string | null;
+          website: string | null;
+        };
+        Insert: {
+          id?: string;
+          app_id: string;
+          app_version: string;
+          type: 'bug' | 'feedback';
+          description: string;
+          email?: string | null;
+          screenshot?: string | null;
+          created_at?: string;
+          user_id?: string | null;
+          status?: 'new' | 'reviewed' | 'closed';
+          ip_address?: string | null;
+          user_agent?: string | null;
+          website?: string | null;
+        };
+        Update: {
+          id?: string;
+          app_id?: string;
+          app_version?: string;
+          type?: 'bug' | 'feedback';
+          description?: string;
+          email?: string | null;
+          screenshot?: string | null;
+          created_at?: string;
+          user_id?: string | null;
+          status?: 'new' | 'reviewed' | 'closed';
+          ip_address?: string | null;
+          user_agent?: string | null;
+          website?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "app_reports_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     }
     Views: {
       [_ in never]: never
