@@ -535,4 +535,7 @@ export default {
     resetPasswordTitle: "Reset Password",
     resetPasswordLabel: "Email",
     toggleSidebar: "Toggle Sidebar",
+    authUsernameLabel: "Username",
+    authEmailLabel: "Email",
+    authPasswordLabel: "Password",
 } as const;

@@ -564,4 +564,7 @@ export default {
     resetPasswordTitle: "重設密碼",
     resetPasswordLabel: "電子郵件",
     toggleSidebar: "切換側邊欄",
+    authUsernameLabel: "用戶名",
+    authEmailLabel: "電子郵件",
+    authPasswordLabel: "密碼",
 } as const;

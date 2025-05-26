@@ -67,7 +67,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email-signin" className="text-right">
-                                Email
+                                {t('authEmailLabel')}
                             </Label>
                             <Input
                                 id="email-signin"
@@ -82,7 +82,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password-signin" className="text-right">
-                                Password
+                                {t('authPasswordLabel')}
                             </Label>
                             <Input
                                 id="password-signin"
@@ -153,7 +153,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="username-signup" className="text-right">
-                                Username
+                                {t('authUsernameLabel')}
                             </Label>
                             <Input
                                 id="username-signup"
@@ -171,7 +171,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email-signup" className="text-right">
-                                Email
+                                {t('authEmailLabel')}
                             </Label>
                             <Input
                                 id="email-signup"
@@ -193,7 +193,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                         )}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password-signup" className="text-right">
-                                Password
+                                {t('authPasswordLabel')}
                             </Label>
                             <Input
                                 id="password-signup"
