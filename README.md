@@ -57,6 +57,9 @@ bun run lint
 - **Commit Linting:** [Commitlint](https://commitlint.js.org/) — Commit message standards
 - **Containerization:** [Docker](https://www.docker.com/) — Easy deployment
 - **Editor:** [Tiptap](https://tiptap.dev/) — Rich text editing
+- **Domain/DNS & DDoS Protection:** [Cloudflare](https://www.cloudflare.com/) — Domain management, DNS, and DDoS protection
+- **Bot/Spam Protection:** [Google reCAPTCHA](https://www.google.com/recaptcha/) — Prevents automated abuse
+- **Deployment:** [Vercel](https://vercel.com/) — Cloud hosting and CI/CD for Next.js
 
 ---
 
@@ -205,6 +208,9 @@ bun run lint
 - **Commit Lint：** [Commitlint](https://commitlint.js.org/) — Commit 訊息規範
 - **容器化：** [Docker](https://www.docker.com/) — 部署方便
 - **編輯器：** [Tiptap](https://tiptap.dev/) — 富文本編輯
+- **Domain/DNS & DDoS Protection:** [Cloudflare](https://www.cloudflare.com/) — Domain management, DNS, and DDoS protection
+- **Bot/Spam Protection:** [Google reCAPTCHA](https://www.google.com/recaptcha/) — Prevents automated abuse
+- **Deployment:** [Vercel](https://vercel.com/) — Cloud hosting and CI/CD for Next.js
 
 ---
 

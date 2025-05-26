@@ -6,8 +6,8 @@
   "category": "productivity",
   "permissions": ["network"],
   "author": "Tabi OS contributors",
-  "version": "2024.06.08-1",
-  "lastUpdated": "2024-06-08",
+  "version": "2025.05.24-1",
+  "lastUpdated": "2025-05-24",
   "changelog": "Initial release with Supabase sync, folders, and accessibility improvements.",
   "window": {
     "defaultSize": { "width": 480, "height": 600 },

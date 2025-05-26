@@ -1,0 +1,201 @@
+# Tabi-OS 專題報告 Project Report
+
+---
+
+## 1. 研究動機與目標 (Motivation & Objectives)
+
+Tabi-OS 的誕生源於現代數位工具分散、效率低落的現象。許多用戶在多個平台間切換，造成不便與困擾。本專題旨在打造一個開放、模組化且可擴充的雲端桌面平台，促進協作與創新，並降低使用與貢獻的門檻。
+
+The motivation for Tabi-OS comes from the fragmentation and inefficiency of digital tools today. Users often juggle multiple platforms, each with its own limitations. This project aims to create an open, modular, and extensible cloud desktop platform that encourages collaboration and innovation, while making it easy for anyone to use and contribute.
+
+### (1) 製作此專題之緣由 (Project Motivation)
+- 數位工具分散、效率低落，需多平台切換。
+- 封閉式/付費平台限制用戶自訂與貢獻。
+- 靈感來自多工具協作網站，目標打造開放、模組化、社群驅動的數位桌面。
+- 促進開源、協作與創新。
+
+現今數位工具分散且效率低落，用戶常需在多個平台間切換，造成操作上的不便與時間浪費。許多現有平台採取封閉式或需付費的模式，進一步限制了用戶自訂功能與社群貢獻的空間。
+
+Tabi-OS 的靈感來自於多工具協作網站，專案設計上強調模組化與高內聚、低耦合的原則。每個應用獨立存放於 `/src/apps/`，並透過自動註冊機制（`/src/config/appRegistry.ts`）實現無需全域修改即可擴充新功能，讓開發者能專注於單一 app 的開發與維護。
+
+我們希望藉由這樣的開放架構，促進開源、協作與創新，讓更多人能輕鬆參與、分享並共同完善這個數位桌面生態系。Tabi-OS 不僅提供多元工具，也降低了貢獻門檻，實現真正以社群為核心的現代雲端桌面平台。
+
+### (2) 預計目標 & 功能說明 (Objectives & Feature Overview)
+- 建立穩健、可擴充的雲端桌面平台（Next.js, React, Supabase）。
+- 支援多種實用工具（書籤、音樂、計算機、記事本、天氣等）。
+- App Store：探索、安裝、移除應用。
+- 多視窗系統，模擬真實桌面體驗。
+- SSR（伺服端渲染）提升效能與 SEO。
+- 無障礙設計（a11y）、多語系（i18n）、極簡美學。
+- 自動發現新應用、每個應用獨立隔離。
+
+本專題的首要目標是建立一個穩健且可擴充的雲端桌面平台，核心技術選用 Next.js、React 以及 Supabase，確保系統具備現代化的開發效率與高可維護性。平台設計上，強調模組化與彈性擴展，讓每個應用皆能獨立開發、測試與部署，並透過自動發現機制（如 `/src/config/appRegistry.ts`）實現無縫整合。
+
+Tabi-OS 支援多種實用工具，包括書籤管理、音樂播放、計算機、記事本、天氣查詢等，所有應用皆存放於 `/src/apps/` 目錄下，彼此隔離，確保高內聚低耦合。用戶可透過 App Store 介面自由探索、安裝或移除應用，實現個人化的數位桌面體驗。
+
+平台採用多視窗系統，模擬真實作業系統的操作邏輯，並結合 SSR（伺服端渲染）技術，提升網站效能與 SEO 表現。無障礙設計（a11y）與多語系（i18n）支援則確保不同背景與需求的用戶皆能輕鬆使用，並以極簡美學為設計主軸，提供直覺且一致的操作介面。
+
+此外，Tabi-OS 強調自動化與開放性，所有新應用皆可自動註冊並獨立運作，無需修改全域程式碼，降低開發與貢獻門檻，促進社群共同參與與持續創新。
+
+### (3) 研究方法 (Research Methods)
+- 文獻與現有平台分析。
+- 採用現代 Web 技術（React, Next.js, Supabase, Bun, TypeScript）。
+- 實作與反覆測試（敏捷開發、CI/CD、用戶回饋）。
+- 社群參與與貢獻。
+
+### (4) 研究流程 (Research Flow)
+1. 需求分析與目標設定
+2. 架構設計與技術選型
+3. 前後端開發與整合
+4. UI/UX 設計與無障礙測試
+5. 部署、測試與優化
+6. 用戶測試與回饋
+7. 文件撰寫與成果展示
+
+![研究流程圖 Research Flow Image](./images/research-flow.png)
+
+---
+
+## 2. 網頁儲存系統介紹 (Web Storage System Introduction)
+
+現代網頁應用需同時兼顧前端互動體驗與後端資料安全。Tabi-OS 採用前後端分離架構，前端負責用戶介面與狀態管理，後端則確保資料儲存、同步與安全。透過 API 溝通與 PostgreSQL 資料庫，平台能即時同步並保護用戶資料。
+
+Modern web applications must balance interactive user experiences with secure data management. Tabi-OS uses a decoupled architecture: the frontend handles UI and state, while the backend ensures data storage, synchronization, and security. Through API communication and a PostgreSQL database, the platform provides real-time sync and robust protection for user data.
+
+- 前端（Frontend）：負責 UI、互動、狀態管理（React, Next.js, Jotai, TypeScript）。
+- 後端（Backend）：資料儲存、認證、API（Supabase, PostgreSQL, RLS）。
+- SQL 語言（PostgreSQL）：結構化查詢語言，安全高效。
+- API：前後端溝通橋樑，確保資料同步與安全。
+
+### 2.1 系統優勢 (System Advantages)
+- 模組化架構，易於擴充與維護。
+- 雲端同步，多裝置即時更新。
+- 嚴格資料安全（RLS, Auth, Cloudflare, reCAPTCHA）。
+- 高效能 SSR、CDN 快速部署。
+- 開源社群驅動，易於貢獻。
+
+### 2.2 資料儲存的必要性與重要性 (Importance of Data Storage)
+- 用戶資料（書籤、偏好、筆記）需安全儲存，保證隱私。
+- 雲端儲存確保多裝置無縫體驗。
+- 實時同步提升用戶體驗。
+- 平台型網站需高可靠性與資料一致性。
+
+### 2.3 網頁儲存系統缺點 (Limitations)
+- 雲端依賴，離線功能有限。
+- 資料同步需考慮衝突與延遲。
+- 安全性需持續維護（DDoS, 資料外洩風險）。
+- 成本與維運壓力。
+
+### 2.4 使用程式介紹 (Tech & Code Structure)
+- 採用 TypeScript 強型別，減少錯誤。
+- i18n：每個 app 支援多語系（/locales/）。
+- a11y：所有 UI 元素有標籤、ARIA、鍵盤操作。
+- Bun：高效包管理與執行環境。
+- React 19 + Next.js 15：現代化 UI 框架。
+- Shadcn UI、Radix UI：一致且可存取的元件。
+- 自動 app 探索註冊（/src/config/appRegistry.ts）。
+- 嚴格資料夾結構，易於維護與擴充。
+- AI 輔助開發與測試。
+
+---
+
+## 3. 專案設計步驟 (Project Design Steps)
+
+- 使用 Git 版本控制，分支管理。
+- Commitlint 規範 commit 訊息。
+- Husky 設定 pre-commit/pre-push 檢查。
+- GitHub 進行協作與 PR 審查。
+- Bun 執行 lint、build、test。
+- ESLint 自動修正與檢查。
+- Debug：console.log、瀏覽器開發者工具。
+- 單元測試與 CI/CD 自動化。
+- 文件與 README 撰寫。
+
+---
+
+## 4. 開發過程介紹 (Development Process & Design Details)
+
+(1) 技術選型與架構設計
+- 選用 Next.js（SSR, RSC）、React、Supabase、TypeScript。
+- 採用模組化資料夾結構，提升維護性。
+- Jotai 管理原子化狀態，降低耦合。
+
+(2) 程式設計與運作方式
+
+在程式設計與開發流程上，Tabi-OS 強調每個 app 的獨立開發，無需修改全域程式碼即可擴充新功能，並支援平行開發。所有應用皆可自動註冊，前端與 Supabase API 進行即時資料同步，確保資料一致性。開發者可透過 `bun dev` 啟動本地開發環境，並以 `bun lint` 進行程式碼檢查。正式部署則交由 Vercel 自動化執行 build 與上線流程。專案的 `package.json` 文件中詳細設定了 scripts、依賴與型別，方便團隊統一管理與維護。下方提供 `package.json` 片段作為流程與設定的參考，建議以截圖方式呈現於論文中以保留原始格式。
+
+// package.json 片段（建議以截圖方式呈現）
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.x",
+    "react": "19.x",
+    "@supabase/supabase-js": "^2.0.0"
+    // ...
+  }
+}
+
+---
+
+## 5. 網站畫面介紹 (UI Screenshots & Features)
+
+- 多視窗桌面系統，App Store，儀表板。
+- 書籤、音樂、計算機、記事本、天氣等工具。
+- 無硬重新載入（SPA），多重下載、Loader。
+- 響應式設計，支援深色模式。
+- 無障礙設計（a11y）、多語系（i18n）。
+- 實時同步、雲端儲存。
+
+![桌面畫面 Desktop Screenshot](./images/desktop-screenshot.png)
+![App Store 畫面 App Store Screenshot](./images/appstore-screenshot.png)
+![多語系與無障礙 i18n & a11y Screenshot](./images/a11y-i18n-screenshot.png)
+
+---
+
+## 6. 遭遇的困難及解決辦法 (Challenges & Solutions)
+
+- 多語系與無障礙需反覆測試與優化。
+- 多視窗系統與 App Store 複雜度高，Jotai 降低耦合。
+- 資料同步與安全性：Supabase 即時功能、Cloudflare、防止機器人。
+- 新手貢獻者 onboarding：完善文件、自動 app 註冊。
+- 雲端依賴與成本：優化資源、CDN、lazy-load。
+
+---
+
+## 7. 未來展望 (Future Work)
+
+- 支援更多第三方 app、插件系統。
+- 強化雲端同步、行動裝置優化。
+- 新增通知、日曆、聊天、儀表板自訂。
+- 擴展 API，支援自動化與深度整合。
+- 持續優化效能與安全性。
+- 擴大開發者社群、完善文件。
+
+---
+
+## 8. 結論 (Conclusion)
+
+Tabi-OS 成功實現模組化、可擴充的雲端桌面平台，結合現代 Web 技術與社群協作。專案過程中累積了團隊合作、技術整合與問題解決的寶貴經驗。展望未來，Tabi-OS 將持續優化與擴展功能，推動資訊管理與開放原始碼領域的發展。
+
+Tabi-OS successfully implements a modular, extensible cloud desktop platform that leverages modern web technologies and community collaboration. The project has provided valuable experience in teamwork, technical integration, and problem-solving. Looking ahead, Tabi-OS will continue to evolve, expanding its features and impact in the field of information management and open source software. By prioritizing accessibility, performance, and openness, Tabi-OS sets a new standard for digital tool ecosystems.
+
+---
+
+## 9. 參考文獻 (References)
+
+- [Tabi-OS README.md]
+- [Tabi-OS CONTRIBUTING.md]
+- Next.js, React, Supabase 官方文件
+- PostgreSQL, Bun, Tailwind CSS, Shadcn UI, Radix UI, Lucide React
+- Cloudflare, Vercel, Google reCAPTCHA
+- [專案 GitHub Repo](https://github.com/your-repo-link)
+- 其他相關論文與技術部落格
+
+---
+
+> 本結構參考本專案 [README.md]、[CONTRIBUTING.md]，適用於專題報告、簡報或論文撰寫。

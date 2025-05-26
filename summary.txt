@@ -1,0 +1,19 @@
+1. Motivation and Goals
+
+The motivation behind Tabi-OS stems from a desire to create a platform where users and developers can both contribute and benefit from a shared ecosystem of tools. In a world where digital solutions are often fragmented, paid, or difficult to customize, I wanted to build an open, collaborative environment that empowers anyone to create, share, and improve useful applications. My goal was to lower the barrier for contribution, making it easy for users to add their own tools, provide feedback, and help shape the platform's evolution.
+
+Tabi-OS aims to be more than just a collection of utilities—it is a modular, user-driven desktop platform that encourages innovation and community involvement. By supporting seamless integration of new apps, versioning, and user feedback, Tabi-OS aspires to become a living ecosystem that adapts to the needs of its users. Ultimately, the project's goal is to foster a culture of open collaboration, where everyone can participate in building a better, more accessible digital toolkit for daily life.
+
+Tabi-OS began as a personal journey to create a platform where users could contribute tools and knowledge to benefit others—and be rewarded for their contributions. My initial inspiration was to build a learning platform, but I quickly realized that keeping educational content up-to-date was a constant struggle. The pace of change meant my courses would become outdated, and I found myself repeatedly starting over.
+
+After several iterations and lessons learned, I shifted my focus to building a website that offered a wide variety of daily tools—like a digital Swiss Army knife for users. However, I noticed that simply providing many tools wasn't enough. Users struggled to discover and use them comfortably, and only I, as the developer, truly understood how everything worked. This led me to rethink the user experience, emphasizing discoverability, feedback, and continuous improvement for each tool.
+
+The vision for Tabi-OS evolved: a modular, user-driven desktop platform where anyone can find, add, and even develop their own apps. Contributors can seamlessly integrate their tools via GitHub, complete with their own databases, APIs, and features. Each app is versioned and can be improved independently, with built-in feedback and reporting mechanisms.
+
+Inspired by the flexibility of modern operating systems and software like VirtualBox, I designed Tabi-OS to support multiple apps running in their own windows, with features like a customizable background and main menu bar. Developers can use local storage, databases, APIs, or even AI—anything is possible within this ecosystem.
+
+Some of the first apps I built for Tabi-OS were born from my own needs, like a YouTube music player and a bookmarks manager. Unlike many paid solutions, these are free and open, with data stored securely using Supabase. I chose Supabase because it's open source, affordable (especially when self-hosted), and developer-friendly, allowing for rapid local testing and type generation.
+
+Building Tabi-OS has been a journey of persistence—after more than 15 failed versions, I finally arrived at a platform that is flexible, maintainable, and easy to extend. Thanks to Next.js, React, reusable components, TypeScript, and modern UI libraries like shadcn, I can develop faster and with less repetitive code. Automation, linting, and AI-powered assistance have all played a role in making this project possible.
+
+I've invested countless hours learning React, Git, state management, and best practices to bring this vision to life. Now, I'm proud to present Tabi-OS: a modular, community-driven desktop platform inspired by the Japanese word 'Tabi-Tabi' (often, frequently), and the spirit of open collaboration. I hope it empowers users and developers alike to create, share, and improve tools for everyone.

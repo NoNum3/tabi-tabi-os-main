@@ -94,6 +94,51 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
     const [urlError, setUrlError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState('file');
 
+    // Profile section: Change Username & Reset Password
+    const [newUsername, setNewUsername] = useState(profile?.username || "");
+    const [usernameLoading, setUsernameLoading] = useState(false);
+    const [resetEmail, setResetEmail] = useState(user?.email || "");
+    const [resetLoading, setResetLoading] = useState(false);
+
+    // State for modals
+    const [usernameModalOpen, setUsernameModalOpen] = useState(false);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+
+    // Change Username handler
+    const handleChangeUsername = async () => {
+        if (!newUsername.trim()) {
+            toast(t('Username cannot be empty', { count: 1 }));
+            return;
+        }
+        setUsernameLoading(true);
+        try {
+            await setUpdateProfile({ username: newUsername.trim() });
+            toast(t('Username updated successfully', { count: 1 }));
+        } catch {
+            toast(t('Failed to update username', { count: 1 }));
+        } finally {
+            setUsernameLoading(false);
+        }
+    };
+
+    // Reset Password handler
+    const handleResetPassword = async () => {
+        if (!resetEmail.trim()) {
+            toast(t('Email cannot be empty', { count: 1 }));
+            return;
+        }
+        setResetLoading(true);
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim());
+            if (error) throw error;
+            toast(t('Password reset email sent', { count: 1 }));
+        } catch {
+            toast(t('Failed to send password reset email', { count: 1 }));
+        } finally {
+            setResetLoading(false);
+        }
+    };
+
     // Handle avatar click to open modal
     const handleAvatarClick = () => {
         setModalOpen(true);
@@ -377,6 +422,26 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                         </div>
                     </div>
                 </div>
+                {/* Profile section: minimalist with modal triggers */}
+                <section className="p-4 border-b border-border bg-background">
+                    <h2 className="text-lg font-semibold mb-2">{t('Profile', { count: 1 })}</h2>
+                    <div className="flex flex-col gap-2">
+                        <Button
+                            type="button"
+                            onClick={() => setUsernameModalOpen(true)}
+                            aria-label={t('Change Username', { count: 1 })}
+                        >
+                            {t('Change Username', { count: 1 })}
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() => setPasswordModalOpen(true)}
+                            aria-label={t('Reset Password', { count: 1 })}
+                        >
+                            {t('Reset Password', { count: 1 })}
+                        </Button>
+                    </div>
+                </section>
                 {/* Search bar */}
                 <div className="p-4 border-b border-border flex-shrink-0 bg-background/80 rounded-b-lg mb-0 pb-0">
                     <input
@@ -479,6 +544,56 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                     </Button>
                 </div>
             </aside>
+            {/* Change Username Modal */}
+            <Dialog open={usernameModalOpen} onOpenChange={setUsernameModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('Change Username', { count: 1 })}</DialogTitle>
+                    </DialogHeader>
+                    <div className="mb-4">
+                        <Label htmlFor="username-input">{t('Username', { count: 1 })}</Label>
+                        <input
+                            id="username-input"
+                            type="text"
+                            className="w-full mt-1 p-2 border rounded"
+                            value={newUsername}
+                            onChange={e => setNewUsername(e.target.value)}
+                            disabled={usernameLoading}
+                            aria-label={t('Change Username', { count: 1 })}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleChangeUsername} disabled={usernameLoading} aria-label={t('Change Username', { count: 1 })}>
+                            {usernameLoading ? t('Saving...', { count: 1 }) : t('Change Username', { count: 1 })}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            {/* Reset Password Modal */}
+            <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('Reset Password', { count: 1 })}</DialogTitle>
+                    </DialogHeader>
+                    <div className="mb-4">
+                        <Label htmlFor="reset-email-input">{t('Email', { count: 1 })}</Label>
+                        <input
+                            id="reset-email-input"
+                            type="email"
+                            className="w-full mt-1 p-2 border rounded"
+                            value={resetEmail}
+                            onChange={e => setResetEmail(e.target.value)}
+                            disabled={resetLoading}
+                            aria-label={t('Reset Password', { count: 1 })}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleResetPassword} disabled={resetLoading} aria-label={t('Reset Password', { count: 1 })}>
+                            {resetLoading ? t('Sending...', { count: 1 }) : t('Reset Password', { count: 1 })}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

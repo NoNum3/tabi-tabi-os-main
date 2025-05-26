@@ -9,6 +9,7 @@ import type { TablesInsert, Json } from "@/types/supabase";
 export const bookmarksAtom = atom<Bookmark[]>([]);
 export const bookmarksErrorAtom = atom<string | null>(null);
 export const bookmarksLoadingAtom = atom<boolean>(false);
+export const bookmarksReorderingAtom = atom(false);
 
 export const fetchBookmarksAtom = atom(
   null,
@@ -143,13 +144,14 @@ export const reorderBookmarksAtom = atom(
     const user = get(userAtom);
     if (!user) return;
     const prevBookmarks = get(bookmarksAtom);
-    // Optimistically update local order
+    set(bookmarksReorderingAtom, true);
+    // Optimistically update local order for instant UI feedback
     const newOrder = orderedIds
       .map(id => prevBookmarks.find(b => b.id === id))
       .filter(Boolean) as Bookmark[];
     set(bookmarksAtom, newOrder);
-    // Try to update Supabase
     try {
+      // Batch update sort_order in Supabase
       await Promise.all(
         orderedIds.map((id, idx) =>
           supabase
@@ -159,11 +161,15 @@ export const reorderBookmarksAtom = atom(
             .eq("user_id", user.id)
         )
       );
+      // Refetch to ensure local state matches DB (handles race conditions and realtime events)
+      await set(fetchBookmarksAtom);
     } catch {
       // Revert on error
       set(bookmarksAtom, prevBookmarks);
       set(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>, "Failed to reorder bookmarks");
     }
+    // Debounce: wait 500ms before allowing realtime updates again
+    setTimeout(() => set(bookmarksReorderingAtom, false), 500);
   }
 );
 
@@ -171,6 +177,7 @@ export const useBookmarksRealtime = () => {
   const user = useAtom(userAtom)[0];
   const setBookmarks = useSetAtom(bookmarksAtom);
   const setError = useSetAtom(bookmarksErrorAtom as WritableAtom<string | null, [string | null], void>);
+  const [isReordering] = useAtom(bookmarksReorderingAtom);
 
   useEffect(() => {
     if (!user) return;
@@ -185,6 +192,7 @@ export const useBookmarksRealtime = () => {
           filter: `user_id=eq.${user.id}`,
         },
         async () => {
+          if (isReordering) return;
           const { data, error } = await supabase
             .from("bookmarks")
             .select("id, user_id, url, title, description, tags, favicon_url, folder_id, is_favorite, is_pinned, symbol, color, sort_order, created_at, updated_at, deleted_at")
@@ -201,5 +209,5 @@ export const useBookmarksRealtime = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, setBookmarks, setError]);
+  }, [user, setBookmarks, setError, isReordering]);
 }; 

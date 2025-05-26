@@ -32,7 +32,7 @@ export const LayoutClientWrapper: React.FC<LayoutClientWrapperProps> = (
             <div className="flex h-screen">
                 {/* We might need to adjust main content padding/margin dynamically if sidebar pushes content */}
                 {/* For now, assuming overlay as implemented */}
-                <main className="flex-1 overflow-y-auto min-w-0">
+                <main className="flex-1 min-w-0">
                     {children}
                 </main>
             </div>

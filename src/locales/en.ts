@@ -74,6 +74,8 @@ export default {
     bookmarkTagsPlaceholder: "e.g. work, docs",
     bookmarkFolder: "Folder",
     bookmarkFolderAll: "All Bookmarks",
+    bookmarkAllBookmarks: "All Bookmarks",
+    searchFolders: "Search folders...",
     bookmarkFolderUnsorted: "Unsorted Bookmarks",
     bookmarkFolderRecycleBin: "Recycle Bin",
     folderAdd: "Add Folder",
@@ -516,4 +518,13 @@ export default {
     signOutSuccess: "Signed Out",
     signOutGoodbye: "You have been signed out successfully.",
     signOutFailed: "Sign Out Failed",
+
+    // ===== Profile/Account =====
+    changeUsername: "Change Username",
+    resetPassword: "Reset Password",
+    username: "Username",
+    email: "Email",
+    saving: "Saving...",
+    sending: "Sending...",
+    cancel: "Cancel",
 } as const;

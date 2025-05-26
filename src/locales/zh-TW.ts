@@ -80,6 +80,8 @@ export default {
     bookmarkTagsPlaceholder: "例如：工作, 文件",
     bookmarkFolder: "資料夾",
     bookmarkFolderAll: "所有書籤",
+    bookmarkAllBookmarks: "所有書籤",
+    searchFolders: "搜尋資料夾…",
     bookmarkFolderUnsorted: "未分類書籤",
     bookmarkFolderRecycleBin: "回收桶",
     folderAdd: "新增資料夾",
@@ -545,4 +547,13 @@ export default {
     chars: '字',
     waitSeconds: '請等待 {seconds} 秒',
     submit: '送出',
+
+    // ===== Profile/Account =====
+    changeUsername: "更改用戶名",
+    resetPassword: "重設密碼",
+    username: "用戶名",
+    email: "電子郵件",
+    saving: "儲存中...",
+    sending: "發送中...",
+    cancel: "取消",
 } as const;

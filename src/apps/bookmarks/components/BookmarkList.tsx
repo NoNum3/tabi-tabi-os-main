@@ -115,7 +115,7 @@ export const BookmarkList = ({ selectedFolder, onEdit, onAddBookmark, sort = 'cu
       <DragDropContext onDragEnd={enableDragDrop ? handleDragEnd : () => {}}>
         <Droppable droppableId="bookmark-list" isDropDisabled={!enableDragDrop || filtered.length < 2}>
           {(provided) => (
-            <ul className="space-y-2" ref={provided.innerRef} {...provided.droppableProps}>
+            <ul className="space-y-2 overflow-y-auto max-h-full" ref={provided.innerRef} {...provided.droppableProps}>
               {filtered.map((b, idx) => (
                 <Draggable key={b.id} draggableId={b.id} index={idx} isDragDisabled={!enableDragDrop || filtered.length < 2}>
                   {(provided, snapshot) => (

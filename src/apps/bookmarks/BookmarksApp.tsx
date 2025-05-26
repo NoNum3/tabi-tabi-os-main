@@ -131,11 +131,11 @@ export const BookmarksApp = () => {
           </Select>
         </label>
       </div>
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         <aside className="hidden md:block w-64 border-r border-border bg-muted h-full overflow-y-auto">
           <BookmarkFolderList selectedFolder={selectedFolder} onSelect={setSelectedFolder} onEdit={handleEditFolder} sort={folderSort} />
         </aside>
-        <main className="flex-1 h-full overflow-y-auto p-4">
+        <main className="flex-1 h-full p-4">
           <BookmarkList selectedFolder={selectedFolder} onEdit={handleEditBookmark} onAddBookmark={handleAddBookmark} sort={bookmarkSort} enableDragDrop={bookmarkSort === 'manual'} />
         </main>
       </div>

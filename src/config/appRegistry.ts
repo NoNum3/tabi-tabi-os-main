@@ -117,8 +117,8 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     requiresAuth: true,
     nameKey: "bookmarkAppName",
     component: BookmarksApp,
-    version: "2024.06.08-1",
-    lastUpdated: "2024-06-08",
+    version: "2025.05.24-1",
+    lastUpdated: "2025-05-24",
     changelog: "Initial release with Supabase sync, folders, and accessibility improvements.",
   },
   ambience: {
@@ -129,6 +129,8 @@ export const appRegistry: Record<string, AppRegistryEntry> = {
     category: "Entertainment", // Assign category
     nameKey: "ambienceAppName",
     component: AmbiencePlayer,
+    version: "2025.05.24-1",
+    lastUpdated: "2025-05-24",
   },
   calculator: {
     // name: "Calculator", // Removed
