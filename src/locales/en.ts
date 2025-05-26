@@ -527,4 +527,7 @@ export default {
     saving: "Saving...",
     sending: "Sending...",
     cancel: "Cancel",
+    sidebarProfile: "Profile",
+    sidebarChangeUsername: "Change Username",
+    sidebarResetPassword: "Reset Password",
 } as const;

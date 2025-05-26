@@ -556,4 +556,7 @@ export default {
     saving: "儲存中...",
     sending: "發送中...",
     cancel: "取消",
+    sidebarProfile: "個人檔案",
+    sidebarChangeUsername: "更改用戶名",
+    sidebarResetPassword: "重設密碼",
 } as const;

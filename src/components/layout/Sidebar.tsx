@@ -424,21 +424,21 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                 </div>
                 {/* Profile section: minimalist with modal triggers */}
                 <section className="p-4 border-b border-border bg-background">
-                    <h2 className="text-lg font-semibold mb-2">{t('Profile', { count: 1 })}</h2>
+                    <h2 className="text-lg font-semibold mb-2">{t('sidebarProfile', { count: 1 })}</h2>
                     <div className="flex flex-col gap-2">
                         <Button
                             type="button"
                             onClick={() => setUsernameModalOpen(true)}
-                            aria-label={t('Change Username', { count: 1 })}
+                            aria-label={t('sidebarChangeUsername', { count: 1 })}
                         >
-                            {t('Change Username', { count: 1 })}
+                            {t('sidebarChangeUsername', { count: 1 })}
                         </Button>
                         <Button
                             type="button"
                             onClick={() => setPasswordModalOpen(true)}
-                            aria-label={t('Reset Password', { count: 1 })}
+                            aria-label={t('sidebarResetPassword', { count: 1 })}
                         >
-                            {t('Reset Password', { count: 1 })}
+                            {t('sidebarResetPassword', { count: 1 })}
                         </Button>
                     </div>
                 </section>
