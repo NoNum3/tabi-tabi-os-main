@@ -42,7 +42,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
         if (success) {
             playSound("/sounds/signed-in.mp3");
             toast(t("signInSuccess", { count: 1 }), {
-                description: `${t("signInWelcome", { count: 1 })} (${email})`,
+                description: t("signInWelcome", { email, count: 1 }),
                 duration: 6000,
             });
             onOpenChange(false);
@@ -67,7 +67,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email-signin" className="text-right">
-                                {t('authEmailLabel')}
+                                {t('authEmailLabel', { count: 1 })}
                             </Label>
                             <Input
                                 id="email-signin"
@@ -82,7 +82,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password-signin" className="text-right">
-                                {t('authPasswordLabel')}
+                                {t('authPasswordLabel', { count: 1 })}
                             </Label>
                             <Input
                                 id="password-signin"
@@ -103,7 +103,7 @@ export const SignInForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading}>
-                            {loading ? t("signIn", { count: 1 }) + "..." : t("signIn", { count: 1 })}
+                            {loading ? `${t("signIn", { count: 1 })}...` : t("signIn", { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -126,14 +126,14 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
         const success = await signUp({ email, password, username });
         if (success) {
             toast(t("signUpSuccess", { count: 1 }), {
-                description: `${t("signUpCheckEmail", { count: 1 })} (${email})`,
+                description: t("signUpCheckEmail", { email, count: 1 }),
                 duration: 8000,
             });
             onOpenChange(false);
         } else if (duplicateEmail) {
             setLocalError(t("signUpEmailUsed", { count: 1 }));
         } else if (error) {
-            toast("Sign Up Failed", {
+            toast(t("signUpFailed", { count: 1 }), {
                 description: error,
                 duration: 8000,
             });
@@ -153,7 +153,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="username-signup" className="text-right">
-                                {t('authUsernameLabel')}
+                                {t('authUsernameLabel', { count: 1 })}
                             </Label>
                             <Input
                                 id="username-signup"
@@ -171,7 +171,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="email-signup" className="text-right">
-                                {t('authEmailLabel')}
+                                {t('authEmailLabel', { count: 1 })}
                             </Label>
                             <Input
                                 id="email-signup"
@@ -193,7 +193,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                         )}
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="password-signup" className="text-right">
-                                {t('authPasswordLabel')}
+                                {t('authPasswordLabel', { count: 1 })}
                             </Label>
                             <Input
                                 id="password-signup"
@@ -216,7 +216,7 @@ export const SignUpForm: React.FC<AuthFormProps> = ({ open, onOpenChange }) => {
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading}>
-                            {loading ? t("signUp", { count: 1 }) + "..." : t("signUp", { count: 1 })}
+                            {loading ? `${t("signUp", { count: 1 })}...` : t("signUp", { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </form>

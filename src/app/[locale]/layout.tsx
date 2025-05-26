@@ -9,6 +9,8 @@ import { LayoutClientWrapper } from "@/components/layout/LayoutClientWrapper";
 import { createSupabaseServerClient } from "@/infrastructure/lib/supabaseServerClient";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthAtomLogger } from "@/components/debug/AuthAtomLogger";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 // Removed dynamic export as async components are dynamic by default
 // export const dynamic = 'force-dynamic';
@@ -183,6 +185,8 @@ export default async function RootLayout({ children, params }: {
                                     {children}
                                 </LayoutClientWrapper>
                                 <Toaster position="bottom-right" />
+                                <Analytics />
+                                <SpeedInsights />
                             </AuthProvider>
                         </JotaiProvider>
                     </ThemeProvider>

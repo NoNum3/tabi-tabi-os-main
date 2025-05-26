@@ -82,13 +82,13 @@ const Taskbar: React.FC = () => {
                                 style={{ width: 'var(--taskbar-icon-size, 24px)', height: 'var(--taskbar-icon-size, 24px)', fontSize: 'inherit' }}
                                 className="hover:bg-accent hover:text-accent-foreground rounded-full"
                                 onClick={toggleSidebar}
-                                aria-label={t('toggleSidebar')}
+                                aria-label={t('toggleSidebar', { count: 1 })}
                             >
                                 <Menu className="h-full w-full" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="center">
-                            <p>{t('toggleSidebar')}</p>
+                            <p>{t('toggleSidebar', { count: 1 })}</p>
                         </TooltipContent>
                     </Tooltip>
 
@@ -101,10 +101,7 @@ const Taskbar: React.FC = () => {
                             const isActive = win.isActive;
                             const isMinimized = win.isMinimized;
                             const title = win.title || (appConfig
-                                ? t(
-                                    appConfig.nameKey || win.appId,
-                                    { count: 1 },
-                                )
+                                ? t(appConfig.nameKey || win.appId, { count: 1 })
                                 : "Unknown App");
 
                             const handleClick = () => {

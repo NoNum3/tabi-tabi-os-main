@@ -22,6 +22,7 @@ export default {
     signUpCheckEmail: "Please check your email inbox for a confirmation link to activate your account.",
     signUpSuccess: "Sign Up Successful",
     signUpEmailUsed: "This email is already registered.",
+    signUpFailed: "Sign Up Failed",
 
     // ===== App Names =====
     clock: "Clock",

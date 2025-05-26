@@ -31,11 +31,11 @@ const HashGeneratorApp: React.FC = () => {
     const generateHash = useCallback(async () => {
         // Check for SubtleCrypto availability
         if (!window.crypto?.subtle) {
-            toast.error(t('hashGenToastCryptoUnavailable'), {
-                description: t('hashGenToastCryptoUnavailableDesc'),
+            toast.error(t('hashGenToastCryptoUnavailable', { count: 1 }), {
+                description: t('hashGenToastCryptoUnavailableDesc', { count: 1 }),
                 duration: 5000,
             });
-            setHashedOutput(t('hashGenErrorCrypto'));
+            setHashedOutput(t('hashGenErrorCrypto', { count: 1 }));
             setIsLoading(false); // Ensure loading stops
             return;
         }
@@ -64,28 +64,28 @@ const HashGeneratorApp: React.FC = () => {
             setHashedOutput(hashHex);
         } catch (error) {
             console.error(`Error generating ${selectedAlgorithm} hash:`, error);
-            toast.error(t('hashGenToastHashFailed'), {
-                description: t('hashGenToastHashFailedDesc', { algorithm: selectedAlgorithm }),
+            toast.error(t('hashGenToastHashFailed', { count: 1 }), {
+                description: t('hashGenToastHashFailedDesc', { algorithm: selectedAlgorithm, count: 1 }),
                 duration: 3000,
             });
-            setHashedOutput(t('hashGenErrorGeneral'));
+            setHashedOutput(t('hashGenErrorGeneral', { count: 1 }));
         } finally {
             setIsLoading(false);
         }
     }, [inputText, selectedAlgorithm, t]);
 
     const handleCopy = async () => {
-        if (!hashedOutput || hashedOutput === t('hashGenErrorGeneral')) return;
+        if (!hashedOutput || hashedOutput === t('hashGenErrorGeneral', { count: 1 })) return;
         try {
             await navigator.clipboard.writeText(hashedOutput);
-            toast.success(t('hashGenToastCopied'), {
-                description: t('hashGenToastCopiedDesc'),
+            toast.success(t('hashGenToastCopied', { count: 1 }), {
+                description: t('hashGenToastCopiedDesc', { count: 1 }),
                 duration: 2000,
             });
         } catch (err) {
             console.error("Failed to copy hash: ", err);
-            toast.error(t('hashGenToastCopyFailed'), {
-                description: t('hashGenToastCopyFailedDesc'),
+            toast.error(t('hashGenToastCopyFailed', { count: 1 }), {
+                description: t('hashGenToastCopyFailedDesc', { count: 1 }),
                 duration: 2000,
             });
         }
@@ -97,20 +97,20 @@ const HashGeneratorApp: React.FC = () => {
                 <CardHeader>
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <Hash className="h-4 w-4" />
-                        {t('hashGenTitle')}
+                        {t('hashGenTitle', { count: 1 })}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col gap-3 pt-4">
                     {/* Input Text Area */}
                     <div>
                         <Label htmlFor="hash-input" className="text-xs">
-                            {t('hashGenInputLabel')}
+                            {t('hashGenInputLabel', { count: 1 })}
                         </Label>
                         <Textarea
                             id="hash-input"
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
-                            placeholder={t('hashGenInputPlaceholder')}
+                            placeholder={t('hashGenInputPlaceholder', { count: 1 })}
                             className="mt-1 resize-none text-sm min-h-[100px]"
                             rows={5}
                         />
@@ -120,7 +120,7 @@ const HashGeneratorApp: React.FC = () => {
                     <div className="flex items-end gap-2">
                         <div className="flex-grow">
                             <Label htmlFor="hash-algo" className="text-xs">
-                                {t('hashGenAlgoLabel')}
+                                {t('hashGenAlgoLabel', { count: 1 })}
                             </Label>
                             <Select
                                 value={selectedAlgorithm}
@@ -150,7 +150,7 @@ const HashGeneratorApp: React.FC = () => {
                                     isLoading ? "animate-spin" : ""
                                 }`}
                             />
-                            {isLoading ? t('hashGenButtonGenerating') : t('hashGenButton')}
+                            {isLoading ? t('hashGenButtonGenerating', { count: 1 }) : t('hashGenButton', { count: 1 })}
                         </Button>
                     </div>
 
@@ -158,17 +158,17 @@ const HashGeneratorApp: React.FC = () => {
                     {hashedOutput && (
                         <div className="mt-2">
                             <Label htmlFor="hash-output" className="text-xs">
-                                {t('hashGenOutputLabel', { algorithm: selectedAlgorithm })}
+                                {t('hashGenOutputLabel', { algorithm: selectedAlgorithm, count: 1 })}
                             </Label>
                             <div className="relative mt-1">
                                 <Textarea
                                     id="hash-output"
                                     value={hashedOutput}
                                     readOnly
-                                    placeholder={t('hashGenOutputPlaceholder')}
+                                    placeholder={t('hashGenOutputPlaceholder', { count: 1 })}
                                     className="pr-10 text-xs font-mono bg-muted resize-none min-h-[80px]"
                                     rows={4}
-                                    aria-label={t('hashGenOutputLabel', { algorithm: selectedAlgorithm })}
+                                    aria-label={t('hashGenOutputLabel', { algorithm: selectedAlgorithm, count: 1 })}
                                 />
                                 <Button
                                     variant="ghost"
@@ -176,9 +176,9 @@ const HashGeneratorApp: React.FC = () => {
                                     className="absolute right-1 top-1 h-7 w-7 text-muted-foreground hover:text-foreground"
                                     onClick={handleCopy}
                                     disabled={!hashedOutput ||
-                                        hashedOutput === t('hashGenErrorGeneral') ||
-                                        hashedOutput === t('hashGenErrorCrypto')}
-                                    title={t('hashGenCopyHash')}
+                                        hashedOutput === t('hashGenErrorGeneral', { count: 1 }) ||
+                                        hashedOutput === t('hashGenErrorCrypto', { count: 1 })}
+                                    title={t('hashGenCopyHash', { count: 1 })}
                                 >
                                     <Copy className="h-4 w-4" />
                                 </Button>

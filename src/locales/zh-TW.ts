@@ -28,6 +28,7 @@ export default {
     signOutFailed: "登出失敗",
     signUpSuccess: "註冊成功",
     signUpEmailUsed: "此電子郵件已被註冊。",
+    signUpFailed: "註冊失敗",
 
     // ===== App Names =====
     clock: "時鐘",
