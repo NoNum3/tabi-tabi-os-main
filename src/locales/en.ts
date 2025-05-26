@@ -530,4 +530,8 @@ export default {
     sidebarProfile: "Profile",
     sidebarChangeUsername: "Change Username",
     sidebarResetPassword: "Reset Password",
+    changeUsernameTitle: "Change Username",
+    changeUsernameLabel: "Username",
+    resetPasswordTitle: "Reset Password",
+    resetPasswordLabel: "Email",
 } as const;

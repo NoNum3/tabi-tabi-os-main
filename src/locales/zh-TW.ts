@@ -559,4 +559,8 @@ export default {
     sidebarProfile: "個人檔案",
     sidebarChangeUsername: "更改用戶名",
     sidebarResetPassword: "重設密碼",
+    changeUsernameTitle: "更改用戶名",
+    changeUsernameLabel: "用戶名",
+    resetPasswordTitle: "重設密碼",
+    resetPasswordLabel: "電子郵件",
 } as const;

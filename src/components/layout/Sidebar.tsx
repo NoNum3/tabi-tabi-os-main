@@ -548,10 +548,10 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
             <Dialog open={usernameModalOpen} onOpenChange={setUsernameModalOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{t('Change Username', { count: 1 })}</DialogTitle>
+                        <DialogTitle>{t('changeUsernameTitle', { count: 1 })}</DialogTitle>
                     </DialogHeader>
                     <div className="mb-4">
-                        <Label htmlFor="username-input">{t('Username', { count: 1 })}</Label>
+                        <Label htmlFor="username-input">{t('changeUsernameLabel', { count: 1 })}</Label>
                         <input
                             id="username-input"
                             type="text"
@@ -559,12 +559,12 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                             value={newUsername}
                             onChange={e => setNewUsername(e.target.value)}
                             disabled={usernameLoading}
-                            aria-label={t('Change Username', { count: 1 })}
+                            aria-label={t('changeUsernameLabel', { count: 1 })}
                         />
                     </div>
                     <DialogFooter>
-                        <Button onClick={handleChangeUsername} disabled={usernameLoading} aria-label={t('Change Username', { count: 1 })}>
-                            {usernameLoading ? t('Saving...', { count: 1 }) : t('Change Username', { count: 1 })}
+                        <Button onClick={handleChangeUsername} disabled={usernameLoading} aria-label={t('changeUsernameTitle', { count: 1 })}>
+                            {usernameLoading ? t('Saving...', { count: 1 }) : t('changeUsernameTitle', { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -573,10 +573,10 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
             <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{t('Reset Password', { count: 1 })}</DialogTitle>
+                        <DialogTitle>{t('resetPasswordTitle', { count: 1 })}</DialogTitle>
                     </DialogHeader>
                     <div className="mb-4">
-                        <Label htmlFor="reset-email-input">{t('Email', { count: 1 })}</Label>
+                        <Label htmlFor="reset-email-input">{t('resetPasswordLabel', { count: 1 })}</Label>
                         <input
                             id="reset-email-input"
                             type="email"
@@ -584,12 +584,12 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                             value={resetEmail}
                             onChange={e => setResetEmail(e.target.value)}
                             disabled={resetLoading}
-                            aria-label={t('Reset Password', { count: 1 })}
+                            aria-label={t('resetPasswordLabel', { count: 1 })}
                         />
                     </div>
                     <DialogFooter>
-                        <Button onClick={handleResetPassword} disabled={resetLoading} aria-label={t('Reset Password', { count: 1 })}>
-                            {resetLoading ? t('Sending...', { count: 1 }) : t('Reset Password', { count: 1 })}
+                        <Button onClick={handleResetPassword} disabled={resetLoading} aria-label={t('resetPasswordTitle', { count: 1 })}>
+                            {resetLoading ? t('Sending...', { count: 1 }) : t('resetPasswordTitle', { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
