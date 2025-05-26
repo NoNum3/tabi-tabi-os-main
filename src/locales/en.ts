@@ -534,4 +534,5 @@ export default {
     changeUsernameLabel: "Username",
     resetPasswordTitle: "Reset Password",
     resetPasswordLabel: "Email",
+    toggleSidebar: "Toggle Sidebar",
 } as const;

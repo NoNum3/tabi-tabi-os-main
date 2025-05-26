@@ -563,4 +563,5 @@ export default {
     changeUsernameLabel: "用戶名",
     resetPasswordTitle: "重設密碼",
     resetPasswordLabel: "電子郵件",
+    toggleSidebar: "切換側邊欄",
 } as const;

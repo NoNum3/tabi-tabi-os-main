@@ -82,13 +82,13 @@ const Taskbar: React.FC = () => {
                                 style={{ width: 'var(--taskbar-icon-size, 24px)', height: 'var(--taskbar-icon-size, 24px)', fontSize: 'inherit' }}
                                 className="hover:bg-accent hover:text-accent-foreground rounded-full"
                                 onClick={toggleSidebar}
-                                aria-label="Toggle Sidebar"
+                                aria-label={t('toggleSidebar')}
                             >
                                 <Menu className="h-full w-full" />
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="center">
-                            <p>Toggle Sidebar</p>
+                            <p>{t('toggleSidebar')}</p>
                         </TooltipContent>
                     </Tooltip>
 
