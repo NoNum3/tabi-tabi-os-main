@@ -8,12 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, QrCode, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from "@/locales/client";
 
 const QRCodeReader: React.FC = () => {
+    const t = useI18n();
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [decodedText, setDecodedText] = useState<string>("");
     const [statusMessage, setStatusMessage] = useState<string>(
-        "Upload a QR code image to scan.",
+        () => t('qrReaderStatusDefault')
     );
     const [isScanning, setIsScanning] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,14 +23,14 @@ const QRCodeReader: React.FC = () => {
 
     const scanQRCode = useCallback((imageDataUrl: string) => {
         if (!canvasRef.current) return;
-        setStatusMessage("Scanning image...");
+        setStatusMessage(t('qrReaderStatusScanning'));
         setIsScanning(true);
         setDecodedText("");
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-            setStatusMessage("Error: Could not get canvas context.");
+            setStatusMessage(t('qrReaderStatusErrorContext'));
             setIsScanning(false);
             return;
         }
@@ -53,29 +55,29 @@ const QRCodeReader: React.FC = () => {
 
                 if (code) {
                     setDecodedText(code.data);
-                    setStatusMessage("QR Code Decoded:");
+                    setStatusMessage(t('qrReaderStatusDecoded'));
                 } else {
-                    setStatusMessage("No QR code found in the image.");
+                    setStatusMessage(t('qrReaderStatusNotFound'));
                 }
             } catch (error) {
                 console.error("QR Scan Error:", error);
-                setStatusMessage("Error scanning QR code.");
+                setStatusMessage(t('qrReaderStatusErrorScan'));
             }
             setIsScanning(false);
         };
         img.onerror = () => {
-            setStatusMessage("Error loading image for scanning.");
+            setStatusMessage(t('qrReaderStatusErrorLoad'));
             setIsScanning(false);
         };
         img.src = imageDataUrl;
-    }, []);
+    }, [t]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
         if (!file.type.startsWith("image/")) {
-            setStatusMessage("Error: Please upload an image file.");
+            setStatusMessage(t('qrReaderStatusErrorFiletype'));
             setImageUrl(null);
             setDecodedText("");
             return;
@@ -88,7 +90,7 @@ const QRCodeReader: React.FC = () => {
             scanQRCode(url);
         };
         reader.onerror = () => {
-            setStatusMessage("Error reading file.");
+            setStatusMessage(t('qrReaderStatusErrorRead'));
             setIsScanning(false);
         };
         reader.readAsDataURL(file);
@@ -102,14 +104,14 @@ const QRCodeReader: React.FC = () => {
         if (!decodedText) return;
         try {
             await navigator.clipboard.writeText(decodedText);
-            toast.success("Copied!", {
-                description: "QR code content copied to clipboard.",
+            toast.success(t('qrReaderCopySuccess'), {
+                description: t('qrReaderCopySuccessDesc'),
                 duration: 2000,
             });
         } catch (err) {
             console.error("Failed to copy text: ", err);
-            toast.error("Copy Failed", {
-                description: "Could not copy text to clipboard.",
+            toast.error(t('qrReaderCopyFailed'), {
+                description: t('qrReaderCopyFailedDesc'),
                 duration: 2000,
             });
         }
@@ -121,7 +123,7 @@ const QRCodeReader: React.FC = () => {
                 <CardHeader>
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <QrCode className="h-4 w-4" />
-                        QR Code Reader
+                        {t('qrReaderTitle')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col gap-3">
@@ -142,14 +144,14 @@ const QRCodeReader: React.FC = () => {
                         disabled={isScanning}
                     >
                         <Upload className="mr-2 h-4 w-4" />
-                        {imageUrl ? "Upload Different Image" : "Upload Image"}
+                        {imageUrl ? t('qrReaderUploadButtonDifferent') : t('qrReaderUploadButton')}
                     </Button>
 
                     {/* Image Preview */}
                     {imageUrl && (
                         <div className="mt-2 border border-border rounded p-2 max-h-40 overflow-auto bg-muted/30">
                             <p className="text-xs text-muted-foreground mb-1">
-                                Preview:
+                                {t('qrReaderPreview')}
                             </p>
                             {/* Disable next/image warning for local data URL preview */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -169,7 +171,7 @@ const QRCodeReader: React.FC = () => {
                                 : "text-muted-foreground"
                         }`}
                     >
-                        {isScanning ? "Scanning..." : statusMessage}
+                        {isScanning ? t('qrReaderStatusScanning') : statusMessage}
                     </p>
 
                     {/* Decoded Text Area & Copy Button */}
@@ -180,7 +182,7 @@ const QRCodeReader: React.FC = () => {
                                 readOnly
                                 className="w-full flex-grow resize-none text-sm bg-muted font-mono"
                                 rows={6}
-                                aria-label="Decoded QR Code Content"
+                                aria-label={t('qrReaderDecodedContentLabel')}
                             />
                             <Button
                                 onClick={handleCopy}
@@ -189,7 +191,7 @@ const QRCodeReader: React.FC = () => {
                                 className="mt-1 self-end"
                             >
                                 <Copy className="mr-2 h-3.5 w-3.5" />
-                                Copy Result
+                                {t('qrReaderCopyResult')}
                             </Button>
                         </div>
                     )}
