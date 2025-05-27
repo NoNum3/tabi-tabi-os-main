@@ -22,6 +22,7 @@ import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { EditorState } from "lexical";
 import { playSound } from "@/infrastructure/lib/utils";
+import { useI18n } from '@/locales/client';
 // import { useTheme } from "next-themes";
 
 import {
@@ -121,6 +122,7 @@ class EditorErrorBoundary extends Component<
 }
 
 const Notepad: React.FC = () => {
+  const t = useI18n();
   const currentUser = useAtomValue(userAtom);
   const notes = useAtomValue(notesAtom);
   const [activeNoteId] = useAtom(activeNoteIdAtom); // setActiveNoteId removed
@@ -293,7 +295,7 @@ const Notepad: React.FC = () => {
                     : "Save current note"}
                 >
                   <SaveIcon className="h-4 w-4 mr-1" />
-                  {isSaving ? "Saving..." : "Save Note"}
+                  {isSaving ? t('notepad.saving', { count: 1 }) : t('notepad.save', { count: 1 })}
                 </Button>
               </div>
               <div className={editorContainerClasses}>
@@ -304,8 +306,8 @@ const Notepad: React.FC = () => {
                   placeholder={
                     <div className="editor-placeholder absolute top-4 left-4 pointer-events-none select-none">
                       {notes.length === 0 && !activeNoteId
-                        ? "Start typing your first note..."
-                        : "Start typing... or select/create a note."}
+                        ? t('notepad.placeholder', { count: 1 })
+                        : t('notepad.placeholder', { count: 1 })}
                     </div>
                   }
                   ErrorBoundary={EditorErrorBoundary}

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/infrastructure/lib/utils";
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight } from "lucide-react";
 import { ElementFormatType } from "lexical";
+import { useI18n } from '@/locales/client';
 
 interface ToolbarAlignButtonsProps {
   formatElement: (align: ElementFormatType) => void;
@@ -13,12 +14,14 @@ export const ToolbarAlignButtons: React.FC<ToolbarAlignButtonsProps> = ({
   formatElement,
   textAlign,
 }) => {
+  const t = useI18n();
+
   return (
     <div className="flex items-center mr-2 pr-2 border-r border-gray-200 dark:border-gray-700">
       <Button
         variant="ghost"
         size="sm"
-        title="Align Left"
+        title={t('notepad.alignLeft', { count: 1 })}
         onClick={() => formatElement("left")}
         className={cn(
           "p-1 h-8 w-8",
@@ -30,7 +33,7 @@ export const ToolbarAlignButtons: React.FC<ToolbarAlignButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Align Center"
+        title={t('notepad.alignCenter', { count: 1 })}
         onClick={() => formatElement("center")}
         className={cn(
           "p-1 h-8 w-8",
@@ -42,7 +45,7 @@ export const ToolbarAlignButtons: React.FC<ToolbarAlignButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Align Right"
+        title={t('notepad.alignRight', { count: 1 })}
         onClick={() => formatElement("right")}
         className={cn(
           "p-1 h-8 w-8",
@@ -54,7 +57,7 @@ export const ToolbarAlignButtons: React.FC<ToolbarAlignButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Justify"
+        title={t('notepad.alignJustify', { count: 1 })}
         onClick={() => formatElement("justify")}
         className={cn(
           "p-1 h-8 w-8",

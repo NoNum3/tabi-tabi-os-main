@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { BlockTypeDropdownValue } from "@/apps/notepad/types/richTextTypes";
+import { useI18n } from '@/locales/client';
 
 interface ToolbarBlockTypeSelectProps {
   blockType: BlockTypeDropdownValue;
@@ -17,29 +18,31 @@ export const ToolbarBlockTypeSelect: React.FC<ToolbarBlockTypeSelectProps> = ({
   blockType,
   onBlockTypeChange,
 }) => {
+  const t = useI18n();
+
   return (
     <Select value={blockType} onValueChange={onBlockTypeChange}>
       <SelectTrigger className="w-[150px] h-8 text-xs px-2 mr-1">
-        <SelectValue placeholder="Block Type" />
+        <SelectValue placeholder={t('notepad.blockType', { count: 1 })} />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="paragraph" className="text-xs">
-          Paragraph
+          {t('notepad.paragraph', { count: 1 })}
         </SelectItem>
         <SelectItem value="h1" className="text-xs">
-          Heading 1
+          {t('notepad.heading1', { count: 1 })}
         </SelectItem>
         <SelectItem value="h2" className="text-xs">
-          Heading 2
+          {t('notepad.heading2', { count: 1 })}
         </SelectItem>
         <SelectItem value="h3" className="text-xs">
-          Heading 3
+          {t('notepad.heading3', { count: 1 })}
         </SelectItem>
         <SelectItem value="bullet" className="text-xs">
-          Bulleted List
+          {t('notepad.bullet', { count: 1 })}
         </SelectItem>
         <SelectItem value="number" className="text-xs">
-          Numbered List
+          {t('notepad.number', { count: 1 })}
         </SelectItem>
       </SelectContent>
     </Select>

@@ -5,6 +5,7 @@ import { cn } from "@/infrastructure/lib/utils";
 import { Copy, Redo, Save, Undo } from "lucide-react";
 import { REDO_COMMAND, UNDO_COMMAND } from "lexical";
 import { playSound } from "@/infrastructure/lib/utils";
+import { useI18n } from '@/locales/client';
 
 interface ToolbarActionButtonsProps {
   editor: LexicalEditor;
@@ -19,6 +20,7 @@ export const ToolbarActionButtons: React.FC<ToolbarActionButtonsProps> = ({
   handleCopy,
   copySuccess,
 }) => {
+  const t = useI18n();
   const handleUndo = () => {
     playSound("/sounds/click.mp3");
     editor.dispatchCommand(UNDO_COMMAND, undefined);
@@ -34,7 +36,7 @@ export const ToolbarActionButtons: React.FC<ToolbarActionButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Undo (Ctrl+Z)"
+        title={t('notepad.undo', { count: 1 })}
         onClick={handleUndo}
         className="p-1 h-8 w-8"
       >
@@ -43,7 +45,7 @@ export const ToolbarActionButtons: React.FC<ToolbarActionButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Redo (Ctrl+Y)"
+        title={t('notepad.redo', { count: 1 })}
         onClick={handleRedo}
         className="p-1 h-8 w-8"
       >
@@ -52,7 +54,7 @@ export const ToolbarActionButtons: React.FC<ToolbarActionButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Save to file"
+        title={t('notepad.saveToFile', { count: 1 })}
         onClick={handleSave}
         className="p-1 h-8 w-8"
       >
@@ -61,7 +63,7 @@ export const ToolbarActionButtons: React.FC<ToolbarActionButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title={copySuccess ? "Copied!" : "Copy to clipboard"}
+        title={copySuccess ? t('notepad.copied', { count: 1 }) : t('notepad.copyToClipboard', { count: 1 })}
         onClick={handleCopy}
         className={cn(
           "p-1 h-8 w-8",

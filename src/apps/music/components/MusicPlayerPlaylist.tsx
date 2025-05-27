@@ -28,6 +28,7 @@ import { supabase } from "@/infrastructure/lib/supabaseClient";
 import { loadFeatureState } from "@/utils/storage";
 import { getYoutubePlaylistId, fetchYoutubePlaylistVideos } from "../youtubeUtils";
 import { userAtom } from "@/application/atoms/authAtoms";
+import { useI18n } from '@/locales/client';
 
 
 const ItemType = "PLAYLIST_ITEM";
@@ -304,6 +305,7 @@ export const MusicPlayerPlaylist = ({
   const [importLoading, setImportLoading] = useState(false);
   const [importError, setImportError] = useState("");
   const [user] = useAtom(userAtom);
+  const t = useI18n();
 
   // Auto-dismiss toast after 2 seconds
   useEffect(() => {
@@ -435,7 +437,7 @@ export const MusicPlayerPlaylist = ({
     onAddPlaylist(savePlaylistName.trim());
     setShowSaveDialog(false);
     setSelectedVideos([]);
-    setToast("Playlist saved!");
+    setToast(t('music.playlistSaved', { count: 1 }));
   };
   // --- Playlist video management ---
   const handleAddVideoToPlaylist = async (plIdx: number) => {
@@ -475,7 +477,7 @@ export const MusicPlayerPlaylist = ({
       // Optionally, also refetch from backend for consistency
       await fetchPlaylistSongs(playlistId);
     } catch {
-      setToast("Failed to add video. Please try again.");
+      setToast(t('music.failedToAddVideo', { count: 1 }));
     }
   };
   const moveVideoInPlaylist = async (
@@ -562,7 +564,7 @@ export const MusicPlayerPlaylist = ({
     // If queue was empty, start from first song
     if (queue.length === 0) setCurrentSongIndex(0);
     setQueue(newQueue);
-    setToast("Sent selected songs to queue!");
+    setToast(t('music.selectedSongsSentToQueue', { count: selectedVideos.length }));
     setSelectedVideos([]);
   };
   const handleSendAllToQueue = () => {
@@ -572,7 +574,7 @@ export const MusicPlayerPlaylist = ({
     // Replace queue and start from first song
     setQueue(all);
     setCurrentSongIndex(0);
-    setToast("Sent all songs to queue!");
+    setToast(t('music.allSongsSentToQueue', { count: allSongs.length }));
     setTab("queue");
     setSelectedVideos([]);
   };
@@ -597,7 +599,7 @@ export const MusicPlayerPlaylist = ({
         },
       ];
       setQueue(newQueue);
-      setToast("Added to queue!");
+      setToast(t('music.addedToQueue', { count: 1 }));
       setSearchTerm("");
       return;
     }
@@ -616,7 +618,7 @@ export const MusicPlayerPlaylist = ({
       await fetchPlaylists();
       setNewVideoTitle("");
     } catch {
-      setAddError("Failed to add playlist. Please try again.");
+      setAddError(t('music.failedToAddPlaylist', { count: 1 }));
     } finally {
       setAddLoading(false);
     }
@@ -746,7 +748,7 @@ export const MusicPlayerPlaylist = ({
             }`}
             onClick={() => setTab("queue")}
           >
-            Queue
+            {t(tab === "queue" ? 'music.queue' : 'music.playlists', { count: 1 })}
           </button>
           <button
             className={`px-4 py-2 text-sm font-semibold rounded-t ${
@@ -756,7 +758,7 @@ export const MusicPlayerPlaylist = ({
             }`}
             onClick={() => setTab("playlists")}
           >
-            Playlists
+            {t(tab === "playlists" ? 'music.playlists' : 'music.queue', { count: 1 })}
           </button>
         </div>
         {/* Tab Content */}
@@ -767,7 +769,7 @@ export const MusicPlayerPlaylist = ({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Paste YouTube URL or search keywords"
+                placeholder={t('music.pasteYouTubeURL', { count: 1 })}
                 className="px-2 py-1 rounded border text-xs bg-muted flex-1"
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
@@ -775,7 +777,7 @@ export const MusicPlayerPlaylist = ({
                 onClick={handleSearch}
                 className="px-2 py-1 rounded bg-primary/10 text-primary text-xs flex items-center gap-1"
               >
-                <Plus size={14} />Add/Search
+                <Plus size={14} />{t('music.addSearch', { count: 1 })}
               </button>
             </div>
             {searchResults.length > 0 && (
@@ -807,11 +809,11 @@ export const MusicPlayerPlaylist = ({
                           },
                         ];
                         setQueue(newQueue);
-                        setToast("Added to queue!");
+                        setToast(t('music.addedToQueue', { count: 1 }));
                       }}
                       className="px-2 py-1 rounded bg-primary/10 text-primary text-xs"
                     >
-                      <Plus size={14} />Add
+                      <Plus size={14} />{t('music.add', { count: 1 })}
                     </button>
                   </div>
                 ))}
@@ -822,20 +824,20 @@ export const MusicPlayerPlaylist = ({
                 onClick={handleClear}
                 className="px-2 py-1 rounded bg-destructive/10 text-destructive text-xs"
               >
-                Clear
+                {t('music.clear', { count: 1 })}
               </button>
               <input
                 type="text"
                 value={newVideoTitle}
                 onChange={(e) => setNewVideoTitle(e.target.value)}
-                placeholder="Playlist name"
+                placeholder={t('music.playlistName', { count: 1 })}
                 className="px-2 py-1 rounded border text-xs bg-muted"
               />
               <button
                 onClick={handleSaveQueueAsPlaylist}
                 className="px-2 py-1 rounded bg-primary/10 text-primary text-xs flex items-center gap-1"
               >
-                <Save size={14} />Save as Playlist
+                <Save size={14} />{t('music.saveAsPlaylist', { count: 1 })}
               </button>
               <button
                 onClick={() => {
@@ -849,7 +851,7 @@ export const MusicPlayerPlaylist = ({
                 }}
                 className="px-2 py-1 rounded bg-muted text-xs flex items-center gap-1 border border-border"
               >
-                <Download size={14} />Download as TXT
+                <Download size={14} />{t('music.downloadAsTxt', { count: 1 })}
               </button>
             </div>
             <div className="flex-1 overflow-y-auto w-full min-w-0">
@@ -884,20 +886,20 @@ export const MusicPlayerPlaylist = ({
               ))}
               {queue.length === 0 && (
                 <div className="text-xs text-muted-foreground text-center py-4">
-                  Queue is empty
+                  {t('music.queueEmpty', { count: 1 })}
                 </div>
               )}
             </div>
             {showSaveDialog && (
               <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
                 <DialogContent>
-                  <DialogTitle>Save Queue as Playlist</DialogTitle>
+                  <DialogTitle>{t('music.saveQueueAsPlaylist', { count: 1 })}</DialogTitle>
                   <input
                     type="text"
                     value={savePlaylistName}
                     onChange={(e) =>
                       setSavePlaylistName(e.target.value)}
-                    placeholder="Playlist name"
+                    placeholder={t('music.playlistName', { count: 1 })}
                     className="w-full px-2 py-1 rounded border text-xs bg-muted mb-2"
                   />
                   {selectedVideos.length > 0 && (
@@ -909,7 +911,7 @@ export const MusicPlayerPlaylist = ({
                           onChange={() =>
                             setSaveOnlyChecked((v) => !v)}
                         />
-                        Save only selected songs ({selectedVideos.length})
+                        {t('music.saveOnlySelected', { count: selectedVideos.length })}
                       </label>
                     </div>
                   )}
@@ -918,13 +920,13 @@ export const MusicPlayerPlaylist = ({
                       onClick={() => setShowSaveDialog(false)}
                       className="px-3 py-1 rounded bg-muted text-xs"
                     >
-                      Cancel
+                      {t('music.cancel', { count: 1 })}
                     </button>
                     <button
                       onClick={handleConfirmSavePlaylist}
                       className="px-3 py-1 rounded bg-primary text-white text-xs"
                     >
-                      Save
+                      {t('music.save', { count: 1 })}
                     </button>
                   </DialogFooter>
                 </DialogContent>
@@ -935,26 +937,26 @@ export const MusicPlayerPlaylist = ({
         {tab === "playlists" && (
           <div className="flex-1 flex flex-col min-w-[220px]">
             <div className="flex gap-2 mb-2 items-center">
-              <span className="font-bold text-sm">Playlists</span>
+              <span className="font-bold text-sm">{t('music.playlists', { count: 1 })}</span>
               <input
                 type="text"
                 value={newVideoTitle}
                 onChange={(e) => setNewVideoTitle(e.target.value)}
-                placeholder="New playlist name"
+                placeholder={t('music.newPlaylistName', { count: 1 })}
                 className="px-2 py-1 rounded border text-xs bg-muted"
               />
               <button
                 onClick={handleAddPlaylist}
                 className="px-2 py-1 rounded bg-primary/10 text-primary text-xs flex items-center gap-1"
                 disabled={addLoading}
-                aria-label="Add playlist"
-                title="Add playlist"
+                aria-label={t('music.addPlaylist', { count: 1 })}
+                title={t('music.addPlaylist', { count: 1 })}
               >
-                <Plus size={14} />{addLoading ? "Adding..." : "Add"}
+                <Plus size={14} />{addLoading ? t('music.adding', { count: 1 }) : t('music.add', { count: 1 })}
               </button>
               {addError && <div role="alert" className="bg-red-100 text-red-800 p-2 rounded text-xs mt-2">{addError}</div>}
               <label className="px-2 py-1 rounded bg-muted text-xs flex items-center gap-1 cursor-pointer">
-                <Upload size={14} /> Import
+                <Upload size={14} /> {t('music.import', { count: 1 })}
                 <input
                   type="file"
                   accept=".txt"
@@ -971,15 +973,15 @@ export const MusicPlayerPlaylist = ({
                   setImportError("");
                   const playlistId = getYoutubePlaylistId(importPlaylistLink.trim());
                   if (!playlistId) {
-                    setImportError("Invalid YouTube playlist link.");
+                    setImportError(t('music.invalidYouTubePlaylistLink', { count: 1 }));
                     setImportLoading(false);
                     return;
                   }
                   try {
                     const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-                    if (!apiKey) throw new Error("Missing YouTube API key");
+                    if (!apiKey) throw new Error(t('music.missingYouTubeAPIKey', { count: 1 }));
                     const videos = await fetchYoutubePlaylistVideos(playlistId, apiKey);
-                    if (!videos.length) throw new Error("No videos found in playlist or API error.");
+                    if (!videos.length) throw new Error(t('music.noVideosFound', { count: 1 }));
                     const name = importPlaylistName.trim() || `YouTube Playlist (${playlistId})`;
                     if (!user) {
                       // Guest: add playlist and songs in one step
@@ -1039,26 +1041,26 @@ export const MusicPlayerPlaylist = ({
                         setImportLoading(false);
                         setImportError("");
                       } else {
-                        setImportError("Failed to add playlist. Try again.");
+                        setImportError(t('music.failedToAddPlaylist', { count: 1 }));
                         setImportLoading(false);
                       }
                     }
                   } catch (err) {
-                    setImportError((err as Error).message || "Failed to import playlist.");
+                    setImportError((err as Error).message || t('music.failedToImportPlaylist', { count: 1 }));
                     setImportLoading(false);
                   }
                 }}
                 className="flex gap-1 items-center"
                 style={{ minWidth: 0 }}
-                aria-label="Import YouTube playlist by link"
+                aria-label={t('music.importYouTubePlaylistByLink', { count: 1 })}
               >
                 <input
                   type="text"
                   value={importPlaylistLink}
                   onChange={e => setImportPlaylistLink(e.target.value)}
-                  placeholder="Paste YouTube playlist link"
+                  placeholder={t('music.pasteYouTubePlaylistLink', { count: 1 })}
                   className="px-2 py-1 rounded border text-xs bg-muted flex-1"
-                  aria-label="YouTube playlist link"
+                  aria-label={t('music.YouTubePlaylistLink', { count: 1 })}
                   style={{ minWidth: 0 }}
                   required
                   disabled={importLoading}
@@ -1067,9 +1069,9 @@ export const MusicPlayerPlaylist = ({
                   type="text"
                   value={importPlaylistName}
                   onChange={e => setImportPlaylistName(e.target.value)}
-                  placeholder="Playlist name (optional)"
+                  placeholder={t('music.playlistNameOptional', { count: 1 })}
                   className="px-2 py-1 rounded border text-xs bg-muted flex-1"
-                  aria-label="Playlist name (optional)"
+                  aria-label={t('music.playlistNameOptional', { count: 1 })}
                   style={{ minWidth: 0 }}
                   disabled={importLoading}
                 />
@@ -1077,9 +1079,9 @@ export const MusicPlayerPlaylist = ({
                   type="submit"
                   className="px-2 py-1 rounded bg-primary/10 text-primary text-xs flex items-center gap-1"
                   disabled={importLoading}
-                  aria-label="Import playlist"
+                  aria-label={t('music.importPlaylist', { count: 1 })}
                 >
-                  <Upload size={14} />{importLoading ? "Importing..." : "Import Playlist"}
+                  <Upload size={14} />{importLoading ? t('music.importing', { count: 1 }) : t('music.importPlaylist', { count: 1 })}
                 </button>
                 {importError && <div role="alert" className="bg-red-100 text-red-800 p-2 rounded text-xs mt-2">{importError}</div>}
               </form>
@@ -1124,7 +1126,7 @@ export const MusicPlayerPlaylist = ({
                             value={renameValue}
                             onChange={(e) => setRenameValue(e.target.value)}
                             className="px-1 py-0.5 rounded border text-xs bg-muted"
-                            aria-label="New playlist name"
+                            aria-label={t('music.newPlaylistName', { count: 1 })}
                             autoFocus
                           />
                           <button type="submit" className="px-2 py-1 rounded bg-primary text-white text-xs">Save</button>
@@ -1152,7 +1154,7 @@ export const MusicPlayerPlaylist = ({
                         }}
                         className="px-2 py-1 rounded bg-muted text-xs flex items-center gap-1 border border-border"
                       >
-                        <Download size={14} />Download as TXT
+                        <Download size={14} />{t('music.downloadAsTxt', { count: 1 })}
                       </button>
                       <button
                         onClick={async (e) => {
@@ -1168,8 +1170,8 @@ export const MusicPlayerPlaylist = ({
                           }
                         }}
                         className="p-1"
-                        aria-label="Delete playlist"
-                        title="Delete playlist"
+                        aria-label={t('music.deletePlaylist', { count: 1 })}
+                        title={t('music.deletePlaylist', { count: 1 })}
                         disabled={playlistDeleteLoading === pl.id}
                       >
                         <Trash2 size={14} className="text-destructive" />
@@ -1196,21 +1198,21 @@ export const MusicPlayerPlaylist = ({
                             type="text"
                             value={newVideoUrl}
                             onChange={(e) => setNewVideoUrl(e.target.value)}
-                            placeholder="YouTube URL"
+                            placeholder={t('music.youTubeURL', { count: 1 })}
                             className="px-2 py-1 rounded border text-xs bg-muted flex-1"
                           />
                           <input
                             type="text"
                             value={newVideoTitle}
                             onChange={(e) => setNewVideoTitle(e.target.value)}
-                            placeholder="Title (optional)"
+                            placeholder={t('music.titleOptional', { count: 1 })}
                             className="px-2 py-1 rounded border text-xs bg-muted flex-1"
                           />
                           <button
                             onClick={() => handleAddVideoToPlaylist(idx)}
                             className="px-2 py-1 rounded bg-primary/10 text-primary text-xs flex items-center gap-1"
                           >
-                            <Plus size={14} />Add Video
+                            <Plus size={14} />{t('music.addVideo', { count: 1 })}
                           </button>
                         </div>
                         <div className="flex gap-2 mb-2">
@@ -1218,13 +1220,13 @@ export const MusicPlayerPlaylist = ({
                             onClick={() => handleSendAllToQueue()}
                             className="px-2 py-1 rounded bg-primary/10 text-primary text-xs flex items-center gap-1"
                           >
-                            <Send size={14} />Send All to Queue
+                            <Send size={14} />{t('music.sendAllToQueue', { count: 1 })}
                           </button>
                           <button
                             onClick={() => handleSendSelectedToQueue()}
                             className="px-2 py-1 rounded bg-muted text-xs flex items-center gap-1"
                           >
-                            <Send size={14} />Send Selected
+                            <Send size={14} />{t('music.sendSelected', { count: 1 })}
                           </button>
                         </div>
                         {(playlistSongsMap[pl.id] || []).map((ps, vidIdx) => {
@@ -1243,7 +1245,7 @@ export const MusicPlayerPlaylist = ({
                                       : [...prev, vidIdx]
                                   );
                                 }}
-                                aria-label={`Select ${song.title}`}
+                                aria-label={t('music.selectSong', { songTitle: song.title, count: 1 })}
                                 className="accent-primary"
                               />
                               <PlaylistItem
@@ -1269,12 +1271,12 @@ export const MusicPlayerPlaylist = ({
                               />
                               <button
                                 className="px-2 py-1 rounded bg-primary/10 text-primary text-xs ml-2"
-                                aria-label={`Send ${song.title} to queue`}
+                                aria-label={t('music.sendSongToQueue', { songTitle: song.title, count: 1 })}
                                 onClick={() => {
                                   // Append only this song to queue, do not touch currentSongIndex or tab
                                   const newQueue = [...queue, song];
                                   setQueue(newQueue);
-                                  setToast(`Sent '${song.title}' to queue!`);
+                                  setToast(t('music.songSentToQueue', { songTitle: song.title, count: 1 }));
                                 }}
                               >
                                 <Send size={14} />
@@ -1284,7 +1286,7 @@ export const MusicPlayerPlaylist = ({
                         })}
                         {(playlistSongsMap[pl.id] || []).length === 0 && (
                           <div className="text-xs text-muted-foreground text-center py-2">
-                            No videos in this playlist
+                            {t('music.noVideosInPlaylist', { count: 1 })}
                           </div>
                         )}
                       </div>
@@ -1297,7 +1299,7 @@ export const MusicPlayerPlaylist = ({
               })}
               {userPlaylists.length === 0 && (
                 <div className="text-xs text-muted-foreground text-center py-4">
-                  No playlists saved
+                  {t('music.noPlaylistsSaved', { count: 1 })}
                 </div>
               )}
             </div>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/infrastructure/lib/utils";
 import { List, ListOrdered } from "lucide-react";
 import type { BlockTypeDropdownValue } from "@/apps/notepad/types/richTextTypes";
+import { useI18n } from '@/locales/client';
 
 interface ToolbarListButtonsProps {
   formatBulletList: () => void;
@@ -15,12 +16,14 @@ export const ToolbarListButtons: React.FC<ToolbarListButtonsProps> = ({
   formatNumberedList,
   blockType,
 }) => {
+  const t = useI18n();
+
   return (
     <div className="flex items-center">
       <Button
         variant="ghost"
         size="sm"
-        title="Bullet List"
+        title={t('notepad.bulletList', { count: 1, defaultValue: 'Bullet List' })}
         onClick={formatBulletList}
         className={cn(
           "p-1 h-8 w-8",
@@ -32,7 +35,7 @@ export const ToolbarListButtons: React.FC<ToolbarListButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Numbered List"
+        title={t('notepad.numberedList', { count: 1, defaultValue: 'Numbered List' })}
         onClick={formatNumberedList}
         className={cn(
           "p-1 h-8 w-8",

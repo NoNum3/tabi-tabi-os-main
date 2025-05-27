@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from '@/locales/client';
 
 interface MusicPlayerAddSongFormProps {
     newSongUrl: string;
@@ -25,6 +26,7 @@ export const MusicPlayerAddSongForm: React.FC<MusicPlayerAddSongFormProps> = ({
     const [showModal, setShowModal] = useState(false);
     const [selectedPlaylist, setSelectedPlaylist] = useState("queue");
     const [newPlaylistName, setNewPlaylistName] = useState("");
+    const t = useI18n();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,21 +58,21 @@ export const MusicPlayerAddSongForm: React.FC<MusicPlayerAddSongFormProps> = ({
                     type="text"
                     value={newSongUrl}
                     onChange={(e) => setNewSongUrl(e.target.value)}
-                    placeholder="Paste any YouTube URL here"
+                    placeholder={t('music.pasteAnyYouTubeURLHere', { count: 1 })}
                     className="flex-grow p-2 rounded bg-input text-foreground placeholder:text-muted-foreground border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 />
                 <input
                     type="text"
                     value={newSongTitle}
                     onChange={(e) => setNewSongTitle(e.target.value)}
-                    placeholder="Title (optional)"
+                    placeholder={t('music.titleOptional', { count: 1 })}
                     className="flex-grow p-2 rounded bg-input text-foreground placeholder:text-muted-foreground border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 />
                 <Button
                     type="submit"
                     disabled={isLoading || !newSongUrl.trim()}
                 >
-                    Add to Queue/Playlist
+                    {t('music.addToQueueOrPlaylist', { count: 1 })}
                 </Button>
             </form>
             {showModal && (
@@ -131,14 +133,14 @@ export const MusicPlayerAddSongForm: React.FC<MusicPlayerAddSongFormProps> = ({
                                 variant="outline"
                                 onClick={() => setShowModal(false)}
                             >
-                                Cancel
+                                {t('music.cancel', { count: 1 })}
                             </Button>
                             <Button
                                 onClick={handleConfirm}
                                 disabled={selectedPlaylist === "new" &&
                                     !newPlaylistName.trim()}
                             >
-                                Confirm
+                                {t('music.confirm', { count: 1 })}
                             </Button>
                         </div>
                     </div>

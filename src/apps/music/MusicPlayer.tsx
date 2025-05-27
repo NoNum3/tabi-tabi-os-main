@@ -3,10 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAtom, useSetAtom, useAtomValue } from "jotai";
 import ReactPlayer from "react-player/youtube";
-import {
-  Fullscreen,
-  Captions,
-} from "lucide-react";
 
 import {
   addPlaylist,
@@ -97,7 +93,6 @@ const MusicPlayer: React.FC = () => {
   const [prevVolume, setPrevVolume] = useState(volume);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
   const [availableResolutions, setAvailableResolutions] = useState(["auto"]); // Start with auto only
   const [currentResolution, setCurrentResolution] = useState("auto");
   const [lastRequestedResolution, setLastRequestedResolution] = useState("auto");
@@ -643,11 +638,6 @@ const MusicPlayer: React.FC = () => {
     }
   };
 
-  const handleToggleSubtitles = () => {
-    setSubtitlesEnabled((prev) => !prev);
-    // TODO: Integrate with YouTube API for real subtitle toggling
-  };
-
   const labelToCode = (label: string) => {
     const codeMap = {
       "4320p": "highres",
@@ -698,63 +688,90 @@ const MusicPlayer: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-background text-foreground">
-      {/* Always-mounted YouTube player, styled for min/max */}
-      <div
-        className={
-          isMinimized
-            ? "fixed bottom-6 right-6 z-[9999] w-[300px] h-[220px] bg-black rounded shadow-lg border border-white/20 transition-all"
-            : "w-full relative aspect-video bg-black"
-        }
-        style={{
-          display: currentSong ? undefined : "none",
-          pointerEvents: isMinimized ? "auto" : undefined,
-        }}
-        aria-hidden={!currentSong}
-      >
-        <MusicPlayerVideo
-          containerRef={containerRef}
-          currentSong={queue[currentSongIndex] || null}
-          playing={playing}
-          isPlayerReady={isPlayerReady}
-          isMuted={isMuted}
-          volume={volume}
-          playerRef={playerRef}
-          onProgress={handleProgress}
-          onDuration={handleDuration}
-          onEnded={handleNext}
-          onError={() => {}}
-          onBuffer={() => {}}
-          onBufferEnd={() => {}}
-          onPlay={handlePlay}
-          onPause={() => setPlaying(false)}
-          onReady={handlePlayerReady}
-          showVideo={true}
-          isFullscreen={isFullscreen}
-          playedSeconds={playedSeconds}
-          duration={duration}
-          onSeek={value => {
-            setPlayedSeconds(value);
-            playerRef.current?.seekTo(value, 'seconds');
+      {isMinimized ? (
+        <div
+          className="fixed bottom-6 right-6 z-[9999] w-[300px] h-[220px] bg-black rounded shadow-lg border border-white/20 transition-all"
+          style={{
+            display: currentSong ? undefined : "none",
+            pointerEvents: "auto",
           }}
-          onTogglePlay={() => setPlaying(!playing)}
-          onPrev={handlePrevious}
-          onNext={handleNext}
-          onToggleMute={toggleMute}
-          onToggleFullscreen={handleToggleFullscreen}
-          setVolume={setVolume}
-          availableResolutions={availableResolutions}
-          currentResolution={currentResolution}
-          onChangeResolution={handleChangeResolution}
-          subtitlesEnabled={subtitlesEnabled}
-          onToggleSubtitles={handleToggleSubtitles}
-        />
-      </div>
-      {/* Main player UI, hidden when minimized */}
-      {!isMinimized && (
+          aria-hidden={!currentSong}
+        >
+          <MusicPlayerVideo
+            containerRef={containerRef}
+            currentSong={queue[currentSongIndex] || null}
+            playing={playing}
+            isPlayerReady={isPlayerReady}
+            isMuted={isMuted}
+            volume={volume}
+            playerRef={playerRef}
+            onProgress={handleProgress}
+            onDuration={handleDuration}
+            onEnded={handleNext}
+            onError={() => {}}
+            onBuffer={() => {}}
+            onBufferEnd={() => {}}
+            onPlay={handlePlay}
+            onPause={() => setPlaying(false)}
+            onReady={handlePlayerReady}
+            showVideo={true}
+            isFullscreen={isFullscreen}
+            playedSeconds={playedSeconds}
+            duration={duration}
+            onSeek={value => {
+              setPlayedSeconds(value);
+              playerRef.current?.seekTo(value, 'seconds');
+            }}
+            onTogglePlay={() => setPlaying(!playing)}
+            onPrev={handlePrevious}
+            onNext={handleNext}
+            onToggleMute={toggleMute}
+            onToggleFullscreen={handleToggleFullscreen}
+            setVolume={setVolume}
+            availableResolutions={availableResolutions}
+            currentResolution={currentResolution}
+            onChangeResolution={handleChangeResolution}
+          />
+        </div>
+      ) : (
         <>
-          {/* --- Seek Slider UI (like mini player) --- */}
-          {/* Removed seek slider UI here */}
-          {/* --- End Seek Slider UI --- */}
+          <div className="w-full relative aspect-video bg-black">
+            <MusicPlayerVideo
+              containerRef={containerRef}
+              currentSong={queue[currentSongIndex] || null}
+              playing={playing}
+              isPlayerReady={isPlayerReady}
+              isMuted={isMuted}
+              volume={volume}
+              playerRef={playerRef}
+              onProgress={handleProgress}
+              onDuration={handleDuration}
+              onEnded={handleNext}
+              onError={() => {}}
+              onBuffer={() => {}}
+              onBufferEnd={() => {}}
+              onPlay={handlePlay}
+              onPause={() => setPlaying(false)}
+              onReady={handlePlayerReady}
+              showVideo={true}
+              isFullscreen={isFullscreen}
+              playedSeconds={playedSeconds}
+              duration={duration}
+              onSeek={value => {
+                setPlayedSeconds(value);
+                playerRef.current?.seekTo(value, 'seconds');
+              }}
+              onTogglePlay={() => setPlaying(!playing)}
+              onPrev={handlePrevious}
+              onNext={handleNext}
+              onToggleMute={toggleMute}
+              onToggleFullscreen={handleToggleFullscreen}
+              setVolume={setVolume}
+              availableResolutions={availableResolutions}
+              currentResolution={currentResolution}
+              onChangeResolution={handleChangeResolution}
+            />
+          </div>
           <MusicPlayerAddSongForm
             newSongUrl={newSongUrl}
             setNewSongUrl={setNewSongUrl}
@@ -776,40 +793,6 @@ const MusicPlayer: React.FC = () => {
             playlists={playlists || []}
             onAddPlaylist={handleAddPlaylist}
           />
-          {/* Custom Controls Overlay */}
-          {!isMinimized && (
-            <div className="absolute bottom-4 left-0 w-full flex justify-center items-center gap-4 z-20 pointer-events-auto" style={{ pointerEvents: 'auto' }}>
-              <button
-                onClick={handleToggleFullscreen}
-                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-                className="p-2 rounded hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
-                tabIndex={0}
-              >
-                <Fullscreen size={22} />
-              </button>
-              <button
-                onClick={handleToggleSubtitles}
-                aria-label={subtitlesEnabled ? "Disable Subtitles" : "Enable Subtitles"}
-                className={`p-2 rounded hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary ${subtitlesEnabled ? 'bg-primary text-white' : ''}`}
-                tabIndex={0}
-              >
-                <Captions size={22} />
-              </button>
-              <label htmlFor="resolution-select" className="sr-only">Video Resolution</label>
-              <select
-                id="resolution-select"
-                value={currentResolution}
-                onChange={e => handleChangeResolution(e.target.value)}
-                className="p-2 rounded bg-background border border-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label="Select video resolution"
-                tabIndex={0}
-              >
-                {availableResolutions.map(res => (
-                  <option key={res} value={res}>{res}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </>
       )}
     </div>

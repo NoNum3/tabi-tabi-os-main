@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/infrastructure/lib/utils";
 import { FilePlus, Pencil, Trash2 } from "lucide-react";
 import { playSound } from "@/infrastructure/lib/utils";
+import { useI18n } from '@/locales/client';
 
 // Constants for resizing
 const MIN_WIDTH = 150; // Minimum sidebar width in pixels
@@ -22,6 +23,7 @@ const MAX_WIDTH = 500; // Maximum sidebar width in pixels
 const DEFAULT_WIDTH = 256; // Default width (w-64)
 
 export const NoteListSidebar = () => {
+  const t = useI18n();
   const [notes] = useAtom(notesAtom);
   const [activeNoteId, setActiveNoteId] = useAtom(
     activeNoteIdAtom as PrimitiveAtom<string | null>,
@@ -120,9 +122,7 @@ export const NoteListSidebar = () => {
     }
     if (
       window.confirm(
-        `Are you sure you want to delete "${
-          notes.find((n) => n.id === noteId)?.title ?? "this note"
-        }"?`,
+        t('notepad.confirmDelete', { count: 1, title: notes.find((n) => n.id === noteId)?.title ?? t('notepad.untitledNote', { count: 1 }) })
       )
     ) {
       deleteNote(noteId);
@@ -166,7 +166,7 @@ export const NoteListSidebar = () => {
     event.stopPropagation();
     playSound("/sounds/click.mp3");
     setEditingNoteId(noteId);
-    setEditedName(currentName || "Untitled Note");
+    setEditedName(currentName || t('notepad.untitledNote', { count: 1 }));
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -187,16 +187,16 @@ export const NoteListSidebar = () => {
       <div
         className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize bg-transparent hover:bg-blue-200 dark:hover:bg-blue-700 active:bg-blue-300 dark:active:bg-blue-600 z-10"
         onMouseDown={handleMouseDown}
-        title="Resize Sidebar"
+        title={t('notepad.resizeSidebar', { count: 1 })}
       />
 
       <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
-        <h2 className="text-lg font-semibold dark:text-gray-200">Notes</h2>
+        <h2 className="text-lg font-semibold dark:text-gray-200">{t('notepad.notes', { count: 1 })}</h2>
         <Button
           variant="ghost"
           size="icon"
           onClick={handleCreateNote}
-          title="New Note"
+          title={t('notepad.newNote', { count: 1 })}
         >
           <FilePlus className="h-5 w-5" />
         </Button>
@@ -209,7 +209,7 @@ export const NoteListSidebar = () => {
             {notes.length === 0
               ? (
                 <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                  No notes yet.
+                  {t('notepad.noNotes', { count: 1 })}
                 </div>
               )
               : (
@@ -259,7 +259,7 @@ export const NoteListSidebar = () => {
                             : (
                               <>
                                 <div className="font-medium truncate text-sm">
-                                  {note.title || "Untitled Note"}
+                                  {note.title || t('notepad.untitledNote', { count: 1 })}
                                 </div>
                                 <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                   {formatTimestamp(note.updated_at)}
@@ -281,10 +281,10 @@ export const NoteListSidebar = () => {
                             onClick={(e) =>
                               handleStartEditing(
                                 note.id,
-                                note.title || "Untitled Note",
+                                note.title || t('notepad.untitledNote', { count: 1 }),
                                 e,
                               )}
-                            title="Rename Note"
+                            title={t('notepad.renameNote', { count: 1 })}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -298,7 +298,7 @@ export const NoteListSidebar = () => {
                               activeNoteId === note.id && "opacity-100",
                             )}
                             onClick={(e) => handleDeleteNote(note.id, e)}
-                            title="Delete Note"
+                            title={t('notepad.deleteNote', { count: 1 })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

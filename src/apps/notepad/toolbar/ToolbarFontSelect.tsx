@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fontFamilies, fontSizes } from "@/apps/notepad/constants/richTextConstants";
+import { useI18n } from '@/locales/client';
 
 interface ToolbarFontSelectProps {
   fontFamily: string;
@@ -21,11 +22,13 @@ export const ToolbarFontSelect: React.FC<ToolbarFontSelectProps> = ({
   fontSize,
   onFontSizeChange,
 }) => {
+  const t = useI18n();
+
   return (
-    <>
+    <div className="flex items-center">
       {/* Font Family Dropdown */}
       <Select value={fontFamily} onValueChange={onFontFamilyChange}>
-        <SelectTrigger className="w-[150px] h-8 text-xs px-2 mr-1">
+        <SelectTrigger className="w-[150px] h-8 text-xs px-2 mr-1" aria-label={t('notepad.fontFamily', { count: 1 })}>
           <SelectValue placeholder="Font Family" />
         </SelectTrigger>
         <SelectContent>
@@ -44,7 +47,7 @@ export const ToolbarFontSelect: React.FC<ToolbarFontSelectProps> = ({
 
       {/* Font Size Dropdown */}
       <Select value={fontSize} onValueChange={onFontSizeChange}>
-        <SelectTrigger className="w-[70px] h-8 text-xs px-2 mr-2 border-r border-gray-200 dark:border-gray-700 pr-3">
+        <SelectTrigger className="w-[70px] h-8 text-xs px-2 mr-2 border-r border-gray-200 dark:border-gray-700 pr-3" aria-label={t('notepad.fontSize', { count: 1 })}>
           <SelectValue placeholder="Size" />
         </SelectTrigger>
         <SelectContent>
@@ -55,6 +58,6 @@ export const ToolbarFontSelect: React.FC<ToolbarFontSelectProps> = ({
           ))}
         </SelectContent>
       </Select>
-    </>
+    </div>
   );
 };

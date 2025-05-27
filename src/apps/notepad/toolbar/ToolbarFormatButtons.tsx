@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/infrastructure/lib/utils";
 import { Bold, Italic, Underline } from "lucide-react";
 import { TextFormatType } from "lexical";
+import { useI18n } from '@/locales/client';
 
 interface ToolbarFormatButtonsProps {
   formatText: (format: TextFormatType) => void;
@@ -17,12 +18,14 @@ export const ToolbarFormatButtons: React.FC<ToolbarFormatButtonsProps> = ({
   isItalic,
   isUnderline,
 }) => {
+  const t = useI18n();
+
   return (
     <div className="flex items-center mr-2 pr-2 border-r border-gray-200 dark:border-gray-700">
       <Button
         variant="ghost"
         size="sm"
-        title="Bold (Ctrl+B)"
+        title={t('notepad.bold', { count: 1 })}
         onClick={() => formatText("bold")}
         className={cn(
           "p-1 h-8 w-8",
@@ -34,7 +37,7 @@ export const ToolbarFormatButtons: React.FC<ToolbarFormatButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Italic (Ctrl+I)"
+        title={t('notepad.italic', { count: 1 })}
         onClick={() => formatText("italic")}
         className={cn(
           "p-1 h-8 w-8",
@@ -46,7 +49,7 @@ export const ToolbarFormatButtons: React.FC<ToolbarFormatButtonsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        title="Underline (Ctrl+U)"
+        title={t('notepad.underline', { count: 1 })}
         onClick={() => formatText("underline")}
         className={cn(
           "p-1 h-8 w-8",
