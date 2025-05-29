@@ -35,7 +35,7 @@ bun run lint
 
 ## 🎬 Demo
 
-> [Live Demo Coming Soon!](#) <!-- Replace # with your demo link -->
+> [Live Demo Coming Soon!](https://youtu.be/JIBnQv8xAQs?si=jLk4Cs41zZ09OcvH) <!-- Replace # with your demo link -->
 
 [![appstore-screenshot.png](https://i.postimg.cc/PqLSHLzM/appstore-screenshot.png)](https://postimg.cc/LqptB8Wq) <!-- Replace with real screenshot or GIF -->
 
@@ -188,7 +188,7 @@ bun run lint
 
 > [即將推出！](#) <!-- 可替換為實際 Demo 連結 -->
 
-![Tabi-OS Screenshot](https://placehold.co/800x400?text=Tabi-OS+Demo) <!-- 可替換為實際截圖或 GIF -->
+[![appstore-screenshot.png](https://i.postimg.cc/PqLSHLzM/appstore-screenshot.png)](https://postimg.cc/LqptB8Wq) <!-- 可替換為實際截圖或 GIF -->
 
 ---
 
