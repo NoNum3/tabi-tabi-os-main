@@ -186,7 +186,7 @@ bun run lint
 
 ## 🎬 線上展示
 
-> [即將推出！](#) <!-- 可替換為實際 Demo 連結 -->
+> [即將推出！](https://youtu.be/JIBnQv8xAQs?si=jLk4Cs41zZ09OcvH) <!-- 可替換為實際 Demo 連結 -->
 
 [![appstore-screenshot.png](https://i.postimg.cc/PqLSHLzM/appstore-screenshot.png)](https://postimg.cc/LqptB8Wq) <!-- 可替換為實際截圖或 GIF -->
 
