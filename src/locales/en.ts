@@ -569,6 +569,11 @@ export default {
     authUsernameLabel: "Username",
     authEmailLabel: "Email",
     authPasswordLabel: "Password",
+    usernameChangeSuccess: "Username changed successfully!",
+    passwordResetEmailSent: "Password reset email sent!",
+    usernameChangeFailed: "Failed to change username.",
+    passwordResetFailed: "Failed to send password reset email.",
+    passwordResetSuccess: "Password reset successful!",
 
     // ===== Music Player =====
     music: {

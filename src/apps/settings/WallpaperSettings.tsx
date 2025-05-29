@@ -309,7 +309,7 @@ export const WallpaperSettings: React.FC<WallpaperSettingsProps> = (
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-background/80 backdrop-blur-sm py-3 px-4 -mx-4 -mb-4 border-t border-border sm:-mx-6 sm:-mb-6 sm:px-6 sm:py-4 rounded-b-lg">
                         <Button variant="ghost" onClick={handleCancel}>
-                            {t("timerCancel", { count: 1 })}
+                            {t("cancel", { count: 1 })}
                         </Button>
                         <Button
                             variant="default"

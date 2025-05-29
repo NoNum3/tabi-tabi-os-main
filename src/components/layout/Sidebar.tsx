@@ -113,9 +113,9 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
         setUsernameLoading(true);
         try {
             await setUpdateProfile({ username: newUsername.trim() });
-            toast(t('Username updated successfully', { count: 1 }));
+            toast(t('usernameChangeSuccess', { count: 1 }));
         } catch {
-            toast(t('Failed to update username', { count: 1 }));
+            toast(t('usernameChangeFailed', { count: 1 }));
         } finally {
             setUsernameLoading(false);
         }
@@ -131,9 +131,9 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim());
             if (error) throw error;
-            toast(t('Password reset email sent', { count: 1 }));
+            toast(t('passwordResetEmailSent', { count: 1 }));
         } catch {
-            toast(t('Failed to send password reset email', { count: 1 }));
+            toast(t('passwordResetFailed', { count: 1 }));
         } finally {
             setResetLoading(false);
         }
@@ -564,7 +564,7 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                     </div>
                     <DialogFooter>
                         <Button onClick={handleChangeUsername} disabled={usernameLoading} aria-label={t('changeUsernameTitle', { count: 1 })}>
-                            {usernameLoading ? t('Saving...', { count: 1 }) : t('changeUsernameTitle', { count: 1 })}
+                            {usernameLoading ? t('saving', { count: 1 }) : t('changeUsernameTitle', { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -589,7 +589,7 @@ export const Sidebar: React.FC<{ fixed?: boolean }> = ({ fixed = true }) => {
                     </div>
                     <DialogFooter>
                         <Button onClick={handleResetPassword} disabled={resetLoading} aria-label={t('resetPasswordTitle', { count: 1 })}>
-                            {resetLoading ? t('Sending...', { count: 1 }) : t('resetPasswordTitle', { count: 1 })}
+                            {resetLoading ? t('sending', { count: 1 }) : t('resetPasswordTitle', { count: 1 })}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -538,6 +538,9 @@ export default {
     // ===== Settings UI =====
     darkModeTitle: "深色模式",
     darkModeDescription: "啟用作業系統的深色主題。",
+    themeDark: "深色",
+    themeLight: "淺色",
+    themeSystem: "依系統",
 
     // ===== Settings: Taskbar & Appearance =====
     settingsTaskbarCategory: "工作列",
@@ -636,6 +639,11 @@ export default {
     authUsernameLabel: "用戶名",
     authEmailLabel: "電子郵件",
     authPasswordLabel: "密碼",
+    usernameChangeSuccess: "用戶名已成功更改！",
+    passwordResetEmailSent: "密碼重設郵件已發送！",
+    usernameChangeFailed: "更改用戶名失敗。",
+    passwordResetFailed: "密碼重設郵件發送失敗。",
+    passwordResetSuccess: "密碼重設成功！",
 
     // ===== Music Player =====
     music: {

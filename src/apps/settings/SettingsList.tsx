@@ -12,7 +12,7 @@ import {
     Layout
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
+import { useTheme } from "next-themes";
 
 interface SettingsItemProps {
     icon: React.ElementType;
@@ -55,18 +55,8 @@ interface SettingsListProps {
 
 export const SettingsList: React.FC<SettingsListProps> = ({ navigateTo }) => {
     const t = useI18n();
-    const [darkMode, setDarkMode] = React.useState(false);
+    const { theme, setTheme } = useTheme();
     const [search, setSearch] = useState("");
-
-    // Handler for toggling dark mode
-    const handleDarkModeToggle = (checked: boolean) => {
-        setDarkMode(checked);
-        if (checked) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    };
 
     // Settings data for search/filter
     const settings = [
@@ -107,9 +97,7 @@ export const SettingsList: React.FC<SettingsListProps> = ({ navigateTo }) => {
                     titleKey: "darkModeTitle",
                     descriptionKey: "darkModeDescription",
                     onClick: () => {},
-                    isSwitch: true,
-                    switchValue: darkMode,
-                    onSwitch: handleDarkModeToggle,
+                    isThemeToggle: true,
                 },
             ],
         },
@@ -149,14 +137,39 @@ export const SettingsList: React.FC<SettingsListProps> = ({ navigateTo }) => {
                                 {section.category}
                             </h3>
                             {section.items.map((item) =>
-                                item.isSwitch ? (
+                                item.isThemeToggle ? (
                                     <div key={item.titleKey} className="flex items-center px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors">
                                         <item.icon className="h-5 w-5 mr-4 text-muted-foreground flex-shrink-0" />
                                         <div className="flex-grow">
                                             <p className="text-sm font-medium">{t(item.titleKey, { count: 1 })}</p>
                                             <p className="text-xs text-muted-foreground">{t(item.descriptionKey, { count: 1 })}</p>
                                         </div>
-                                        <Switch checked={item.switchValue} onCheckedChange={item.onSwitch} className="ml-2" aria-label={`Toggle ${t(item.titleKey, { count: 1 })}`} />
+                                        <div className="flex gap-2 ml-2" role="radiogroup" aria-label={t('darkModeTitle', { count: 1 })}>
+                                            <button
+                                                className={`px-2 py-1 rounded text-xs font-medium border ${theme === 'light' ? 'bg-accent text-accent-foreground border-accent' : 'bg-muted text-muted-foreground border-border'} focus:outline-none focus:ring-2 focus:ring-primary`}
+                                                aria-checked={theme === 'light'}
+                                                role="radio"
+                                                onClick={() => setTheme('light')}
+                                            >
+                                                {t('themeLight', { count: 1 })}
+                                            </button>
+                                            <button
+                                                className={`px-2 py-1 rounded text-xs font-medium border ${theme === 'dark' ? 'bg-accent text-accent-foreground border-accent' : 'bg-muted text-muted-foreground border-border'} focus:outline-none focus:ring-2 focus:ring-primary`}
+                                                aria-checked={theme === 'dark'}
+                                                role="radio"
+                                                onClick={() => setTheme('dark')}
+                                            >
+                                                {t('themeDark', { count: 1 })}
+                                            </button>
+                                            <button
+                                                className={`px-2 py-1 rounded text-xs font-medium border ${theme === 'system' ? 'bg-accent text-accent-foreground border-accent' : 'bg-muted text-muted-foreground border-border'} focus:outline-none focus:ring-2 focus:ring-primary`}
+                                                aria-checked={theme === 'system'}
+                                                role="radio"
+                                                onClick={() => setTheme('system')}
+                                            >
+                                                {t('themeSystem', { count: 1 })}
+                                            </button>
+                                        </div>
                                     </div>
                                 ) : (
                                     <SettingsItem
