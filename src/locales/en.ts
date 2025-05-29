@@ -510,6 +510,9 @@ export default {
     customColor: "Custom Color",
     resetToDefault: "Reset to Default",
     apply: "Apply",
+    themeDark: "Dark",
+    themeLight: "Light",
+    themeSystem: "System",
 
     // ===== Toasts & Notifications =====
     appUnavailableToast: "This app isn't available. Please add it from the App Store or log in.",
