@@ -37,7 +37,7 @@ bun run lint
 
 > [Live Demo Coming Soon!](#) <!-- Replace # with your demo link -->
 
-![Tabi-OS Screenshot](https://placehold.co/800x400?text=Tabi-OS+Demo) <!-- Replace with real screenshot or GIF -->
+![Tabi-OS Screenshot]([https://placehold.co/800x400?text=Tabi-OS+Demo](https://postimg.cc/LqptB8Wq)) <!-- Replace with real screenshot or GIF -->
 
 ---
 
