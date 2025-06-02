@@ -252,7 +252,8 @@ function Mainmenu() {
   };
 
   return (
-    <>
+    <div className="fixed top-0 left-0 w-full z-[100]">
+      {/* Mainmenu content starts here */}
       {/* Sidebar Drawer (UserProfileSidebar) for both desktop and mobile */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-[80vw] sm:w-[350px] pt-12">
@@ -543,7 +544,7 @@ function Mainmenu() {
           </DialogContent>
         </Dialog>
       </div>
-    </>
+    </div>
   );
 }
 

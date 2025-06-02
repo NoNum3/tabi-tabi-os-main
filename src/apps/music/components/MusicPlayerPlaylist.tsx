@@ -748,7 +748,7 @@ export const MusicPlayerPlaylist = ({
             }`}
             onClick={() => setTab("queue")}
           >
-            {t(tab === "queue" ? 'music.queue' : 'music.playlists', { count: 1 })}
+            {t('music.queue', { count: 1 })}
           </button>
           <button
             className={`px-4 py-2 text-sm font-semibold rounded-t ${
@@ -758,7 +758,7 @@ export const MusicPlayerPlaylist = ({
             }`}
             onClick={() => setTab("playlists")}
           >
-            {t(tab === "playlists" ? 'music.playlists' : 'music.queue', { count: 1 })}
+            {t('music.playlists', { count: 1 })}
           </button>
         </div>
         {/* Tab Content */}

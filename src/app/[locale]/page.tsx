@@ -9,7 +9,7 @@ export default function Home() {
             <DesktopBackground />
             <Mainmenu />
             <Taskbar />
-            <div className="h-full w-full flex flex-col p-4 md:p-5 lg:p-6 pt-0">
+            <div className="h-full w-full flex flex-col p-4 md:p-5 lg:p-6 pt-16">
                 <div className="flex-1 relative">
                     <DynamicAppsIcons />
                 </div>
