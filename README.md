@@ -1,5 +1,6 @@
 # Tabi-OS 
->[SlideShow PPT!](https://tabi-os-slidev.vercel.app/1)
+>[SlideShow PPT!](https://tabi-os-slidev.vercel.app)
+
 [🇬🇧 English](#english) | [🇹🇼 繁體中文](#繁體中文)
 
 ---
