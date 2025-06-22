@@ -28,6 +28,29 @@ bun run dev
 bun run lint
 ```
 
+## 
+```bash
+# Install CLI and authenticate
+npm install -g supabase
+supabase login
+
+# Link your project
+supabase link --project-ref your-project-ref
+
+# Optional: start local dev environment
+supabase start
+
+# After schema changes
+supabase db diff --local > supabase/migrations/$(date +%Y%m%d%H%M%S)_update.sql
+
+# Test migration locally
+supabase db reset
+
+# Deploy to Supabase cloud
+supabase db push
+
+```
+
 > **Troubleshooting:**
 > - Make sure you have [Bun](https://bun.sh/) installed (`bun --version`).
 > - If you see errors, try deleting `node_modules` and running `bun install` again.
@@ -182,6 +205,27 @@ bun run lint
 > **疑難排解：**
 > - 請確認已安裝 [Bun](https://bun.sh/)（`bun --version`）。
 > - 若遇到錯誤，請刪除 `node_modules` 並重新執行 `bun install`。
+
+```bash
+# 安裝 CLI 並登入
+npm install -g supabase
+supabase login
+
+# 連結 Supabase 專案
+supabase link --project-ref your-project-ref
+
+# 可選：啟動本地環境
+supabase start
+
+# 對資料庫結構更動後產生遷移檔
+supabase db diff --local > supabase/migrations/$(date +%Y%m%d%H%M%S)_update.sql
+
+# 重設並測試本地遷移
+supabase db reset
+
+# 推送到 Supabase 雲端
+supabase db push
+```
 
 ---
 
