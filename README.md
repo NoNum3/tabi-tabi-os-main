@@ -59,7 +59,7 @@ supabase db push
 
 ## 🎬 Demo
 
-> [Live Demo Coming Soon!](https://youtu.be/JIBnQv8xAQs?si=jLk4Cs41zZ09OcvH) <!-- Replace # with your demo link -->
+> [Live Demo Click here!](https://youtu.be/JIBnQv8xAQs?si=jLk4Cs41zZ09OcvH) <!-- Replace # with your demo link -->
 
 [![appstore-screenshot.png](https://i.postimg.cc/PqLSHLzM/appstore-screenshot.png)](https://postimg.cc/LqptB8Wq) <!-- Replace with real screenshot or GIF -->
 
